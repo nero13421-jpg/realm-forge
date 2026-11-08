@@ -2448,6 +2448,8 @@ function finishGroup(b,g,res){
 }
 function endBattle(b){
   var M=S.match,m=campByKey(b.camp);b.done=true;b.t1=M.clock;
+  /* when the last fight ends, the map pulls back out to the whole match: battlefields drawn at full detail are heavy */
+  if(!M.battles.some(function(x){return !x.done})){if(UI.pz)delete UI.pz.m;if(UI.pzDeep)delete UI.pzDeep.m;UI.bsel=null}
   var rec=b.rec;
   var left=b.foes.filter(function(f){return f.alive}),alive=b.units.filter(function(u){return u.alive&&!u.gone}),res;
   if(m){m.mobs=left.map(function(f){f.ref.hp=f.hp;return f.ref});m.inBattle=null;m.wait=Math.max(m.wait||0,20);if(left.length&&(b.wdmg||b.past)&&m.path&&m.path.length)m.thru=ix(m.path[0][0],m.path[0][1])}
