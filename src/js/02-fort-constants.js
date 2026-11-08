@@ -59,6 +59,8 @@ function wname(t,hd,wd){if(t==='knife')return (hd==='cu'?'Copper dagger':'Flint 
   var base={spear:'spear',axe:'axe',battle_axe:'battle axe',short_arrows:'short arrows',long_arrows:'long arrows'}[t];return HEADS[hd].n+' '+base+' · '+WOODS[wd].n.toLowerCase()+' '+WHANDLE[t]}
 WTYPES.forEach(function(t){(HEADED[t]?['fl','cu']:['-']).forEach(function(hd){['oak','pine'].forEach(function(wd){var k=wvar(t,hd,wd),base=CD[t];CD[k]={n:wname(t,hd,wd),k:base.k}})})});
 /* armor: every piece and what it stops */
+/* flanks and backs: a blow from the side lands more often, one from behind more often still and harder; a shield guards only the front and the shield (left) side */
+var ARC={side:{hit:1.15,dmg:1},rear:{hit:1.3,dmg:1.25}};
 var ARM={hide_armor:{def:5,dodge:0,wt:12},leather_armor:{def:8,dodge:0,wt:10},leather_greaves:{def:3,dodge:0,wt:4},hide_helmet:{def:3,dodge:0,wt:2},leather_helmet:{def:4,dodge:0,wt:2},oak_helmet:{def:6,dodge:0,wt:4},hide_shield:{def:10,dodge:5,wt:6},leather_shield:{def:12,dodge:5,wt:5},oak_shield:{def:16,dodge:2,wt:9}};
 CD.leather_armor={n:'Cow leather chest armor',k:'armor'};CD.leather_greaves={n:'Cow leather greaves',k:'greaves'};CD.leather_helmet={n:'Cow leather helmet',k:'helmet'};CD.oak_helmet={n:'Oak wooden helmet',k:'helmet'};CD.leather_shield={n:'Cow leather shield',k:'shield'};CD.oak_shield={n:'Oak wooden shield',k:'shield'};
 function headOf(card){return card?wmat(card.key).hd:null}

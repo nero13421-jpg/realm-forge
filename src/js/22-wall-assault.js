@@ -79,6 +79,7 @@ function endBattle(b){
   var rec=b.rec;
   var left=b.foes.filter(function(f){return f.alive}),alive=b.units.filter(function(u){return u.alive&&!u.gone}),res;
   if(m){m.mobs=left.map(function(f){f.ref.hp=f.hp;return f.ref});m.inBattle=null;m.wait=Math.max(m.wait||0,20);if(left.length&&(b.wdmg||b.past)&&m.path&&m.path.length)m.thru=ix(m.path[0][0],m.path[0][1])}
+  if(b.flk)mlog(b.flk+' blow'+(b.flk===1?'':'s')+' at '+b.where+' landed on a flank or a back.','dim');
   if(!left.length){res='won';var lt0='';if(m){S.prestige+=m.reward;M.earned+=m.reward;lt0=giveLoot(m,false)}mlog('The fight at '+b.where+' is won. The '+b.tn+' are destroyed.'+(m?' +'+m.reward+' prestige. Loot: '+lt0+'.'+(m.razed?'':' Their camp still stands.'):''),'good')}
   else if(!b.units.some(function(u){return u.alive})){res='lost';mlog('Everyone at '+b.where+' is killed. '+left.length+' '+b.tn+' remain.','bad')}
   else if(!alive.length){res='fled';mlog('Your men escape from '+b.where+'. '+left.length+' '+b.tn+' remain.','bad')}

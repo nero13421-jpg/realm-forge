@@ -186,8 +186,13 @@ function bfSeen(F,u,f){var c=bfCell(F,f.x,f.y);return bfD(u,f)<=(u.sight||400)*(
 function bfCover(F,a,t){/* your men behind a palisade take arrows ×0.25 */if(!F.wl||!F.wl.length||t.side==='e')return 1;var dx=a.x-t.x,dy=a.y-t.y,d=Math.hypot(dx,dy)||1,lim=Math.min(d-.5,6);for(var s=.5;s<=lim;s+=.75){if(isWallC(bfCell(F,t.x+dx/d*s,t.y+dy/d*s)))return COVER}return 1}
 function bfShotMul(F,a,t){var hm=a.tw?1.2:F.hg?1+Math.max(-.2,Math.min(.2,(bfHt(F,a.x,a.y)-bfHt(F,t.x,t.y))*.01)):1;return ((GROUND[bfCell(F,a.x,a.y)]||GROUND.o).sh||1)*((GROUND[bfCell(F,t.x,t.y)]||GROUND.o).cv||1)*hm*bfCover(F,a,t)}
 function bfEv(b,a,t,k,d,lab,x){b.evn++;b.ev.push({n:b.evn,k:k,x:x,a:a._ri,t:t._ri,ax:a.x,ay:a.y,bx:t.x,by:t.y,d:d,s:t.side==='e'?'e':'p',lab:lab});if(b.ev.length>150)b.ev.shift();b.rec.ev.push([b.bt,a._ri,t._ri,k,d,lab,x])}
-function bfHit(b,a,t,dmg,skill,k,x){var h0=t.hp,h=hitX(t,dmg,skill);if(t.side==='e')t.woke=true;bfEv(b,a,t,k,h?Math.max(0,h0-t.hp):-1,t._dg?'dodged':null,x);if(h&&t.hp<=0)t.alive=false;return h}
-function bfFrame(b){var fr=[];b.units.concat(b.foes).forEach(function(x){fr[x._ri]=[Math.round(x.x*10)/10,Math.round(x.y*10)/10,Math.max(0,Math.round(x.hp)),x.alive?(x.gone?2:1):0]});b.rec.fr.push(fr)}
+function bfArc(a,t){var f=t.face;if(!f)return 'front';var dx=a.x-t.x,dy=a.y-t.y,d=Math.hypot(dx,dy),fd=Math.hypot(f[0],f[1]);if(d<1e-6||fd<1e-6)return 'front';var c=(dx*f[0]+dy*f[1])/(d*fd);if(c>=.5)return 'front';if(c<=-.5)return 'rear';return (dx*f[1]-dy*f[0])>0?'left':'right'}
+function bfHit(b,a,t,dmg,skill,k,x){var arc=bfArc(a,t),A=arc==='rear'?ARC.rear:arc==='front'?null:ARC.side,noSh=t.shield&&(arc==='rear'||arc==='right'),sd=0,sh0=t.shield;
+  if(A){skill*=A.hit;dmg*=A.dmg}if(noSh){if(t.dfn!=null){sd=t.shDef||0;t.dfn-=sd}else t.shield=false}
+  a.face=[t.x-a.x,t.y-a.y];/* a man turns to whoever he strikes */
+  var h0=t.hp,h=hitX(t,dmg,skill);if(noSh){if(t.dfn!=null)t.dfn+=sd;else t.shield=sh0}if(A&&h&&!t._dg)b.flk=(b.flk||0)+1;if(t.side==='e')t.woke=true;bfEv(b,a,t,k,h?Math.max(0,h0-t.hp):-1,t._dg?'dodged':(A&&h?(arc==='rear'?'from behind!':'flank!'):null),x);if(h&&t.hp<=0)t.alive=false;return h}
+function bfFrame(b){var cen=function(L){var n=0,cx=0,cy=0;L.forEach(function(q){if(q.alive&&!q.gone){n++;cx+=q.x;cy+=q.y}});return n?[cx/n,cy/n]:null};
+  b.units.concat(b.foes).forEach(function(x){if(!x.alive)return;if(!x.face){/* at contact men face the way their team faces, mobs face the men */var tm=x.side==='e'?null:b.teams.filter(function(t){return t.k===x.tk})[0],c0=cen(x.side==='e'?b.units:b.foes);x.face=tm&&tm.face?tm.face.slice():c0?[c0[0]-x.x,c0[1]-x.y]:[1,0]}if(x._px!=null){var dx=x.x-x._px,dy=x.y-x._py;if(dx*dx+dy*dy>.0025)x.face=[dx,dy]}x._px=x.x;x._py=x.y});var fr=[];b.units.concat(b.foes).forEach(function(x){fr[x._ri]=[Math.round(x.x*10)/10,Math.round(x.y*10)/10,Math.max(0,Math.round(x.hp)),x.alive?(x.gone?2:1):0]});b.rec.fr.push(fr)}
 /* bodies keep apart: at least GAP_E yards between enemies, GAP_S between men of the same side, so the lines stay readable */
 var GAP_E=1.5,GAP_S=1;
 function sepOk(F,e,x,y){var o=BFM;BFM={foe:e.side==='e',jh:0};var r=bfPass(F,x,y);BFM=o;return r}
