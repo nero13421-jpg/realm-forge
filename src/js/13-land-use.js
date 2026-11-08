@@ -21,9 +21,10 @@ function supply0(){var N=COLS*ROWS,used={},prc={},out={set:{},past:{},claim:{}},
   S.setl.forEach(function(st){var nd=NEED[st.type];if(!nd)return;var T=walkFrom(setHexes(st)),R={fire:0,spec:0,woodT:0,past:0,need:nd,tiles:[]};
     var near=[];for(k=0;k<N;k++)if(T[k]<Infinity&&!used[k]&&(WOOD[S.grid[k]]||SPEC[S.grid[k]]||S.grid[k]==='pasture')&&!setAt(k%COLS,Math.floor(k/COLS)))near.push(k);near.sort(function(a,b){return T[a]-T[b]});
     var take=function(k2,kind){used[k2]=1;R.tiles.push(k2);out.claim[k2]={by:st.id,kind:kind}};
-    near.forEach(function(k2){var g=S.grid[k2];
-      if(nd.woodT&&WOODT[g]&&R.woodT<nd.woodT){R.woodT++;take(k2,'fire')}
-      else if(nd.fire&&WOOD[g]&&R.fire<nd.fire){R.fire+=WOOD[g];take(k2,'fire')}
+    /* a hamlet's wood tile: plain woodland first, so it leaves the richer oak forest to villages and camps */
+    if(nd.woodT)near.filter(function(k2){return WOODT[S.grid[k2]]}).sort(function(a,b){return (S.grid[a]==='woodland'?0:1)-(S.grid[b]==='woodland'?0:1)||T[a]-T[b]}).slice(0,nd.woodT).forEach(function(k2){R.woodT++;take(k2,'fire')});
+    near.forEach(function(k2){var g=S.grid[k2];if(used[k2])return;
+      if(nd.fire&&WOOD[g]&&R.fire<nd.fire){R.fire+=WOOD[g];take(k2,'fire')}
       else if(nd.spec&&SPEC[g]&&R.spec<nd.spec){R.spec+=SPEC[g];take(k2,'spec')}
       else if(nd.past&&g==='pasture'&&R.past<nd.past){R.past++;take(k2,'cloth')}});
     R.ok=R.fire>=(nd.fire||0)-1e-9&&R.spec>=(nd.spec||0)&&R.woodT>=(nd.woodT||0)&&R.past>=(nd.past||0);out.set[st.id]=R});
@@ -32,7 +33,7 @@ function supply0(){var N=COLS*ROWS,used={},prc={},out={set:{},past:{},claim:{}},
   return out}
 function needText(R){var n=R.need,o=[];if(n.woodT)o.push('woodland <b>'+R.woodT+'/'+n.woodT+'</b>');if(n.past)o.push('pastures <b>'+R.past+'/'+n.past+'</b>');if(n.fire)o.push('firewood <b>'+(Math.round(R.fire*100)/100)+'/'+n.fire+'</b>');if(n.spec)o.push('orchards <b>'+R.spec+'/'+n.spec+'</b>');return ' · '+o.join(' · ')}
 function needSay(nd){var o=[];if(nd.woodT)o.push(nd.woodT+' woodland tile');if(nd.past)o.push(nd.past+' pastures (for clothing)');if(nd.fire)o.push(nd.fire+' firewood');if(nd.spec)o.push(nd.spec+' orchards');return o.join(', ')}
-function supplyPanel(){if(S.match||S.tut)return '';var SU=supply(),rows=[];
+function supplyPanel(){if(S.match)return '';var SU=supply(),rows=[];
   S.setl.forEach(function(st){var R=SU.set[st.id];if(!R)return;rows.push('<div class="row suprow'+(R.ok?'':' bad')+'"><button class="btn sm'+(UI.supSel===st.id?' on':'')+'" data-act="supsel" data-id="'+st.id+'">'+esc(setName(st))+'</button><span>'+SETT[st.type].n+needText(R)+(R.ok?' ✓':' · short')+'</span></div>')});
   var ps=Object.keys(SU.past),pk=ps.filter(function(k){return SU.past[k].ok}).length;
   if(ps.length)rows.push('<div class="row suprow'+(pk<ps.length?' bad':'')+'"><button class="btn sm'+(UI.supSel==='p'?' on':'')+'" data-act="supsel" data-id="p">Pastures</button><span>'+pk+' of '+ps.length+' fed by prairie (1 field feeds 2)'+(pk<ps.length?' · '+(ps.length-pk)+' short':' ✓')+'</span></div>');
@@ -42,7 +43,7 @@ function supplyMarks(){if(S.match||UI.supSel==null||UI.tab!=='realm')return '';v
   else{var st=setById(UI.supSel);if(st)setHexes(st).forEach(function(k){o+='<polygon class="sup-ring sup-home" points="'+hexPts(k%COLS,Math.floor(k/COLS),.86)+'"/>'})}
   return o}
 function found(type,c,r,c2,r2){
-  if(NEED[type]&&!S.tut){var tmp={id:-7,type:type,c:c,r:r};if(c2!=null){tmp.c2=c2;tmp.r2=r2}S.setl.push(tmp);var SUf=supply(),Rf=SUf.set[-7];S.setl.pop();
+  if(NEED[type]){var tmp={id:-7,type:type,c:c,r:r};if(c2!=null){tmp.c2=c2;tmp.r2=r2}S.setl.push(tmp);var SUf=supply(),Rf=SUf.set[-7];S.setl.pop();
     if(!Rf.ok){var nf=NEED[type];say('A '+SETT[type].n.toLowerCase()+' needs '+needSay(nf)+' within an hour\'s walk that no other settlement already uses. In reach:'+needText(Rf).replace(/<\/?b>/g,'')+'.',true);if(UI.place)UI.place.first=null;return render()}}
   S.hgt=S.hgt||[];S.hgt[ix(c,r)]={s:'flat',b:baseFor(c,r,'flat',0,0)};if(c2!=null)S.hgt[ix(c2,r2)]={s:'flat',b:S.hgt[ix(c,r)].b};
   var d=SETT[type],cards=S.cards.filter(function(x){return x.at===null&&x.key==='setcard'});

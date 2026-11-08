@@ -37,7 +37,7 @@ let uid,uid2;
 if(process.env.P2){await p.evaluate(st=>localStorage.setItem('realmforge-chal-1',st),fs.readFileSync('tut-p2.json','utf8'));await p.reload();await p.evaluate(()=>{window.__S=function(){return __ev('S')};window.__UI=function(){return __ev('UI')}});uid=await S(()=>__S().units[0].id);uid2=await S(()=>__S().units[1].id);console.log('resumed at step',await step())}else{
 await next('welcome');
 // farmland: a block around the board centre
-console.log('placed',await placeTiles('pond',1),await placeTiles('cultivated',8));await next('farmland');
+console.log('placed',await placeTiles('pond',1),await placeTiles('cultivated',8),await placeTiles('woodland',1),await placeTiles('field',1),await placeTiles('pasture',2));await next('farmland');
 await hamlet();await next('hamlet');
 await p.click('[data-tab="packs"]');await p.click('[data-act="assignall"]');await next('assign');
 await p.click('[data-tab="settle"]');await p.fill('#snm','Riverbend');await p.press('#snm','Tab');await next('name');
@@ -54,7 +54,7 @@ await p.click('[data-tab="patrol"]');await p.click('[data-act="fmnew"]');await p
 // encounters
 await fight(1,{deploy:async()=>{await p.click('[data-act="bfauto"]').catch(()=>{})}});await next('E1');
 await p.click('[data-tab="packs"]');await p.click('[data-act="open"][data-k="booster"]');await next('packA');
-console.log('placed',await placeTiles('pond',1),await placeTiles('cultivated',8));await hamlet();await next('hamlet2');
+console.log('placed',await placeTiles('pond',1),await placeTiles('cultivated',8),await placeTiles('woodland',1),await placeTiles('field',1),await placeTiles('pasture',2));await hamlet();await next('hamlet2');
 // road between: draw across two placed tiles using zoom clicks
 await p.click('[data-tab="realm"]');await p.click('[data-act="draw"][data-k="road"]');const st0=await S(()=>{const s=__S().setl[0];return[s.c,s.r]});await hexTap(`[data-act="hex"][data-c="${st0[0]}"][data-r="${st0[1]}"]`);
 await hexTap(`[data-act="hex"][data-c="${st0[0]+1}"][data-r="${st0[1]}"]`);await p.click('[data-act="dfinish"]');console.log('road',await p.innerText('.msg'));await next('road');
@@ -72,7 +72,7 @@ const fem=await S(()=>__S().cards.find(c=>c.sex==='f').id);await p.click('[data-
 await p.click('[data-tab="settle"]');await p.click(`[data-act="selset"][data-id="${s2}"]`);await p.click(`[data-act="priest"][data-h="${fem}"]`);await next('priestess');
 await p.click('[data-act="sacA"][data-k="rabbit"]');console.log('sac form',await p.innerText('.upanel:has(#sacV)').catch(()=>'none'));await p.click('[data-act="sacrifice"]');console.log(await p.innerText('.msg'));await next('sacrifice');
 await p.click('[data-tab="packs"]');await p.click('[data-act="open"][data-k="booster"]');await next('packB');
-console.log('placed',await placeTiles('pond',1),await placeTiles('cultivated',8));await hamlet();
+console.log('placed',await placeTiles('pond',1),await placeTiles('cultivated',8),await placeTiles('woodland',1),await placeTiles('field',1),await placeTiles('pasture',2));await hamlet();
 const s3=await S(()=>__S().setl[2].id);await p.click('[data-tab="packs"]');await p.selectOption('#asel',String(s3));await p.click('[data-act="assignall"]');await next('hamlet3');
 await p.click('[data-tab="settle"]');await p.click(`[data-act="selset"][data-id="${S0=await S(()=>__S().setl[0].id)}"]`);
 for(const k of ['tat_antler','red_crystal','gnosis','p_bolt'])await equip(men[0],k);console.log(await p.innerText('.msg'));await next('powerup');
@@ -97,7 +97,7 @@ await p.click('[data-tab="realm"]');await p.click('[data-act="plc"][data-t="e"][
 const sp=await S(()=>{const s=__S(),W=s.bw,H=s.bh;const taken=(c,r)=>s.grid[r*W+c]||s.setl.some(x=>(x.c===c&&x.r===r)||(x.c2===c&&x.r2===r));for(let r=0;r<H;r++)for(let c=0;c<W;c++){if(taken(c,r))continue;const nb=(r&1)?[[1,0],[-1,0],[0,-1],[1,-1],[0,1],[1,1]]:[[1,0],[-1,0],[-1,-1],[0,-1],[-1,1],[0,1]];if(nb.some(d=>{const C=c+d[0],R=r+d[1];return C>=0&&R>=0&&C<W&&R<H&&taken(C,R)}))return[c,r]}});
 await hexTap(`[data-act="hex"][data-c="${sp[0]}"][data-r="${sp[1]}"]`);console.log('slope:',await p.innerText('.msg').catch(()=>''));await next('hill');
 // farmland for a village, then the village on two empty hexes side by side
-console.log('placed',await placeTiles('pond',4),await placeTiles('cultivated',22),await placeTiles('orchard',3));
+console.log('placed',await placeTiles('pond',4),await placeTiles('cultivated',22),await placeTiles('orchard',3),await placeTiles('forest',6));
 await p.click('[data-tab="realm"]');await p.click('[data-act="plc"][data-t="s"][data-k="village"]');
 const vp=await S(()=>{const s=__S(),W=s.bw,H=s.bh;const taken=(c,r)=>s.grid[r*W+c]||s.setl.some(x=>(x.c===c&&x.r===r)||(x.c2===c&&x.r2===r));const NB=(c,r)=>((r&1)?[[1,0],[-1,0],[0,-1],[1,-1],[0,1],[1,1]]:[[1,0],[-1,0],[-1,-1],[0,-1],[-1,1],[0,1]]).map(d=>[c+d[0],r+d[1]]).filter(q=>q[0]>=0&&q[1]>=0&&q[0]<W&&q[1]<H);const nearSet=(c,r)=>NB(c,r).some(q=>s.setl.some(x=>(x.c===q[0]&&x.r===q[1])||(x.c2===q[0]&&x.r2===q[1])));
   for(let r=0;r<H;r++)for(let c=0;c<W;c++){if(taken(c,r)||nearSet(c,r)||!NB(c,r).some(q=>taken(q[0],q[1])))continue;for(const q of NB(c,r))if(!taken(q[0],q[1])&&!nearSet(q[0],q[1]))return[c,r,q[0],q[1]]}});
