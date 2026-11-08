@@ -6,7 +6,7 @@ await p.evaluate(()=>{window.__S=function(){return __ev('S')};window.__UI=functi
 const S=(f,a)=>p.evaluate(f,a);const step=async()=>S(()=>__S().tut&&__S().tut.step);
 const next=async(label)=>{if(await p.$('[data-act="lootok"]')){console.log('loot popup:',(await p.innerText('.lootcard')).replace(/\n/g,' ').slice(0,160));await p.click('[data-act="lootok"]')}const st=await step();const dis=await p.$eval('[data-act="tutnext"]',e=>e.disabled).catch(()=>'none');if(dis!==false){console.log('NOT DONE at',st,label,await p.innerText('.tutgoal').catch(()=>''));await p.click('[data-act="tutskip"]')}else await p.click('[data-act="tutnext"]');console.log('step',st,'→',await step(),label)};
 const t0=Date.now();
-const hexTap=sel=>p.$eval(sel,e=>e.dispatchEvent(new MouseEvent('click',{bubbles:true}))).catch(e=>console.log('hex miss',sel));
+const hexTap=sel=>p.$eval(sel,e=>{e.scrollIntoView({block:'center'});const r=e.getBoundingClientRect();e.dispatchEvent(new MouseEvent('click',{bubbles:true,clientX:r.left+r.width/2,clientY:r.top+r.height/2}))}).catch(e=>console.log('hex miss',sel));
 const placeTiles=async(k,n)=>{await p.click('[data-tab="realm"]');await p.click(`[data-act="plc"][data-t="t"][data-k="${k}"]`);let placed=0;const bad=new Set();
   for(let g=0;g<400&&placed<n;g++){const cand=await S(([bad,k])=>{const s=__S(),W=s.bw,H=s.bh,out=[];const taken=(c,r)=>s.grid[r*W+c]||s.setl.some(x=>(x.c===c&&x.r===r)||(x.c2===c&&x.r2===r));const any=s.grid.some(Boolean)||s.setl.length;
     const NB=(c,r)=>((r&1)?[[1,0],[-1,0],[0,-1],[1,-1],[0,1],[1,1]]:[[1,0],[-1,0],[-1,-1],[0,-1],[-1,1],[0,1]]).map(d=>[c+d[0],r+d[1]]).filter(q=>q[0]>=0&&q[1]>=0&&q[0]<W&&q[1]<H);
