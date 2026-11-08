@@ -1546,7 +1546,7 @@ var TUT_ENC={
   4:{reward:{lumber:6,gravel:6},camps:[{type:'goblin',n:5},{type:'brigand',n:3,d:7}]},
   5:{reward:{lumber:4,gravel:4},camps:[{type:'pigger'}]},
   6:{stay:true,reward:{lumber:4,gravel:4},camps:[{type:'tiggle',n:14}]},
-  7:{stay:true,reward:{lumber:6,gravel:6},camps:[{type:'brigand',n:6,armor:1,hill:1},{type:'goblin',n:8,d:5}]},
+  7:{stay:true,reward:{lumber:6,gravel:6},camps:[{type:'brigand',n:4,armor:1,hill:1},{type:'goblin',n:5,d:5}]},
   8:{reward:{lumber:8,gravel:8},camps:[{type:'dogman',d:4}]}
 };
 function tutWalled(){return S.setl[0]&&setWalled(S.setl[0])&&gates().length>0}
@@ -1591,7 +1591,7 @@ var TUT=[
  {part:2,ch:'Part 2 · Village',t:'A village',tab:'realm',pr:4500,d:'<p>A <b>village</b> is its own settlement, not a grown hamlet: three settlement cards on <b>two empty hexes side by side</b>, 1000 prestige, 450 people to feed.</p><ul><li>Its special food: the <b>3 orchards</b> (farmland: water within two tiles).</li><li>It burns <b>8 firewood</b> from land within an hour\'s walk: oak forest 1.5 a tile, woodland 1, pine 0.75, swamp 0.5. Place the <b>6 oak forests</b> near it.</li><li>Enough cultivated fields to feed everyone (header: people fed / needed).</li></ul>',chk:function(){return S.setl.some(function(x){return x.type==='village'})}},
  {part:2,ch:'Part 2 · Fights',t:'Fight 5 · A pigger',enc:5,d:'<p>A pigger has crashed out of the woods: one beast, 300 HP, twice a man\'s speed, a flint spear, no camp. It is dumb: it charges the nearest thing, and at a wall it hacks the nearest panel. Flint does ×1.25 against beasts.</p>',chk:function(){return tutWon(5)}},
  {part:2,ch:'Part 2 · Fights',t:'Fight 6 · The tiggle swamp',enc:6,d:'<p>Fourteen tiggles, frog-men, hold a swamp nearby. They never leave wet ground and cross water freely. Their little bows reach only 12 yd.</p><p>Bring long bows and <b>Arcane Arrow</b>, march a squad to the dry edge of the swamp, and shoot them from there. Wading in with spears is how squads die. Then burn their camp.</p>',chk:function(){return tutWon(6)}},
- {part:2,ch:'Part 2 · Fights',t:'Fight 7 · The hill',enc:7,d:'<p>Old enemies, new ground: six armored brigands dug in on a mound, and a goblin camp close by. Uphill, the brigands shoot farther and hit harder, and your men climb slowly. Open with bows and spells from range, and close together.</p>',chk:function(){return tutWon(7)}},
+ {part:2,ch:'Part 2 · Fights',t:'Fight 7 · The hill',enc:7,d:'<p>Old enemies, new ground: four armored brigands dug in on a mound, and a goblin camp close by. Uphill, the brigands shoot farther and hit harder, and your men climb slowly. Open with bows and spells from range, and close together.</p>',chk:function(){return tutWon(7)}},
  {part:2,ch:'Part 2 · Fights',t:'Fight 8 · The dog man',enc:8,d:'<p>Something lives in the deep woods. It runs on all fours, faster than any man, and rears up to fight: a <b>dog man</b>, 600 HP, claws, and clever. He goes for gates and weak points, not the nearest wall.</p><p>Kill him. What he carries is worth it.</p>',chk:function(){return tutWon(8)}},
  {part:2,ch:'Part 2 · Done',t:'Join your realms',d:'<p>The Chalcolithic realm is built. Now join it to your permanent realm: you will see both, drag this one round your realm\'s edge, turn it, and drop it where it touches. Settlements cannot touch, and tiles cannot overlap.</p>',end2:true}
 ];
