@@ -148,7 +148,7 @@ function startMatch(){
   S.grid=g.grid;S.hgt=g.hgt;S.setl.forEach(function(s){s.c+=g.dc;s.r+=g.dr;if(s.c2!=null){s.c2+=g.dc;s.r2+=g.dr}});
   syncDims();
   shiftLines(Math.sqrt(3)*SH*g.dc,SH*1.5*g.dr);shiftRoutes(g.dc,g.dr);
-  UI.raids=[];UI.manim=null;UI.pb=null;UI.mview='mine';UI.tile=null;UI.tab='match';UI.mres=null;UI.place=null;UI.confirm=false;UI.res=null;
+  UI.raids=[];UI.manim=null;UI.pb=null;UI.mview='mine';/* a new match opens on the whole map, not zoomed into the last fight's ground */if(UI.pz)delete UI.pz.m;if(UI.pzDeep)delete UI.pzDeep.m;UI.tile=null;UI.tab='match';UI.mres=null;UI.place=null;UI.confirm=false;UI.res=null;
   S.match.speed=S.match.tutEnc?10:1;S.match.autoPause=true;cleanUnits();S.units.forEach(function(U){initLive(U)});UI.mu=S.units.length?S.units[0].id:null;
   S.match.setc=S.setl.map(function(x){var q=center(x.c,x.r);return[x.id,Math.round(q[0]),Math.round(q[1])]});snapM();UI.rsvg=replayBase();UI.rp=null;
   mlog('Match begins ('+Math.round(UI.mshare*100)+'% yours). '+g.camps.length+' mob camp'+(g.camps.length===1?'':'s')+' in a world of '+(g.W*g.H)+' hexes.','dim');
