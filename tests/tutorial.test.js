@@ -3,7 +3,7 @@ const {chromium}=require('playwright');const fs=require('fs');
 (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1100,height:1400}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
 let h=fs.readFileSync(path.resolve(__dirname,'..','dist','realmforge-chalcolithic.html'),'utf8').replace('var saved=load();','window.__S=function(){return S};window.__UI=function(){return UI};var saved=load();');
 fs.writeFileSync('wrap43.html','<!doctype html><html><head><meta charset="utf-8"></head><body>'+h+'</body></html>');
-await p.goto('file://'+__dirname+'/wrap43.html');await p.evaluate(()=>localStorage.clear());await p.reload();
+await p.goto('file://'+path.resolve('wrap43.html'));await p.evaluate(()=>localStorage.clear());await p.reload();
 const S=(f,a)=>p.evaluate(f,a);const step=async()=>S(()=>__S().tut&&__S().tut.step);
 const next=async(label)=>{if(await p.$('[data-act="lootok"]')){console.log('loot popup:',(await p.innerText('.lootcard')).replace(/\n/g,' ').slice(0,160));await p.click('[data-act="lootok"]')}const st=await step();const dis=await p.$eval('[data-act="tutnext"]',e=>e.disabled).catch(()=>'none');if(dis!==false){console.log('NOT DONE at',st,label,await p.innerText('.tutgoal').catch(()=>''));await p.click('[data-act="tutskip"]')}else await p.click('[data-act="tutnext"]');console.log('step',st,'→',await step(),label)};
 const t0=Date.now();
