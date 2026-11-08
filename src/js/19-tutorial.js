@@ -12,7 +12,7 @@ var TUT_PACKS={A:['human_f','altar','rabbit','rabbit','wolf','human','human','hu
  C:['human','human','human','human','human','human','spear@cu.oak','spear@cu.oak','spear@cu.pine','knife@cu.oak','knife@cu.oak','longbow','longbow@-.pine','long_arrows@cu.oak','long_arrows@cu.oak','long_arrows','leather_armor','leather_armor','leather_helmet','oak_shield','leather_greaves','rod_cu','rod_wood','ring_swift','ring_endur','ring_str','orange_crystal','gnosis','gnosis','p_arrow','p_slash','setcard','setcard','setcard','e_gs_field','e_lm_woodland','t_orchard','t_orchard','t_orchard'].concat(Array(22).fill('t_cultivated'))};
 /* each encounter is one or more full camps; part 2 brings the Chalcolithic's own trouble */
 var TUT_ENC={
-  1:{reward:{lumber:6,gravel:6},camps:[{type:'goblin',n:10}]},
+  1:{reward:{lumber:6,gravel:6},camps:[{type:'goblin',n:6}]},
   2:{reward:{lumber:6,gravel:6},camps:[{type:'brigand',n:6}]},
   3:{reward:{lumber:4,gravel:4},camps:[{type:'goblin',n:12}]},
   4:{reward:{lumber:6,gravel:6},camps:[{type:'goblin',n:10},{type:'brigand',n:5,d:4}]},

@@ -31,17 +31,18 @@ await next('squad');
 await p.selectOption(`#urt${uid}`,'defend');await next('defend');
 await p.click('[data-tab="patrol"]');await p.click('[data-act="fmnew"]');await p.click('[data-act="fmshape"][data-s="ranks"] >> nth=1');await next('formations');
 // encounters
-const fight=async(n,opts)=>{for(let tryN=0;tryN<4;tryN++){await p.click('[data-act="tutenc"]');let did={};
+const fight=async(n,opts)=>{for(let tryN=0;tryN<4;tryN++){await p.click('[data-act="tutenc"]');let did={},last=null;
   for(let k=0;k<1500;k++){await p.waitForTimeout(150);if(!(await S(()=>!!__S().match)))break;
     if(await p.$('[data-act="bfight"]')){if(opts.deploy)await opts.deploy(did);await p.click('[data-act="bfight"]').catch(()=>{});await p.waitForTimeout(300)}
     const inFight=await S(()=>{const M=__S().match;return !!(M&&M.battles&&M.battles.some(b=>!b.done&&b.phase==='fight'))});
     if(inFight&&opts.live&&!did.live){await p.waitForSelector('#bview svg');did.live=await opts.live()}
     if(await p.$('.speedbar [data-act="mspd"][data-s="0"].on')&&!(await p.$('[data-act="bfight"]')))await p.click('.speedbar [data-act="mspd"][data-s="60"]').catch(()=>{});
     else if(inFight&&await p.$('#bctl [data-act="mspd"][data-s="10"]:not(.on)'))await p.click('#bctl [data-act="mspd"][data-s="10"]').catch(()=>{});
+    last=await S(()=>{const M=__S().match;return M?{log:M.log.slice(-4).map(x=>x.m).join(' / '),foes:M.camps.map(c=>c.mobs.length).join('+'),men:__S().units.map(U=>U.hids.filter(h=>{const c=__S().cards.find(x=>x.id===h);return c&&!c.dead}).length).join('+')}:null})||last;
     const need=await S(()=>{const M=__S().match;if(!M)return null;const m=M.camps.find(c=>!c.razed&&!c.mobs.length);if(!m)return null;if(__S().units.some(U=>U.live&&(U.live.mode==='raze'||U.live.raze)))return null;if(M.battles&&M.battles.some(b=>!b.done))return null;return m.key});
     if(need){const lr=await S(k=>{const M=__S().match,m=M.camps.find(c=>c.key===k);return[m.lair%M.W,Math.floor(m.lair/M.W)]},need);await p.click('[data-act="mview"][data-v="all"]').catch(()=>{});await p.click(`[data-act="hex"][data-c="${lr[0]}"][data-r="${lr[1]}"] >> nth=0`).catch(e=>console.log('hex fail',e.message));await p.click(`.lootcard [data-act="razego"][data-u="${uid}"]`).catch(e=>console.log('raze fail',e.message));console.log('burn ordered',n)}}
   if(await S(()=>!!__S().match))console.log('STUCK',errs.slice(0,3),await S(()=>[__S().match.speed,__S().match.halt]),JSON.stringify(await S(()=>{const M=__S().match;return{clock:M.clock,camps:M.camps.map(m=>({razed:m.razed,n:m.mobs.length,roam:m.roam,pos:m.pos,lair:m.lair,W:M.W})),units:__S().units.map(U=>({rem:U.live.rem,wait:U.live.wait,busy:U.live.busy,raze:U.live.raze,endur:U.live.endur,lairTerr:__S().grid[__S().match.camps[0].lair],sp:U.live.ub&&U.live.ub.sp,mode:U.live.mode,st:U.live.status,pos:U.live.pos,raze:U.live.raze,path:U.live.path.length,tg:U.live.target})),log:M.log.slice(-8).map(x=>x.t+' '+x.m)}})));
-  const won=await S(n=>!!__S().tut.won[n],n);console.log('encounter',n,'try',tryN+1,won?'WON':'lost',(await p.innerText('.verdict').catch(()=>'')));if(won)return true}return false};
+  const won=await S(n=>!!__S().tut.won[n],n);console.log('encounter',n,'try',tryN+1,won?'WON':'lost',JSON.stringify(last),(await p.innerText('.verdict').catch(()=>'')));if(won)return true}return false};
 await fight(1,{deploy:async()=>{await p.click('[data-act="bfauto"]').catch(()=>{})}});await next('E1');
 await p.click('[data-tab="packs"]');await p.click('[data-act="open"][data-k="booster"]');await next('packA');
 console.log('placed',await placeTiles('cultivated',8));await hamlet();await next('hamlet2');
