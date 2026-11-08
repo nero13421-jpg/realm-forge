@@ -29,5 +29,5 @@ python tools/build.py --test       # rebuild dist/ (and the test copy)
 npm install                        # once, installs Playwright
 npx playwright install chromium    # once, downloads the test browser
 node tests/smoke.test.js           # quick check: every tab opens, no errors
-node tests/tutorial.test.js        # full tutorial run, about 12 minutes
+node tests/tutorial.test.js        # full tutorial run, both parts and the join, about 26 minutes
 ```
