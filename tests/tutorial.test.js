@@ -15,7 +15,7 @@ const placeTiles=async(k,n)=>{await p.click('[data-tab="realm"]');await p.click(
     const hd=(a,b)=>{const aq=a[0]-(a[1]-(a[1]&1))/2,bq=b[0]-(b[1]-(b[1]&1))/2,dq=aq-bq,dr=a[1]-b[1];return (Math.abs(dq)+Math.abs(dr)+Math.abs(dq+dr))/2};
     for(let r=0;r<H;r++)for(let c=0;c<W;c++){if(taken(c,r)||bad.indexOf(c+','+r)>=0)continue;if(!(NB(c,r).some(q=>taken(q[0],q[1]))||!any))continue;
       const wd=wet.length?Math.min(...wet.map(w=>hd(w,[c,r]))):9;let sc=Math.abs(c-W/2)+Math.abs(r-H/2);
-      if(k==='pond'){if(NB(c,r).some(q=>s.grid[q[1]*W+q[0]]==='pond'))continue;sc+=wd<=2?20:0}else if(k==='cultivated'||k==='orchard'){if(wd>2)continue}
+      if(k==='pond'){if(NB(c,r).some(q=>s.grid[q[1]*W+q[0]]==='pond'))continue;const hl=(q)=>{const h=(s.hgt||[])[q[1]*W+q[0]];return h&&(h.s!=='flat'||h.r)};if(hl([c,r])||NB(c,r).some(q=>hl(q)||NB(q[0],q[1]).some(hl)))continue;sc+=wd<=2?20:0}else if(k==='cultivated'||k==='orchard'){if(wd>2)continue}
       out.push([c,r,sc])}out.sort((a,b)=>a[2]-b[2]);return out[0]},[[...bad],k]);
     if(!cand)break;const before=await S(()=>__S().grid.filter(Boolean).length);await p.$eval(`[data-act="hex"][data-c="${cand[0]}"][data-r="${cand[1]}"]`,e=>e.dispatchEvent(new MouseEvent('click',{bubbles:true})));const after=await S(()=>__S().grid.filter(Boolean).length);if(after>before)placed++;else{bad.add(cand[0]+','+cand[1]);if(bad.size>40){console.log('place fail',await p.innerText('.msg').catch(()=>''));break}}}
   return placed};
