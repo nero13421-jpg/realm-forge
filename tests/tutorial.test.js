@@ -86,7 +86,7 @@ fs.writeFileSync('tut-p2.json',JSON.stringify(await p.evaluate(()=>({a:localStor
 await p.click('[data-act="tutbegin"]');await p.click('[data-act="open"][data-k="starter"]');await next('pack2');
 console.log('placed',await placeTiles('pond',1));
 await p.click('[data-tab="realm"]');await p.click('[data-act="draw"][data-k="stream"]');const pd=await S(()=>{const s=__S(),i=s.grid.indexOf('pond');return[i%s.bw,Math.floor(i/s.bw)]});
-await hexTap(`[data-act="hex"][data-c="${pd[0]}"][data-r="${pd[1]}"]`);await hexTap(`[data-act="hex"][data-c="${pd[0]+1}"][data-r="${pd[1]}"]`);await hexTap(`[data-act="hex"][data-c="${pd[0]+2}"][data-r="${pd[1]}"]`);await p.click('[data-act="dfinish"]');console.log('stream',await p.innerText('.msg'));await next('stream');
+await hexTap(`[data-act="hex"][data-c="${pd[0]+2}"][data-r="${pd[1]}"]`);await hexTap(`[data-act="hex"][data-c="${pd[0]+1}"][data-r="${pd[1]}"]`);await hexTap(`[data-act="hex"][data-c="${pd[0]}"][data-r="${pd[1]}"]`);await p.click('[data-act="dfinish"]');console.log('stream',await p.innerText('.msg'));await next('stream');
 console.log('placed',await placeTiles('cultivated',8),await placeTiles('woodland',1),await placeTiles('field',1),await placeTiles('pasture',2));await hamlet();
 await p.click('[data-tab="packs"]');await p.click('[data-act="assignall"]');
 const m2=await S(()=>__S().cards.filter(c=>c.key==='human').map(c=>c.id));
