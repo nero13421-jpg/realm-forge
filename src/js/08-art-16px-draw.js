@@ -54,8 +54,10 @@ function head(){
     '<div><dt>People fed / needed</dt><dd class="'+(need>cap?'bad':'')+'">'+Math.floor(cap)+' / '+need+'</dd></div>'+
     '<div><dt>Settlements</dt><dd>'+S.setl.length+'</dd></div><div><dt>Humans</dt><dd>'+hum+'</dd></div>'+(S.match?'<div><dt>Match clock</dt><dd id="hclock">'+mmss(S.match.clock)+'</dd></div>':'');
   var T=S.match?[['packs','Packs'],['settle','Settlements'],['units','Units'],['res','Resources'],['match','Match'],['patrol','Patrols'],['info','Info']]:[['packs','Packs'],['settle','Settlements'],['units','Units'],['res','Resources'],['realm','Realm'],['match','Match'],['patrol','Patrols'],['info','Info']];
-  var TS=tutStep(),TH=TS&&TS.tab&&!S.match?TS.tab:(TS&&TS.enc&&!S.match?null:null);
-  $('#tabs').innerHTML=T.map(function(t){return '<button class="btn'+(UI.tab===t[0]?' on':'')+(TH===t[0]&&UI.tab!==t[0]?' tuthint':'')+'" data-act="tab" data-tab="'+t[0]+'">'+t[1]+'</button>'}).join('');
+  var TS=tutStep(),TH=TS&&TS.tab&&!S.match?TS.tab:null,TO=tutTabsOpen();
+  if(TO){T=T.filter(function(t){return TO[t[0]]||(S.match&&t[0]==='match')})}
+  document.body.classList.toggle('tutmode',!!S.tut);
+  $('#tabs').innerHTML=(S.tut?'<span class="tutban">Tutorial realm · '+(S.tut.part===2?'Part 2 · The Chalcolithic':'Part 1 · The Neolithic')+'</span>':'')+T.map(function(t){var fr=S.tut&&S.tut.fresh===t[0];return '<button class="btn'+(UI.tab===t[0]?' on':'')+(TH===t[0]&&UI.tab!==t[0]?' tuthint':'')+(fr?' tutnew':'')+'" data-act="tab" data-tab="'+t[0]+'">'+(fr?'<span class="tutnewb">New</span> ':'')+t[1]+'</button>'}).join('');
 }
 function msgHtml(){return '<p class="msg'+(UI.bad?' bad':'')+'">'+esc(UI.msg)+'</p>'}
 

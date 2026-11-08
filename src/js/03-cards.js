@@ -98,7 +98,7 @@ function packCount(k){return k==='booster'?(S.packs||0):((S.pk||{})[k]||0)}
 function packAdd(k,n){if(k==='booster')S.packs=(S.packs||0)+n;else{S.pk=S.pk||{};S.pk[k]=(S.pk[k]||0)+n}}
 function openPackOf(k){
   UI.fresh=[];packAdd(k,-1);
-  if(k==='starter'){(S.tut?TUT_STARTER:STARTER).forEach(function(x){for(var j=0;j<x[1];j++)UI.fresh.push(mk(x[0]).id)});if(!S.tut){var wf=mk('human');wf.sex='f';UI.fresh.push(wf.id)}}
+  if(k==='starter'){if(S.tut)S.tut.opened0=1;(S.tut?(S.tut.part===2?TUT2_STARTER:TUT_STARTER):STARTER).forEach(function(x){for(var j=0;j<x[1];j++)UI.fresh.push(mk(x[0]).id)});if(!S.tut){var wf=mk('human');wf.sex='f';UI.fresh.push(wf.id)}}
   else if(k==='booster'&&S.tut&&S.tut.pk&&S.tut.pk.length){S.tut.pk.shift().forEach(function(key){var nc=mk(key==='human_f'?'human':key);if(key==='human_f'){nc.sex='f';nc.name='Ama'}UI.fresh.push(nc.id)});S.tut.opened++}
   else for(var i=0;i<PACKS[k].size;i++){var nc=mk(rollKey());if(nc.key==='human'&&Math.random()<FEMALE_P)nc.sex='f';UI.fresh.push(nc.id)}
   UI.opened=PACKS[k].n;

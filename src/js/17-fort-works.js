@@ -10,7 +10,7 @@ function towerOf(hid){var t=null;towers().forEach(function(x){if((x.men||[]).ind
 function towerOff(hid){towers().forEach(function(x){x.men=(x.men||[]).filter(function(i){return i!==hid})})}
 /* labor: a free man (not in a unit, not on a tower, not the one picked at an altar), from your hand first */
 function laborFree(){var inU={},pr={};S.units.forEach(function(U){U.hids.forEach(function(h){inU[h]=1})});S.setl.forEach(function(x){if(x.altar&&x.altar.pr)pr[x.altar.pr]=1});return S.cards.filter(function(c){return c.key==='human'&&c.sex!=='f'&&!inU[c.id]&&!pr[c.id]&&!towerOf(c.id)}).sort(function(a,b){return (a.at===null?0:1)-(b.at===null?0:1)})}
-function laborNeed(n){return S.tut?0:n}
+function laborNeed(n){return S.tut?0:n}/* labor is free in the tutorial, both parts */
 function payLabor(n){laborFree().slice(0,laborNeed(n)).forEach(killHuman)}
 function laborText(n){n=laborNeed(n);return n?n+' '+(n===1?'man':'men')+' as labor':''}
 function palCost(h,m){return{cost:PALS[h].cost,tk:PALS[h].tim,tn:PAL_TIM,mats:{},lab:Math.ceil(m/PAL_LAB_M)}}

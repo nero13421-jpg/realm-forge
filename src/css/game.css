@@ -295,3 +295,18 @@ button.tag:hover{background:#f3ead3}
 .bar{height:8px;background:var(--ground);border:1px solid var(--line)}
 .bar i{display:block;height:100%;background:var(--verd)}
 .bar.over i{background:var(--oxide)}
+/* the narrative tutorial: a framed realm of its own, black title cards between parts */
+body.tutmode .wrap{outline:2px solid var(--ochre);outline-offset:10px;border-radius:2px}
+.tutban{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ground);background:var(--ochre);padding:4px 10px;align-self:center}
+.btn.tutnew{border-color:var(--ochre);box-shadow:0 0 0 2px var(--ochre)}.tutnewb{font-size:10px;letter-spacing:.08em;text-transform:uppercase;background:var(--ochre);color:var(--ground);padding:0 4px;margin-right:2px}
+.tutcard h2{font-size:22px}
+.tuttitle{position:fixed;inset:0;z-index:50;background:#070605;display:flex;align-items:center;justify-content:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));animation:ttin 1.2s ease-out both}
+.tuttin{max-width:56ch;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;color:#efe4cc}
+.tuttin h1{font-family:var(--f-display);font-size:clamp(28px,6vw,46px);margin:0;letter-spacing:.01em;text-wrap:balance;color:#f2e6c8}
+.tutsm{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:#c8a050;margin:0}.tutlede{color:#bfb39a;margin:0}
+@keyframes ttin{from{opacity:0}to{opacity:1}}@media(prefers-reduced-motion:reduce){.tuttitle{animation:none}}
+.mergewrap{overflow-x:auto;border:1px solid var(--line);background:var(--t-empty)}
+.mergesvg{display:block;width:100%;max-height:60vh;min-width:320px}
+.mgnd{fill:transparent;stroke:rgba(232,222,198,.06);cursor:pointer}.mgnd:hover{fill:rgba(210,154,58,.12)}
+.mperm{stroke:#17140f;stroke-width:1;pointer-events:none}.mset{fill:#e8dec6}
+.mnew{stroke:var(--ochre);stroke-width:1.6;opacity:.78;pointer-events:none}.mnew.mset{fill:#f4d99a}.mnew.bad{stroke:var(--oxide);opacity:.55}

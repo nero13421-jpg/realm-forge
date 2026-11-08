@@ -12,8 +12,18 @@ document.addEventListener('click',function(e){
   if(a==='tutnext'){var cs=tutStep();if(cs&&(!cs.chk||cs.chk())){S.tut.step++;tutEnter();save()}window.scrollTo(0,0);return render()}
   if(a==='tutskip'){if(S.tut){S.tut.step++;tutEnter();save()}window.scrollTo(0,0);return render()}
   if(a==='tutenc'){var es=tutStep();if(es&&es.enc&&!S.match){S.tut.enc=es.enc;UI.mshare=.25;startMatch()}return}
-  if(a==='tutquit'){if(S.match)return;S.tut=null;save();say('Tutorial closed. This realm is yours to keep.');return render()}
-  if(a==='tutend'){if(d.v==='old'){try{var o2=localStorage.getItem(TKEY);if(o2){S=JSON.parse(o2);localStorage.removeItem(TKEY);COLS=9;ROWS=7;migrate();syncDims();initUI();UI.tab='packs';say('Your old realm is back.');save();return render()}}catch(x){}}S.tut=null;try{localStorage.removeItem(TKEY)}catch(x){}UI.tab='packs';say('The realm is yours. Good luck out there.');save();return render()}
+  if(a==='tutbegin'){if(S.tut){S.tut.title=null;tutEnter();save()}window.scrollTo(0,0);return render()}
+  if(a==='tutquit'){if(S.match)return;if(S.tut&&S.tut.part===2){try{var pq=localStorage.getItem(PKEY);if(pq){S=JSON.parse(pq);localStorage.removeItem(PKEY);COLS=9;ROWS=7;migrate();syncDims();initUI();UI.tab='packs';say('Part 2 set aside. Your realm is back as it was.');save();return render()}}catch(x){}}
+    S.tut=null;S.p1=1;save();say('Tutorial closed. This realm is yours to keep.');return render()}
+  if(a==='tutend1'){if(!S.tut)return render();S.tut=null;S.p1=1;try{localStorage.removeItem(TKEY)}catch(x){}save();if(d.v==='p2')return tutStart2();UI.tab='realm';say('This is your realm. Part 2 is in Packs whenever you want it.');return render()}
+  if(a==='mergego'){if(S.match)return;return mergeStart()}
+  if(a==='mhex'){if(UI.merge){UI.merge.at=[+d.c,+d.r]}return render()}
+  if(a==='mnudge'){if(UI.merge){UI.merge.at=nb6(UI.merge.at[0],UI.merge.at[1])[+d.v]}return render()}
+  if(a==='mturn'){if(UI.merge){UI.merge.rot=(UI.merge.rot+(+d.v))%6}return render()}
+  if(a==='mjoin'){if(UI.merge)return mergeApply();return render()}
+  if(a==='mcancel'){UI.merge=null;return render()}
+  if(a==='tutp2'){if(S.match||S.tut)return;return tutStart2()}
+  if(a==='tutend_old'){if(d.v==='old'){try{var o2=localStorage.getItem(TKEY);if(o2){S=JSON.parse(o2);localStorage.removeItem(TKEY);COLS=9;ROWS=7;migrate();syncDims();initUI();UI.tab='packs';say('Your old realm is back.');save();return render()}}catch(x){}}S.tut=null;try{localStorage.removeItem(TKEY)}catch(x){}UI.tab='packs';say('The realm is yours. Good luck out there.');save();return render()}
   if(a==='restart'){
     if(!UI.rc){UI.rc=true;return render()}
     COLS=9;ROWS=7;fresh();save();initUI();UI.tab='packs';UI.rc=false;UI.mres=null;UI.res=null;UI.tile=null;UI.fresh=[];UI.place=null;UI.confirm=false;UI.mview='mine';say('');UI.saved='Realm deleted. Fresh start.';return render();
