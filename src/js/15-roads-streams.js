@@ -30,7 +30,6 @@ function uRoads(U){return inFile(U)?roadSet():{}}
 function roadSet(){var o={};(S.lines||[]).forEach(function(l){if(l.type==='road')l.hexes.forEach(function(k){o[k]=1})});return o}
 function hexSpeed(k,rs){var g=S.grid[k],b=g?TERR[g].sp:1;if(b===0)return 0;return (rs||roadSet())[k]?ROAD_SP:b}
 function isFlow(l){return l.type==='stream'||l.type==='creek'}
-function hasStream(k){return (S.lines||[]).some(function(l){return isFlow(l)&&l.hexes.indexOf(k)>=0})}
 function streamSegs(ty){var o=[];(S.lines||[]).forEach(function(l){if(isFlow(l)&&(!ty||l.type===ty))for(var i=1;i<l.pts.length;i++)o.push([l.pts[i-1],l.pts[i]])});return o}
 function segX(p1,p2,p3,p4){
   function o(a,b,c){return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])}

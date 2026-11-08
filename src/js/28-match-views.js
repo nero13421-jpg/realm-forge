@@ -43,10 +43,9 @@ function plannerHtml(R,st){
   return '<div class="upanel"><h3>Patrol planner</h3><p class="note">Pick a patrol or make a new one, then draw its moves right on the map above. Tap Whole map to plan outside your own land.</p>'+routeListHtml(R)+(R?routeEditor(R,st):'')+'</div>';
 }
 function fold(k,title,body,cls){var f=UI.mfold||{},shut=!!f[k];return '<div class="fold'+(shut?' shut':'')+(cls?' '+cls:'')+'"><button class="foldh" data-act="mfold" data-k="'+k+'" aria-expanded="'+(!shut)+'"><span>'+title+'</span><i>'+(shut?'▸':'▾')+'</i></button><div class="foldb"'+(shut?' hidden':'')+'>'+body+'</div></div>'}
-var MFOLDS=['bf','map','stat','units','plan','battles','tile','log'];
 function matchPop(){var tl=UI.tile;if(!tl)return '';var c=tl[0],r=tl[1],cam=UI.pz&&UI.pz.m,deep=deepSet('m')[ix(c,r)];
   return tilePopHtml(c,r,'<ul class="facts">'+tileFacts(c,r).map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>'+razeRow(c,r)+'<div class="row">'+(deep?'':'<button class="btn sm go" data-act="pzgo" data-k="m" data-c="'+c+'" data-r="'+r+'">Zoom in here</button>')+'<button class="btn sm" data-act="topatrols">Plan a march to '+lab(c,r)+'</button></div>')}
-var MFOLDS=['map','stat','units','plan','battles','log'];
+var MFOLDS=['stat','units','plan','battles','log'];
 function vMatch(){
   var M=S.match;if(!M)return vMatchStart();
   var PR=UI.medit?routeById(UI.R):null,pst=setById(UI.Rfrom)||S.setl[0],ppf=PR?routePreview(PR,pst):{route:[]};

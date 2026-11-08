@@ -99,9 +99,6 @@ button.tag:hover{background:#f3ead3}
 .cnt{font-family:var(--f-mono);font-size:9px;fill:var(--bone);stroke:#14100a;stroke-width:2.5;paint-order:stroke;text-anchor:middle;dominant-baseline:central;pointer-events:none}
 .facts{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px;font-size:.88rem}
 .facts li{border-left:3px solid var(--ochre);padding-left:8px}
-.compass{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-.compass .btn{padding:6px 4px;text-align:center;line-height:1.25;text-transform:none}
-.compass .mid-lab{display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);color:var(--ochre)}
 
 #view{display:flex;flex-direction:column;gap:20px}
 /* animation */
@@ -134,7 +131,6 @@ button.tag:hover{background:#f3ead3}
 .bfe .bob{transform-box:fill-box;transform-origin:50% 100%;transition:transform .45s ease-in,opacity .45s}.bfe.dead .bob{opacity:.9;filter:grayscale(.55) brightness(.8);animation:none}.pa1,.pa2,.pc,.pg,.pd{display:none}.bfe.atk .lA,.bfe.atk .lB,.bfe.cst .lA,.bfe.cst .lB,.bfe.guard .lA,.bfe.guard .lB,.bfe.dead .lA,.bfe.dead .lB{display:none}.bfe.atk .pa1{display:inline;animation:pfa var(--pd,320ms) steps(1) forwards}.bfe.atk .pa2{display:inline;opacity:0;animation:pfb var(--pd,320ms) steps(1) forwards}@keyframes pfa{0%{opacity:1}42%{opacity:0}100%{opacity:0}}@keyframes pfb{0%{opacity:0}42%{opacity:1}100%{opacity:1}}.bfe.cst .pc{display:inline}.bfe.guard:not(.atk):not(.cst):not(.dead) .pg{display:inline}.bfe.dead .pd{display:inline}.bfe.dead.atk .pa1,.bfe.dead.atk .pa2,.bfe.dead .pg,.bfe.dead .pc{display:none}.fx-dust{fill:#cbb88a;opacity:.6}.fx-blood{fill:#8a1a14}.bfe .gsh{display:none}.bfe.guard .gsh{display:inline}.bfe.dead .hpb,.bfe.dead .hpbg{display:none}.bfe.dead .bfr{opacity:.3}
 .bfe.gone{display:none}.bfe.sel .bfr{stroke:#fff;stroke-width:.18}
 .bfe.walk .lA{animation:legA .36s steps(1) infinite}.bfe.walk .lB{animation:legB .36s steps(1) infinite}
-.bfdz{fill:rgba(240,198,78,.07);stroke:rgba(240,198,78,.55);stroke-width:.4;stroke-dasharray:2 1.5}
 .bflab{font:600 3px var(--f-mono);fill:#fff;text-anchor:middle;paint-order:stroke;stroke:#000;stroke-width:.6}
 .bfarrow{stroke:#f4ead2;stroke-width:.2}
 .fx-thrust{stroke:#f4ead2;stroke-width:.22;stroke-linecap:round}
@@ -150,19 +146,16 @@ button.tag:hover{background:#f3ead3}
 .bfe .shr{fill:#7fd6ff1a;stroke:#9fe3ff;stroke-width:.14;display:none}.bfe.shd .shr{display:inline}
 .bpop{font:700 2.6px var(--f-mono);text-anchor:middle;paint-order:stroke;stroke:#140f0a;stroke-width:.45;fill:#ffd36a;animation:bpop 1.2s ease-out forwards}
 .bpop.p{fill:#ff8a74}.bpop.miss{fill:#cfc6b4;font-size:2px;font-weight:500}
-@keyframes bpop{from{transform:translateY(0);opacity:1}to{transform:translateY(-6px);opacity:0}}
-.bgrid{display:grid;grid-template-columns:minmax(0,4fr) minmax(210px,1fr);grid-template-areas:'f d' 'l d';grid-template-rows:auto 1fr;gap:8px 12px;align-items:start}.bdock .bspd .clock{margin-right:4px}.bmain{grid-area:f}.bdock{grid-area:d}.bleg{grid-area:l;min-width:0}
-.bmain{min-width:0;display:flex;flex-direction:column;gap:6px}
+@keyframes bpop{from{transform:translateY(0);opacity:1}to{transform:translateY(-6px);opacity:0}}.bdock .bspd .clock{margin-right:4px}.bdock{grid-area:d}
 .bdock{position:sticky;top:8px;max-height:calc(100vh - 16px);overflow-y:auto;display:flex;flex-direction:column;gap:8px;background:var(--ground);border:1px solid var(--line);padding:10px;min-width:0;font-size:.85rem}
 .bdock .note{font-size:.74rem}.bdock .msg{font-size:.78rem}.bdock .bsq.fobs{margin:0 0 4px 0}.bdock .bsqs{margin:0}.bdock .bspd{gap:4px;flex-wrap:nowrap}.bdock .bspd .btn{flex:1 1 0;padding:5px 0;text-align:center}.bdock .bstat{border-top:1px solid var(--line);padding-top:6px;font-size:.76rem}.bdock .bsq>.btn{flex:1 1 100%;text-align:left}
-@media(max-width:820px){.bgrid{grid-template-columns:minmax(0,1fr);grid-template-areas:'f' 'd' 'l'}.bdock{position:sticky;top:auto;bottom:0;max-height:45vh;z-index:5;box-shadow:0 -6px 16px #0008;padding-bottom:max(10px,env(safe-area-inset-bottom,0px))}}
+@media(max-width:820px){.bdock{position:sticky;top:auto;bottom:0;max-height:45vh;z-index:5;box-shadow:0 -6px 16px #0008;padding-bottom:max(10px,env(safe-area-inset-bottom,0px))}}
 .cambar{gap:4px;align-items:center}.cambar .label{margin-right:4px}
 .fold{display:flex;flex-direction:column;gap:10px;min-width:0}
 .foldh{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;background:none;border:0;border-bottom:1px solid var(--line);padding:2px 0 6px;color:var(--bone);text-align:left}
 .foldh:hover{border-bottom-color:var(--bone-dim)}.foldh h2,.foldh h3{margin:0}.foldh i{font-style:normal;font-family:var(--f-mono);color:var(--muted)}
 .fold.shut .foldh{border-bottom-color:transparent;padding-bottom:0}
 .foldall{justify-content:flex-end;gap:10px;align-items:center}
-.lookhd{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .bsqs{display:flex;flex-direction:column;gap:6px;margin:8px 0}.bsq{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .tbtn i,.glegend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px;border:1px solid #0006}
 .glegend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.8rem;color:var(--muted);margin-top:6px}.glegend i{border-radius:2px}.glegend b{color:var(--bone);font-weight:600}
@@ -265,11 +258,6 @@ button.tag:hover{background:#f3ead3}
 .drawing .lh{pointer-events:none}.draw-wall{stroke:#e0a050;stroke-width:.5;stroke-dasharray:.7 .35}.twrow select{max-width:220px}
 .draw-road,.draw-stream{stroke:var(--ochre);stroke-width:2.5;stroke-dasharray:5 4}
 .draw-pt{fill:var(--ochre);stroke:#14100a;stroke-width:1}
-.zoomsvg{width:100%;max-width:560px;height:auto;display:block;margin:0 auto;border:1px solid var(--line)}
-.zl .ln{vector-effect:non-scaling-stroke}
-.zl .road-o{stroke-width:11}.zl .road-i{stroke-width:6;stroke-dasharray:3 3}
-.zl .stream-o{stroke-width:7}.zl .stream-i{stroke-width:3.5}
-.zl .draw-road,.zl .draw-stream{stroke-width:3}.zl .draw-pt{stroke-width:1.5}
 .umk .umbg{fill:#17140f;opacity:.85;stroke:var(--bone);stroke-width:1.5}
 .umk.on .umbg{stroke:var(--ochre);stroke-width:3}
 .umk{transition:transform .1s linear}.mk{transition:transform .1s linear}
@@ -496,7 +484,7 @@ var STATS=[
 function statBase(k){for(var i=0;i<STATS.length;i++)if(STATS[i][0]===k)return STATS[i][3];return 0}
 function stats(c,wt,eq){
   eq=eq||gearOf(c);if(wt==null){wt=0;eq.forEach(function(x){wt+=wtOf(x.key)})}
-  var b=function(k){return 1+bo(c,k)},has=function(k){return eq.some(function(x){return x.key===k})},X={},rg=function(k){return has(k)?1+RING_B:1};
+  var b=function(k){return 1+bo(c,k,eq)},has=function(k){return eq.some(function(x){return x.key===k})},X={},rg=function(k){return has(k)?1+RING_B:1};
   X.mEnd=statBase('mEnd')*b('stag');X.mdEnd=statBase('mdEnd')*b('stag')*rg('ring_endur');X.spEnd=statBase('spEnd')*b('rabbit')*rg('ring_swift');X.cEnd=statBase('cEnd');X.rec=statBase('rec');
   X.walk=PACE.walk;X.jog=PACE.jog;X.sprint=PACE.sprint*b('rabbit')*rg('ring_swift');X.creep=PACE.creep;X.carry=statBase('carry')*rg('ring_str');X.jd=statBase('jd');X.jh=statBase('jh');
   X.strike=statBase('strike');X.str=statBase('str')*b('wolf')*rg('ring_str');X.range=statBase('range');X.hp=Math.round(statBase('hp')*b('boar'));
@@ -528,7 +516,7 @@ function killHuman(h){removeFromUnit(h.id);S.cards.forEach(function(c){if(c.eq==
 /* the animal shown at the altar: the one you picked, else the kind this man already carries, else the first you hold */
 function sacPick(T,cnt){if(UI.sacA&&cnt[UI.sacA])return UI.sacA;if(T&&T.boon&&cnt[T.boon.k])return T.boon.k;return Object.keys(cnt)[0]||null}
 var BOON={rabbit:{n:'Rabbit',a:'Swiftness',lo:3,hi:6,t:'sprint speed and sprint endurance: charges, flanking runs and falling back. Not road marching.'},stag:{n:'Stag',a:'Stamina',lo:3,hi:6,t:'marching and middle-distance endurance'},boar:{n:'Boar',a:'Hardiness',lo:3,hi:6,t:'durability, more health'},wolf:{n:'Wolf',a:'Ferocity',lo:3,hi:6,t:'strength, more melee and bow damage'},hawk:{n:'Hawk',a:'Keen eye',lo:3,hi:6,t:'bow hit chance and sight range'}};
-function bo(c,k){var v=c&&c.boon&&c.boon.k===k?c.boon.p/100:0;if(c&&c.key==='human')S.cards.forEach(function(x){if(x.eq===c.id&&x.boon&&x.boon.k===k)v+=x.boon.p/100});return v}
+function bo(c,k,eq){var v=c&&c.boon&&c.boon.k===k?c.boon.p/100:0;if(c&&c.key==='human')(eq||gearOf(c)).forEach(function(x){if(x.boon&&x.boon.k===k)v+=x.boon.p/100});return v}
 /* gear can be blessed only while it has never been worn */
 function blessable(c){return c&&isItem(c)&&!c.worn&&c.eq==null&&['animal','altar','mat','crystal','gnosis','parch','tattoo'].indexOf(kindOf(c))<0}
 function resText(c){return c.boon?BOON[c.boon.k].a+' +'+c.boon.p+'% · resonance '+(c.res||0):''}
@@ -646,7 +634,7 @@ var ART16={"h_body":{"c":{"o":"#2a1a10","h":"#4a2e1a","H":"#6e4a2c","s":"#e2ac80
 var ART=(function(){var a={};['spear','axe','battle_axe','club','knife','shortbow','longbow','short_arrows','long_arrows','hide_armor','hide_shield','hide_helmet','o_armor','o_helmet','o_shield','rabbit','stag','boar','wolf','hawk','altar','lumber','gravel','red_crystal','gnosis','parch','setcard','tat_spiral','tat_antler','tat_serpent','tat_eye','tat_hand'].forEach(function(k){a[k]=ART16[k]});a.human={c:ART16.h_body.c,r:ART16.h_body.r.concat(ART16.h_legA.r)};return a})();
 ART.stimber={c:{o:'#2a1a10',W:'#b0804e',w:'#8a6036',l:'#ecd09c',L:'#caa070'},r:ART16.lumber.r};ART.ltimber={c:{o:'#160e06',W:'#6a4020',w:'#4a2c14',l:'#b88a58',L:'#8a5e30'},r:ART16.lumber.r};
 ART.rod_wood={"c": {"o": "#2a1a10", "W": "#b8864a", "w": "#e0bc80"}, "r": [["o", 2, 12, 3, 3], ["o", 3, 11, 3, 3], ["o", 4, 10, 3, 3], ["o", 5, 9, 3, 3], ["o", 6, 8, 3, 3], ["o", 7, 7, 3, 3], ["o", 8, 6, 3, 3], ["o", 9, 5, 3, 3], ["o", 10, 4, 3, 3], ["o", 11, 3, 3, 3], ["W", 3, 12.5, 1.5, 1.5], ["w", 3.5, 12, 1, 1], ["W", 4, 11.5, 1.5, 1.5], ["w", 4.5, 11, 1, 1], ["W", 5, 10.5, 1.5, 1.5], ["w", 5.5, 10, 1, 1], ["W", 6, 9.5, 1.5, 1.5], ["w", 6.5, 9, 1, 1], ["W", 7, 8.5, 1.5, 1.5], ["w", 7.5, 8, 1, 1], ["W", 8, 7.5, 1.5, 1.5], ["w", 8.5, 7, 1, 1], ["W", 9, 6.5, 1.5, 1.5], ["w", 9.5, 6, 1, 1], ["W", 10, 5.5, 1.5, 1.5], ["w", 10.5, 5, 1, 1], ["W", 11, 4.5, 1.5, 1.5], ["w", 11.5, 4, 1, 1], ["W", 12, 3.5, 1.5, 1.5], ["w", 12.5, 3, 1, 1], ["o", 11.5, 0.5, 4, 4], ["W", 12.5, 1.5, 2, 2], ["w", 12.5, 1.5, 1, 1]]};ART.rod_cu={"c": {"o": "#2a1a10", "W": "#b8864a", "w": "#e0bc80", "c": "#d8833a", "h": "#f6c48a"}, "r": [["o", 2, 12, 3, 3], ["o", 3, 11, 3, 3], ["o", 4, 10, 3, 3], ["o", 5, 9, 3, 3], ["o", 6, 8, 3, 3], ["o", 7, 7, 3, 3], ["o", 8, 6, 3, 3], ["o", 9, 5, 3, 3], ["o", 10, 4, 3, 3], ["o", 11, 3, 3, 3], ["W", 3, 12.5, 1.5, 1.5], ["w", 3.5, 12, 1, 1], ["W", 4, 11.5, 1.5, 1.5], ["w", 4.5, 11, 1, 1], ["W", 5, 10.5, 1.5, 1.5], ["w", 5.5, 10, 1, 1], ["W", 6, 9.5, 1.5, 1.5], ["w", 6.5, 9, 1, 1], ["W", 7, 8.5, 1.5, 1.5], ["w", 7.5, 8, 1, 1], ["W", 8, 7.5, 1.5, 1.5], ["w", 8.5, 7, 1, 1], ["W", 9, 6.5, 1.5, 1.5], ["w", 9.5, 6, 1, 1], ["W", 10, 5.5, 1.5, 1.5], ["w", 10.5, 5, 1, 1], ["W", 11, 4.5, 1.5, 1.5], ["w", 11.5, 4, 1, 1], ["W", 12, 3.5, 1.5, 1.5], ["w", 12.5, 3, 1, 1], ["o", 11, 0, 5, 5], ["c", 12, 1, 3, 3], ["h", 12, 1, 1.5, 1.5], ["o", 6.5, 6.5, 3, 3], ["c", 7, 7, 2, 2]]};ART.leather_greaves={"c": {"o": "#2a1a10", "L": "#8a4a2a", "l": "#b06a3a", "d": "#5a2e1a", "k": "#e8dec6"}, "r": [["o", 2, 2, 5, 13], ["o", 9, 2, 5, 13], ["L", 3, 3, 3, 11], ["L", 10, 3, 3, 11], ["l", 3, 3, 1, 11], ["l", 10, 3, 1, 11], ["d", 5, 3, 1, 11], ["d", 12, 3, 1, 11], ["k", 2, 5, 5, 1], ["k", 9, 5, 5, 1], ["k", 2, 10, 5, 1], ["k", 9, 10, 5, 1], ["d", 3, 13, 3, 1], ["d", 10, 13, 3, 1]]};
-ART.ring_swift={"c": {"o": "#2a1a10", "c": "#d8833a", "h": "#f6c48a", "s": "#9a5420", "g": "#7ec8e8", "G": "#3a86b0", "w": "#ffffff"}, "r": [["o", 7, 2, 1, 1], ["o", 8, 2, 1, 1], ["o", 6, 3, 1, 1], ["g", 7, 3, 1, 1], ["g", 8, 3, 1, 1], ["o", 9, 3, 1, 1], ["o", 5, 4, 1, 1], ["g", 6, 4, 1, 1], ["g", 7, 4, 1, 1], ["g", 8, 4, 1, 1], ["g", 9, 4, 1, 1], ["o", 10, 4, 1, 1], ["o", 5, 5, 1, 1], ["o", 6, 5, 1, 1], ["G", 7, 5, 1, 1], ["G", 8, 5, 1, 1], ["o", 9, 5, 1, 1], ["o", 10, 5, 1, 1], ["o", 4, 6, 1, 1], ["o", 5, 6, 1, 1], ["h", 6, 6, 1, 1], ["o", 7, 6, 1, 1], ["o", 8, 6, 1, 1], ["c", 9, 6, 1, 1], ["o", 10, 6, 1, 1], ["o", 11, 6, 1, 1], ["o", 3, 7, 1, 1], ["o", 4, 7, 1, 1], ["h", 5, 7, 1, 1], ["h", 6, 7, 1, 1], ["c", 7, 7, 1, 1], ["c", 8, 7, 1, 1], ["c", 9, 7, 1, 1], ["c", 10, 7, 1, 1], ["o", 11, 7, 1, 1], ["o", 12, 7, 1, 1], ["o", 3, 8, 1, 1], ["h", 4, 8, 1, 1], ["h", 5, 8, 1, 1], ["h", 6, 8, 1, 1], ["o", 7, 8, 1, 1], ["o", 8, 8, 1, 1], ["c", 9, 8, 1, 1], ["c", 10, 8, 1, 1], ["c", 11, 8, 1, 1], ["o", 12, 8, 1, 1], ["o", 3, 9, 1, 1], ["h", 4, 9, 1, 1], ["h", 5, 9, 1, 1], ["o", 6, 9, 1, 1], ["o", 9, 9, 1, 1], ["c", 10, 9, 1, 1], ["c", 11, 9, 1, 1], ["o", 12, 9, 1, 1], ["o", 3, 10, 1, 1], ["c", 4, 10, 1, 1], ["c", 5, 10, 1, 1], ["o", 6, 10, 1, 1], ["o", 9, 10, 1, 1], ["c", 10, 10, 1, 1], ["c", 11, 10, 1, 1], ["o", 12, 10, 1, 1], ["o", 3, 11, 1, 1], ["c", 4, 11, 1, 1], ["c", 5, 11, 1, 1], ["o", 6, 11, 1, 1], ["o", 9, 11, 1, 1], ["s", 10, 11, 1, 1], ["s", 11, 11, 1, 1], ["o", 12, 11, 1, 1], ["o", 3, 12, 1, 1], ["c", 4, 12, 1, 1], ["c", 5, 12, 1, 1], ["c", 6, 12, 1, 1], ["c", 7, 12, 1, 1], ["c", 8, 12, 1, 1], ["s", 9, 12, 1, 1], ["s", 10, 12, 1, 1], ["s", 11, 12, 1, 1], ["o", 12, 12, 1, 1], ["o", 4, 13, 1, 1], ["c", 5, 13, 1, 1], ["c", 6, 13, 1, 1], ["c", 7, 13, 1, 1], ["c", 8, 13, 1, 1], ["s", 9, 13, 1, 1], ["s", 10, 13, 1, 1], ["o", 11, 13, 1, 1], ["o", 5, 14, 1, 1], ["o", 6, 14, 1, 1], ["c", 7, 14, 1, 1], ["c", 8, 14, 1, 1], ["o", 9, 14, 1, 1], ["o", 10, 14, 1, 1], ["o", 7, 15, 1, 1], ["o", 8, 15, 1, 1], ["w", 7, 3, 1, 1]]};ART.ring_endur={"c": {"o": "#2a1a10", "c": "#d8833a", "h": "#f6c48a", "s": "#9a5420", "g": "#7ccc7a", "G": "#3e8a40", "w": "#ffffff"}, "r": [["o", 7, 2, 1, 1], ["o", 8, 2, 1, 1], ["o", 6, 3, 1, 1], ["g", 7, 3, 1, 1], ["g", 8, 3, 1, 1], ["o", 9, 3, 1, 1], ["o", 5, 4, 1, 1], ["g", 6, 4, 1, 1], ["g", 7, 4, 1, 1], ["g", 8, 4, 1, 1], ["g", 9, 4, 1, 1], ["o", 10, 4, 1, 1], ["o", 5, 5, 1, 1], ["o", 6, 5, 1, 1], ["G", 7, 5, 1, 1], ["G", 8, 5, 1, 1], ["o", 9, 5, 1, 1], ["o", 10, 5, 1, 1], ["o", 4, 6, 1, 1], ["o", 5, 6, 1, 1], ["h", 6, 6, 1, 1], ["o", 7, 6, 1, 1], ["o", 8, 6, 1, 1], ["c", 9, 6, 1, 1], ["o", 10, 6, 1, 1], ["o", 11, 6, 1, 1], ["o", 3, 7, 1, 1], ["o", 4, 7, 1, 1], ["h", 5, 7, 1, 1], ["h", 6, 7, 1, 1], ["c", 7, 7, 1, 1], ["c", 8, 7, 1, 1], ["c", 9, 7, 1, 1], ["c", 10, 7, 1, 1], ["o", 11, 7, 1, 1], ["o", 12, 7, 1, 1], ["o", 3, 8, 1, 1], ["h", 4, 8, 1, 1], ["h", 5, 8, 1, 1], ["h", 6, 8, 1, 1], ["o", 7, 8, 1, 1], ["o", 8, 8, 1, 1], ["c", 9, 8, 1, 1], ["c", 10, 8, 1, 1], ["c", 11, 8, 1, 1], ["o", 12, 8, 1, 1], ["o", 3, 9, 1, 1], ["h", 4, 9, 1, 1], ["h", 5, 9, 1, 1], ["o", 6, 9, 1, 1], ["o", 9, 9, 1, 1], ["c", 10, 9, 1, 1], ["c", 11, 9, 1, 1], ["o", 12, 9, 1, 1], ["o", 3, 10, 1, 1], ["c", 4, 10, 1, 1], ["c", 5, 10, 1, 1], ["o", 6, 10, 1, 1], ["o", 9, 10, 1, 1], ["c", 10, 10, 1, 1], ["c", 11, 10, 1, 1], ["o", 12, 10, 1, 1], ["o", 3, 11, 1, 1], ["c", 4, 11, 1, 1], ["c", 5, 11, 1, 1], ["o", 6, 11, 1, 1], ["o", 9, 11, 1, 1], ["s", 10, 11, 1, 1], ["s", 11, 11, 1, 1], ["o", 12, 11, 1, 1], ["o", 3, 12, 1, 1], ["c", 4, 12, 1, 1], ["c", 5, 12, 1, 1], ["c", 6, 12, 1, 1], ["c", 7, 12, 1, 1], ["c", 8, 12, 1, 1], ["s", 9, 12, 1, 1], ["s", 10, 12, 1, 1], ["s", 11, 12, 1, 1], ["o", 12, 12, 1, 1], ["o", 4, 13, 1, 1], ["c", 5, 13, 1, 1], ["c", 6, 13, 1, 1], ["c", 7, 13, 1, 1], ["c", 8, 13, 1, 1], ["s", 9, 13, 1, 1], ["s", 10, 13, 1, 1], ["o", 11, 13, 1, 1], ["o", 5, 14, 1, 1], ["o", 6, 14, 1, 1], ["c", 7, 14, 1, 1], ["c", 8, 14, 1, 1], ["o", 9, 14, 1, 1], ["o", 10, 14, 1, 1], ["o", 7, 15, 1, 1], ["o", 8, 15, 1, 1], ["w", 7, 3, 1, 1]]};ART.ring_str={"c": {"o": "#2a1a10", "c": "#d8833a", "h": "#f6c48a", "s": "#9a5420", "g": "#e05a46", "G": "#9a2a20", "w": "#ffffff"}, "r": [["o", 7, 2, 1, 1], ["o", 8, 2, 1, 1], ["o", 6, 3, 1, 1], ["g", 7, 3, 1, 1], ["g", 8, 3, 1, 1], ["o", 9, 3, 1, 1], ["o", 5, 4, 1, 1], ["g", 6, 4, 1, 1], ["g", 7, 4, 1, 1], ["g", 8, 4, 1, 1], ["g", 9, 4, 1, 1], ["o", 10, 4, 1, 1], ["o", 5, 5, 1, 1], ["o", 6, 5, 1, 1], ["G", 7, 5, 1, 1], ["G", 8, 5, 1, 1], ["o", 9, 5, 1, 1], ["o", 10, 5, 1, 1], ["o", 4, 6, 1, 1], ["o", 5, 6, 1, 1], ["h", 6, 6, 1, 1], ["o", 7, 6, 1, 1], ["o", 8, 6, 1, 1], ["c", 9, 6, 1, 1], ["o", 10, 6, 1, 1], ["o", 11, 6, 1, 1], ["o", 3, 7, 1, 1], ["o", 4, 7, 1, 1], ["h", 5, 7, 1, 1], ["h", 6, 7, 1, 1], ["c", 7, 7, 1, 1], ["c", 8, 7, 1, 1], ["c", 9, 7, 1, 1], ["c", 10, 7, 1, 1], ["o", 11, 7, 1, 1], ["o", 12, 7, 1, 1], ["o", 3, 8, 1, 1], ["h", 4, 8, 1, 1], ["h", 5, 8, 1, 1], ["h", 6, 8, 1, 1], ["o", 7, 8, 1, 1], ["o", 8, 8, 1, 1], ["c", 9, 8, 1, 1], ["c", 10, 8, 1, 1], ["c", 11, 8, 1, 1], ["o", 12, 8, 1, 1], ["o", 3, 9, 1, 1], ["h", 4, 9, 1, 1], ["h", 5, 9, 1, 1], ["o", 6, 9, 1, 1], ["o", 9, 9, 1, 1], ["c", 10, 9, 1, 1], ["c", 11, 9, 1, 1], ["o", 12, 9, 1, 1], ["o", 3, 10, 1, 1], ["c", 4, 10, 1, 1], ["c", 5, 10, 1, 1], ["o", 6, 10, 1, 1], ["o", 9, 10, 1, 1], ["c", 10, 10, 1, 1], ["c", 11, 10, 1, 1], ["o", 12, 10, 1, 1], ["o", 3, 11, 1, 1], ["c", 4, 11, 1, 1], ["c", 5, 11, 1, 1], ["o", 6, 11, 1, 1], ["o", 9, 11, 1, 1], ["s", 10, 11, 1, 1], ["s", 11, 11, 1, 1], ["o", 12, 11, 1, 1], ["o", 3, 12, 1, 1], ["c", 4, 12, 1, 1], ["c", 5, 12, 1, 1], ["c", 6, 12, 1, 1], ["c", 7, 12, 1, 1], ["c", 8, 12, 1, 1], ["s", 9, 12, 1, 1], ["s", 10, 12, 1, 1], ["s", 11, 12, 1, 1], ["o", 12, 12, 1, 1], ["o", 4, 13, 1, 1], ["c", 5, 13, 1, 1], ["c", 6, 13, 1, 1], ["c", 7, 13, 1, 1], ["c", 8, 13, 1, 1], ["s", 9, 13, 1, 1], ["s", 10, 13, 1, 1], ["o", 11, 13, 1, 1], ["o", 5, 14, 1, 1], ["o", 6, 14, 1, 1], ["c", 7, 14, 1, 1], ["c", 8, 14, 1, 1], ["o", 9, 14, 1, 1], ["o", 10, 14, 1, 1], ["o", 7, 15, 1, 1], ["o", 8, 15, 1, 1], ["w", 7, 3, 1, 1]]};
+ART.ring_swift={"c": {"o": "#2a1a10", "c": "#d8833a", "h": "#f6c48a", "s": "#9a5420", "g": "#7ec8e8", "G": "#3a86b0", "w": "#ffffff"}, "r": [["o", 7, 2, 1, 1], ["o", 8, 2, 1, 1], ["o", 6, 3, 1, 1], ["g", 7, 3, 1, 1], ["g", 8, 3, 1, 1], ["o", 9, 3, 1, 1], ["o", 5, 4, 1, 1], ["g", 6, 4, 1, 1], ["g", 7, 4, 1, 1], ["g", 8, 4, 1, 1], ["g", 9, 4, 1, 1], ["o", 10, 4, 1, 1], ["o", 5, 5, 1, 1], ["o", 6, 5, 1, 1], ["G", 7, 5, 1, 1], ["G", 8, 5, 1, 1], ["o", 9, 5, 1, 1], ["o", 10, 5, 1, 1], ["o", 4, 6, 1, 1], ["o", 5, 6, 1, 1], ["h", 6, 6, 1, 1], ["o", 7, 6, 1, 1], ["o", 8, 6, 1, 1], ["c", 9, 6, 1, 1], ["o", 10, 6, 1, 1], ["o", 11, 6, 1, 1], ["o", 3, 7, 1, 1], ["o", 4, 7, 1, 1], ["h", 5, 7, 1, 1], ["h", 6, 7, 1, 1], ["c", 7, 7, 1, 1], ["c", 8, 7, 1, 1], ["c", 9, 7, 1, 1], ["c", 10, 7, 1, 1], ["o", 11, 7, 1, 1], ["o", 12, 7, 1, 1], ["o", 3, 8, 1, 1], ["h", 4, 8, 1, 1], ["h", 5, 8, 1, 1], ["h", 6, 8, 1, 1], ["o", 7, 8, 1, 1], ["o", 8, 8, 1, 1], ["c", 9, 8, 1, 1], ["c", 10, 8, 1, 1], ["c", 11, 8, 1, 1], ["o", 12, 8, 1, 1], ["o", 3, 9, 1, 1], ["h", 4, 9, 1, 1], ["h", 5, 9, 1, 1], ["o", 6, 9, 1, 1], ["o", 9, 9, 1, 1], ["c", 10, 9, 1, 1], ["c", 11, 9, 1, 1], ["o", 12, 9, 1, 1], ["o", 3, 10, 1, 1], ["c", 4, 10, 1, 1], ["c", 5, 10, 1, 1], ["o", 6, 10, 1, 1], ["o", 9, 10, 1, 1], ["c", 10, 10, 1, 1], ["c", 11, 10, 1, 1], ["o", 12, 10, 1, 1], ["o", 3, 11, 1, 1], ["c", 4, 11, 1, 1], ["c", 5, 11, 1, 1], ["o", 6, 11, 1, 1], ["o", 9, 11, 1, 1], ["s", 10, 11, 1, 1], ["s", 11, 11, 1, 1], ["o", 12, 11, 1, 1], ["o", 3, 12, 1, 1], ["c", 4, 12, 1, 1], ["c", 5, 12, 1, 1], ["c", 6, 12, 1, 1], ["c", 7, 12, 1, 1], ["c", 8, 12, 1, 1], ["s", 9, 12, 1, 1], ["s", 10, 12, 1, 1], ["s", 11, 12, 1, 1], ["o", 12, 12, 1, 1], ["o", 4, 13, 1, 1], ["c", 5, 13, 1, 1], ["c", 6, 13, 1, 1], ["c", 7, 13, 1, 1], ["c", 8, 13, 1, 1], ["s", 9, 13, 1, 1], ["s", 10, 13, 1, 1], ["o", 11, 13, 1, 1], ["o", 5, 14, 1, 1], ["o", 6, 14, 1, 1], ["c", 7, 14, 1, 1], ["c", 8, 14, 1, 1], ["o", 9, 14, 1, 1], ["o", 10, 14, 1, 1], ["o", 7, 15, 1, 1], ["o", 8, 15, 1, 1], ["w", 7, 3, 1, 1]]};ART.ring_endur={c:Object.assign({},ART.ring_swift.c,{g:'#7ccc7a',G:'#3e8a40'}),r:ART.ring_swift.r};ART.ring_str={c:Object.assign({},ART.ring_swift.c,{g:'#e05a46',G:'#9a2a20'}),r:ART.ring_swift.r};
 /* recolours for the variants: copper heads, pine wood, cow leather, oak, the orange crystal */
 (function(){var rc=function(base,map){var a=ART[base];if(!a)return null;var c={};Object.keys(a.c).forEach(function(k){c[k]=map[k]||a.c[k]});return{c:c,r:a.r}};
   var LEA={A:'#8a4a2a',a:'#5a2e1a',u:'#b06a3a',W:'#8a4a2a',w:'#5a2e1a',R:'#4a2414'},OAK={A:'#9a6a38',a:'#6a4424',u:'#c8945a',W:'#9a6a38',w:'#6a4424',R:'#4a2e18'};
@@ -853,6 +841,7 @@ function legend(){
   return '<div class="legend">'+Object.keys(TERR).map(function(k){return '<span><i style="background:'+LEG_COL[k]+'"></i>'+TERR[k].n+'</span>'}).join('')+'<span>Thin brown lines = height every 10 m · bold every 50 m</span>'+'<span><i style="background:#7a6446"></i>Settlement</span><span><i style="background:#c9bda0"></i>Gravel road</span><span><i style="background:#6fb4e8"></i>Stream</span><span>Goblin or brigand figure = camp · ✓ cleared'+(S.match?' · ! party on the move · number = mobs left':'')+'</span></div>';
 }
 
+/* ---------- the home views: packs, settlements (gear, altar), resources, the realm map, and render() ---------- */
 function vPacks(){
   var hand=inHand().filter(function(c){return !isItem(c)}),fresh=UI.fresh.map(byId).filter(Boolean);
   var men=hand.filter(function(c){return c.key==='human'&&c.sex!=='f'&&fpass('hand',c)});
@@ -1091,11 +1080,14 @@ function doPlace(c,r){
    prairie for fodder and hay. A supply tile counts if it is within an hour's walk, and each tile serves one claimant. */
 var WOOD={forest:1.5,woodland:1,pwood:.75,pforest:.75,swamp:.5},SPEC={orchard:1},NEED={hamlet:{woodT:1,past:2},village:{fire:8,spec:3},camp:{fire:2}},WOODT={forest:1,woodland:1,pwood:1,pforest:1},WALK_S=3600,PRAIRIE_CAP=2;
 /* seconds to walk from a set of hexes to every hex within an hour, over placed ground (roads faster, slopes slower) */
-function walkFrom(src){var N=COLS*ROWS,T=new Float64Array(N).fill(Infinity),done=new Uint8Array(N),RS=roadSet(),q=[];src.forEach(function(k){T[k]=0;q.push(k)});
+/* a small binary min-heap of [cost, key] pairs */
+function heap(){var a=[];return{n:function(){return a.length},push:function(t,k){a.push([t,k]);var i=a.length-1;while(i){var p=(i-1)>>1;if(a[p][0]<=a[i][0])break;var x=a[p];a[p]=a[i];a[i]=x;i=p}},
+  pop:function(){var top=a[0],last=a.pop();if(a.length){a[0]=last;var i=0;for(;;){var l=2*i+1,r=l+1,m=i;if(l<a.length&&a[l][0]<a[m][0])m=l;if(r<a.length&&a[r][0]<a[m][0])m=r;if(m===i)break;var x=a[m];a[m]=a[i];a[i]=x;i=m}}return top[1]}}}
+function walkFrom(src){var N=COLS*ROWS,T=new Float64Array(N).fill(Infinity),done=new Uint8Array(N),RS=roadSet(),q=heap();src.forEach(function(k){T[k]=0;q.push(0,k)});
   var spd=function(k){if(!placedAt(k%COLS,Math.floor(k/COLS)))return 0;return S.grid[k]?(RS[k]?ROAD_SP:TERR[S.grid[k]].sp):1};
-  while(q.length){var bi=0;for(var j=1;j<q.length;j++)if(T[q[j]]<T[q[bi]])bi=j;var k=q.splice(bi,1)[0];if(done[k])continue;done[k]=1;var s1=spd(k)||1,h1=hgtAt(k),c=k%COLS,r=Math.floor(k/COLS);
+  while(q.n()){var k=q.pop();if(done[k])continue;done[k]=1;var s1=spd(k)||1,h1=hgtAt(k),c=k%COLS,r=Math.floor(k/COLS);
     nbrs(c,r).forEach(function(p){var m=ix(p[0],p[1]);if(done[m])return;var s2=spd(m);if(!s2)return;var h2=hgtAt(m),gr=h1&&h2?((h2.b+(h2.r||0)/2)-(h1.b+(h1.r||0)/2))/(HEX_YD*.9144):0,G=gradeMul(gr),
-      t=(HEX_YD/2)/(PACE.walk*s1)+(HEX_YD/2)/(PACE.walk*s2);t=G.cap!=null?Math.max(t,HEX_YD/G.cap):t/G.m;var nt=T[k]+t;if(nt<T[m]&&nt<=WALK_S){T[m]=nt;q.push(m)}})}
+      t=(HEX_YD/2)/(PACE.walk*s1)+(HEX_YD/2)/(PACE.walk*s2);t=G.cap!=null?Math.max(t,HEX_YD/G.cap):t/G.m;var nt=T[k]+t;if(nt<T[m]&&nt<=WALK_S){T[m]=nt;q.push(nt,m)}})}
   return T}
 function setHexes(s){return [ix(s.c,s.r)].concat(s.c2!=null?[ix(s.c2,s.r2)]:[])}
 /* who gets which tile: settlements in the order they were founded take the nearest free tiles they need, then pastures take prairie */
@@ -1206,7 +1198,7 @@ function makeUnit(c){
 /* ---------- zoomed tile detail ---------- */
 function seeded(n){var a=n>>>0;return function(){a=(a+0x6D2B79F5)>>>0;var t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
 var MICRO={};['tree','bush','reed','puddle','lily','ripple','tuft','flowerY','flowerW','sheep','stone','hut'].forEach(function(k){MICRO[k]=ART16['m_'+k]});
-function microAt(t,x,y){var o='';t.r.forEach(function(q){o+='<rect x="'+(x+q[1]).toFixed(1)+'" y="'+(y+q[2]).toFixed(1)+'" width="'+q[3]+'" height="'+q[4]+'" fill="'+t.c[q[0]]+'"/>'});return o}
+function microSvg(t,x,y){var o='';t.r.forEach(function(q){o+='<rect x="'+(x+q[1]).toFixed(1)+'" y="'+(y+q[2]).toFixed(1)+'" width="'+q[3]+'" height="'+q[4]+'" fill="'+t.c[q[0]]+'"/>'});return o}
 function hexPts(c,r,k){var p=center(c,r),pts=[];for(var i=0;i<6;i++){var a=Math.PI/180*(60*i-30);pts.push((p[0]+SH*(k||.97)*Math.cos(a)).toFixed(1)+','+(p[1]+SH*(k||.97)*Math.sin(a)).toFixed(1))}return pts.join(' ')}
 
 /* ---------- roads and streams ---------- */
@@ -1241,7 +1233,6 @@ function uRoads(U){return inFile(U)?roadSet():{}}
 function roadSet(){var o={};(S.lines||[]).forEach(function(l){if(l.type==='road')l.hexes.forEach(function(k){o[k]=1})});return o}
 function hexSpeed(k,rs){var g=S.grid[k],b=g?TERR[g].sp:1;if(b===0)return 0;return (rs||roadSet())[k]?ROAD_SP:b}
 function isFlow(l){return l.type==='stream'||l.type==='creek'}
-function hasStream(k){return (S.lines||[]).some(function(l){return isFlow(l)&&l.hexes.indexOf(k)>=0})}
 function streamSegs(ty){var o=[];(S.lines||[]).forEach(function(l){if(isFlow(l)&&(!ty||l.type===ty))for(var i=1;i<l.pts.length;i++)o.push([l.pts[i-1],l.pts[i]])});return o}
 function segX(p1,p2,p3,p4){
   function o(a,b,c){return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])}
@@ -2139,7 +2130,6 @@ function settleMen(us){
 function hpSum(a){var t=0;a.forEach(function(x){t+=Math.max(0,x.hp)});return t}
 function bfD(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
 function bfNear(from,arr,jit){var best=null,bs=1e9;arr.forEach(function(t,k){if(!t.alive||t.gone)return;var s=bfD(t,from)+((k*7+jit*13)%10)*.3;if(s<bs){bs=s;best=t}});return best}
-function bfH(F,x,y){if(!F.hg)return 0;var gx=Math.max(0,Math.min(BFX-1,Math.floor(x/BFC))),gy=Math.max(0,Math.min(BFY-1,Math.floor(y/BFC)));return F.hg[gy*BFX+gx]||0}
 function bfHt(F,x,y){/* smooth height inside the field, metres */if(!F.hg)return 0;var fx=Math.max(0,Math.min(BFX-1.001,x/BFC-.5)),fy=Math.max(0,Math.min(BFY-1.001,y/BFC-.5)),ix0=Math.floor(fx),iy0=Math.floor(fy),tx=fx-ix0,ty=fy-iy0,ix1=Math.min(BFX-1,ix0+1),iy1=Math.min(BFY-1,iy0+1),H=F.hg;
   return (H[iy0*BFX+ix0]*(1-tx)+H[iy0*BFX+ix1]*tx)*(1-ty)+(H[iy1*BFX+ix0]*(1-tx)+H[iy1*BFX+ix1]*tx)*ty}
 function bfMeleeMod(F,u,holding,t){var g=GROUND[bfCell(F,u.x,u.y)]||GROUND.o,m=g.ml||0;if(holding&&g.ln)m+=g.ln;if(t&&F.hg)m+=Math.max(-8,Math.min(8,(bfHt(F,u.x,u.y)-bfHt(F,t.x,t.y))*.5));return m}
@@ -2244,7 +2234,7 @@ function bfIdx(x,y){var gx=Math.max(0,Math.min(BFX-1,Math.floor(x/BFC))),gy=Math
 function bfFlood(F,s){var R=new Uint8Array(BFX*BFY),q=[s],h=0,o=BFM;R[s]=1;BFM={foe:true,jh:0};while(h<q.length){var k=q[h++],x=k%BFX,y=(k-x)/BFX;for(var dy=-1;dy<=1;dy++)for(var dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;var X=x+dx,Y=y+dy;if(X<0||Y<0||X>=BFX||Y>=BFY)continue;var kk=Y*BFX+X;if(R[kk]||cmv(F.g.charAt(kk))<=0)continue;if(dx&&dy&&(cmv(F.g.charAt(y*BFX+X))<=0||cmv(F.g.charAt(Y*BFX+x))<=0))continue;R[kk]=1;q.push(kk)}}BFM=o;return R}
 function foeFlood(b,f){var s=bfIdx(f.x,f.y),L=b._fl||(b._fl=[]);for(var i=0;i<L.length;i++)if(L[i][s])return L[i];var R=bfFlood(b.F,s);L.push(R);return R}
 function wallAI(b,f,tg){var F=b.F,R=foeFlood(b,f);if(tg&&R[bfIdx(tg.x,tg.y)])return false;
-  var cand=[];F.wl.forEach(function(ci){var c=F.g.charAt(ci);if(!isWallC(c))return;var x=ci%BFX,y=(ci-x)/BFX,best=-1,bd=1e9;[[1,0],[-1,0],[0,1],[0,-1]].forEach(function(q){var X=x+q[0],Y=y+q[1];if(X<0||Y<0||X>=BFX||Y>=BFY)return;var kk=Y*BFX+X;if(!R[kk])return;var dd=Math.hypot((X+.5)*BFC-f.x,(Y+.5)*BFC-f.y);if(dd<bd){bd=dd;best=kk}});if(best>=0)cand.push({i:ci,n:best,g:c==='G',d:bd})});
+  var cand=[];F.wl.forEach(function(ci){var c=F.g.charAt(ci);if(!isWallC(c))return;var x=ci%BFX,y=(ci-x)/BFX,best=-1,bd=1e9;D4.forEach(function(q){var X=x+q[0],Y=y+q[1];if(X<0||Y<0||X>=BFX||Y>=BFY)return;var kk=Y*BFX+X;if(!R[kk])return;var dd=Math.hypot((X+.5)*BFC-f.x,(Y+.5)*BFC-f.y);if(dd<bd){bd=dd;best=kk}});if(best>=0)cand.push({i:ci,n:best,g:c==='G',d:bd})});
   if(!cand.length)return false;
   var near=function(a){var p=null;a.forEach(function(c){if(!p||c.d<p.d)p=c});return p},pick=null,walk=false;
   if(INTEL[f.kind]==='smart'){var gs=cand.filter(function(c){return c.g&&c.d<=GATE_SEE});if(gs.length)pick=near(gs);else{f.sv=f.sv||{};cand.forEach(function(c){if(c.d<=12)f.sv[c.i]=1});var un=cand.filter(function(c){return !f.sv[c.i]});if(un.length){pick=near(un);walk=true}else pick=near(cand)}}
@@ -2411,7 +2401,7 @@ function drawBattleView(){
 var CAM_FORCE=null;
 function pipHtml(){if(!UI.pip||!S.match||!activeBattles().length)return '';var nm=(CAMS.filter(function(x){return x[0]===UI.pip})[0]||['',''])[1];return '<div class="pip" aria-label="Camera on the fight"><div class="pzhd"><b>Camera · '+esc(nm.toLowerCase())+'</b><button class="btn sm" data-act="pipcam" data-v="" aria-label="Close the camera">×</button></div><div id="pipv" class="bfwrap"></div></div>'}
 /* ---------- battlefield ground and drawing ---------- */
-var BFW=280,BFH=192,BFC=4,BFX=70,BFY=48,BPW=140,BPH=96;
+var BFW=280,BFH=192,BFC=4,BFX=70,BFY=48,BPW=140,BPH=96,D4=[[1,0],[-1,0],[0,1],[0,-1]];/* the four grid steps */
 var GROUND={
   o:{n:'Open',mv:1,sh:1,cv:1,t:'full speed, best for archers'},
   f:{n:'Footbridge',mv:.9,sh:1,cv:1,t:'a plank path one man wide over the stream: crossing single file, no wading'},
@@ -2473,7 +2463,7 @@ function bfGenAt(cx,cy,seed){
   var open=function(k){return (GROUND[g[k]]||GROUND.o).mv>0};
   for(var tries=0;tries<6;tries++){
     var seen=new Array(g.length),qq=[];for(y=0;y<BFY;y++){var k0=y*BFX;if(open(k0)){seen[k0]=1;qq.push(k0)}}
-    while(qq.length){var k1=qq.shift(),cx1=k1%BFX,cy1=(k1-cx1)/BFX;[[1,0],[-1,0],[0,1],[0,-1]].forEach(function(dd){var X=cx1+dd[0],Y=cy1+dd[1];if(X<0||Y<0||X>=BFX||Y>=BFY)return;var kk=Y*BFX+X;if(!seen[kk]&&open(kk)){seen[kk]=1;qq.push(kk)}})}
+    while(qq.length){var k1=qq.shift(),cx1=k1%BFX,cy1=(k1-cx1)/BFX;D4.forEach(function(dd){var X=cx1+dd[0],Y=cy1+dd[1];if(X<0||Y<0||X>=BFX||Y>=BFY)return;var kk=Y*BFX+X;if(!seen[kk]&&open(kk)){seen[kk]=1;qq.push(kk)}})}
     var ok=false;for(y=0;y<BFY;y++)if(seen[y*BFX+BFX-1])ok=true;if(ok)break;
     var ty=Math.floor(BFY*(.3+rn()*.4)),tyy=ty;for(x=0;x<BFX;x++){if(rn()<.3)tyy=Math.max(1,Math.min(BFY-2,tyy+(rn()<.5?-1:1)));[tyy,tyy+1].forEach(function(Y){var kk=Y*BFX+x;if(!open(kk))g[kk]=base==='swamp'?'m':base==='woodland'?'w':'o'})}
   }
@@ -2526,17 +2516,17 @@ function bfSvg(F,P,click){
   var C=camOf(),rn=seeded(F.seed+17),op=OPEN[F.base]||OPEN.field,o='<svg class="bfield" viewBox="0 '+(-C.pad)+' '+C.W+' '+(C.H*C.k+C.pad)+'" shape-rendering="crispEdges" role="img" aria-label="Battlefield, '+esc(F.n)+'"><defs>';
   o+='<pattern id="'+P+'gp-o" width="2" height="2" patternUnits="userSpaceOnUse"><rect width="2" height="2" fill="'+op[0]+'"/><rect width="1" height="1" fill="'+op[1]+'"/></pattern>';
   Object.keys(GFILL).forEach(function(k){var f=GFILL[k];o+='<pattern id="'+P+'gp-'+k+'" width="2" height="2" patternUnits="userSpaceOnUse"><rect width="2" height="2" fill="'+f[0]+'"/><rect x="1" y="1" width="1" height="1" fill="'+f[1]+'"/></pattern>'});
-  [['tree',.62],['bush',.38],['reed',.32],['puddle',.45],['tuft',.3],['stone',.25],['ripple',.45],['flowerY',.3],['sheep',.28]].forEach(function(q){o+='<g id="'+P+'d-'+q[0]+'" transform="scale('+q[1]+')">'+microAt(MICRO[q[0]],-MICRO[q[0]].w/2,-MICRO[q[0]].h)+'</g>'});
+  [['tree',.62],['bush',.38],['reed',.32],['puddle',.45],['tuft',.3],['stone',.25],['ripple',.45],['flowerY',.3],['sheep',.28]].forEach(function(q){o+='<g id="'+P+'d-'+q[0]+'" transform="scale('+q[1]+')">'+microSvg(MICRO[q[0]],-MICRO[q[0]].w/2,-MICRO[q[0]].h)+'</g>'});
   o+='<g id="'+P+'d-pine"><polygon points="0,-3.2 1.5,0 -1.5,0" fill="#22402c"/><polygon points="0,-5 1.1,-2 -1.1,-2" fill="#2c5236"/><rect x="-.18" y="0" width=".36" height=".7" fill="#4a3220"/></g>';
   o+='<g id="'+P+'d-bog"><ellipse cx="0" cy="0" rx="1.6" ry=".7" fill="#120e08"/><circle cx=".6" cy="-.2" r=".25" fill="#5a5030"/><circle cx="-.7" cy=".1" r=".18" fill="#5a5030"/></g>';
-  o+='<g id="'+P+'d-hut" transform="scale(.55)">'+microAt(MICRO.hut,-MICRO.hut.w/2,-MICRO.hut.h)+'</g>'+fortDefs(P)+'</defs>';
+  o+='<g id="'+P+'d-hut" transform="scale(.55)">'+microSvg(MICRO.hut,-MICRO.hut.w/2,-MICRO.hut.h)+'</g>'+fortDefs(P)+'</defs>';
   o+='<g transform="'+camMatrix()+'"><rect width="'+BFW+'" height="'+BFH+'" fill="url(#'+P+'gp-o)"/>';
   for(var y=0;y<BFY;y++){var x=0;while(x<BFX){var k=F.g.charAt(y*BFX+x),x2=x;while(x2<BFX&&F.g.charAt(y*BFX+x2)===k)x2++;if(k!=='o'&&k!=='h')o+='<rect x="'+x*BFC+'" y="'+y*BFC+'" width="'+(x2-x)*BFC+'" height="'+BFC+'" fill="url(#'+P+'gp-'+k+')"/>';x=x2}}
   if(F.hg){var sh2='',ct='',ctb='';for(var y2=0;y2<BFY;y2++){var run=null,rs=0;for(var x2=0;x2<=BFX;x2++){var lv=null;if(x2<BFX){var q=y2*BFX+x2,H=F.hg,hl=H[q-(x2>0?1:0)],hr=H[q+(x2<BFX-1?1:0)],hu=H[q-(y2>0?BFX:0)],hd=H[q+(y2<BFY-1?BFX:0)],gx=(hr-hl)/(2*BFC*.9144),gy=(hd-hu)/(2*BFC*.9144);lv=Math.max(-3,Math.min(3,Math.round((-gx-gy)*6)))}
       if(lv!==run){if(run)sh2+='<rect x="'+rs*BFC+'" y="'+y2*BFC+'" width="'+(x2-rs)*BFC+'" height="'+BFC+'" fill="'+(run>0?'#fff':'#000')+'" opacity="'+(Math.abs(run)*.07).toFixed(2)+'"/>';run=lv;rs=x2}}}
     for(var y3=0;y3<BFY;y3++)for(var x3=0;x3<BFX;x3++){var q3=y3*BFX+x3,a3=Math.floor(F.hg[q3]/5);if(x3<BFX-1){var b3=Math.floor(F.hg[q3+1]/5);if(a3!==b3){var seg='M'+(x3+1)*BFC+' '+y3*BFC+'v'+BFC;if(Math.max(a3,b3)%5===0)ctb+=seg;else ct+=seg}}if(y3<BFY-1){var c3=Math.floor(F.hg[q3+BFX]/5);if(a3!==c3){var sg2='M'+x3*BFC+' '+(y3+1)*BFC+'h'+BFC;if(Math.max(a3,c3)%5===0)ctb+=sg2;else ct+=sg2}}}
     o+='<g shape-rendering="crispEdges">'+sh2+(ct?'<path d="'+ct+'" stroke="#3a2410" stroke-width=".35" opacity=".55" fill="none"/>':'')+(ctb?'<path d="'+ctb+'" stroke="#3a2410" stroke-width=".7" opacity=".7" fill="none"/>':'')+'</g>'}
-  if(F.hg){var wf='';for(var y4=0;y4<BFY;y4++)for(var x4=0;x4<BFX;x4++){var q4=y4*BFX+x4,c4=F.g.charAt(q4);if(c4!=='s'&&c4!=='f')continue;var H4=F.hg,gm=0;[[1,0],[-1,0],[0,1],[0,-1]].forEach(function(dd){var X=x4+dd[0],Y=y4+dd[1];if(X<0||Y<0||X>=BFX||Y>=BFY)return;var k2=Y*BFX+X;if(F.g.charAt(k2)==='s'||F.g.charAt(k2)==='a')gm=Math.max(gm,Math.abs(H4[q4]-H4[k2])/(BFC*.9144))});
+  if(F.hg){var wf='';for(var y4=0;y4<BFY;y4++)for(var x4=0;x4<BFX;x4++){var q4=y4*BFX+x4,c4=F.g.charAt(q4);if(c4!=='s'&&c4!=='f')continue;var H4=F.hg,gm=0;D4.forEach(function(dd){var X=x4+dd[0],Y=y4+dd[1];if(X<0||Y<0||X>=BFX||Y>=BFY)return;var k2=Y*BFX+X;if(F.g.charAt(k2)==='s'||F.g.charAt(k2)==='a')gm=Math.max(gm,Math.abs(H4[q4]-H4[k2])/(BFC*.9144))});
       if(gm>FALL_G&&c4==='s')wf+='<rect x="'+x4*BFC+'" y="'+y4*BFC+'" width="'+BFC+'" height="'+BFC+'"/>'}
     if(wf)o+='<g class="wfall">'+wf+'</g><g class="wfall w2">'+wf+'</g>'}
   o+='</g>';var items=[];
@@ -3113,10 +3103,9 @@ function plannerHtml(R,st){
   return '<div class="upanel"><h3>Patrol planner</h3><p class="note">Pick a patrol or make a new one, then draw its moves right on the map above. Tap Whole map to plan outside your own land.</p>'+routeListHtml(R)+(R?routeEditor(R,st):'')+'</div>';
 }
 function fold(k,title,body,cls){var f=UI.mfold||{},shut=!!f[k];return '<div class="fold'+(shut?' shut':'')+(cls?' '+cls:'')+'"><button class="foldh" data-act="mfold" data-k="'+k+'" aria-expanded="'+(!shut)+'"><span>'+title+'</span><i>'+(shut?'▸':'▾')+'</i></button><div class="foldb"'+(shut?' hidden':'')+'>'+body+'</div></div>'}
-var MFOLDS=['bf','map','stat','units','plan','battles','tile','log'];
 function matchPop(){var tl=UI.tile;if(!tl)return '';var c=tl[0],r=tl[1],cam=UI.pz&&UI.pz.m,deep=deepSet('m')[ix(c,r)];
   return tilePopHtml(c,r,'<ul class="facts">'+tileFacts(c,r).map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>'+razeRow(c,r)+'<div class="row">'+(deep?'':'<button class="btn sm go" data-act="pzgo" data-k="m" data-c="'+c+'" data-r="'+r+'">Zoom in here</button>')+'<button class="btn sm" data-act="topatrols">Plan a march to '+lab(c,r)+'</button></div>')}
-var MFOLDS=['map','stat','units','plan','battles','log'];
+var MFOLDS=['stat','units','plan','battles','log'];
 function vMatch(){
   var M=S.match;if(!M)return vMatchStart();
   var PR=UI.medit?routeById(UI.R):null,pst=setById(UI.Rfrom)||S.setl[0],ppf=PR?routePreview(PR,pst):{route:[]};
@@ -3284,7 +3273,7 @@ function a64draw(who,eq,pose,L){var N=A64N,c=document.createElement('canvas');c.
   var o=out.slice();
   for(y=0;y<N;y++)for(x=0;x<N;x++){var a=at(x,y);if(!a||A64DET[a])continue;var r=at(x+1,y),d2=at(x,y+1);if((r&&r!==a&&!A64DET[r]&&pal[r]!==pal[a])||(d2&&d2!==a&&!A64DET[d2]&&pal[d2]!==pal[a]))o[y*N+x]=o[y*N+x].map(function(v,i){return v*.5+A64OUT[i]*.38})}
   var img=g.createImageData(N,N),D=img.data,glowy=pose==='cast';
-  for(y=0;y<N;y++)for(x=0;x<N;x++){var q=y*N+x,col=o[q];if(!col&&[[1,0],[-1,0],[0,1],[0,-1]].some(function(z){var X=x+z[0],Y=y+z[1];return X>=0&&Y>=0&&X<N&&Y<N&&out[Y*N+X]}))col=(glowy&&[[1,0],[-1,0],[0,1],[0,-1]].some(function(z){var X=x+z[0],Y=y+z[1];return X>=0&&Y>=0&&X<N&&Y<N&&(map[Y*N+X]==='glow2'||map[Y*N+X]==='glow')}))?[120,200,255]:A64OUT;if(!col)continue;D[q*4]=col[0];D[q*4+1]=col[1];D[q*4+2]=col[2];D[q*4+3]=255}
+  for(y=0;y<N;y++)for(x=0;x<N;x++){var q=y*N+x,col=o[q];if(!col&&D4.some(function(z){var X=x+z[0],Y=y+z[1];return X>=0&&Y>=0&&X<N&&Y<N&&out[Y*N+X]}))col=(glowy&&D4.some(function(z){var X=x+z[0],Y=y+z[1];return X>=0&&Y>=0&&X<N&&Y<N&&(map[Y*N+X]==='glow2'||map[Y*N+X]==='glow')}))?[120,200,255]:A64OUT;if(!col)continue;D[q*4]=col[0];D[q*4+1]=col[1];D[q*4+2]=col[2];D[q*4+3]=255}
   g.putImageData(img,0,0);return c}
 function a64dead(src){/* the fallen body: the standing figure laid on its back, with a dark pool under it */var N=A64N,c=document.createElement('canvas');c.width=c.height=N;var g=c.getContext('2d');g.imageSmoothingEnabled=false;
   g.fillStyle='#5a1410';g.beginPath();g.ellipse(30,61,14,2.4,0,0,7);g.fill();g.fillStyle='#7a1a14';g.fillRect(22,60,10,2);g.fillRect(36,61,6,1);

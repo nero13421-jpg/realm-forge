@@ -179,7 +179,6 @@ function settleMen(us){
 function hpSum(a){var t=0;a.forEach(function(x){t+=Math.max(0,x.hp)});return t}
 function bfD(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
 function bfNear(from,arr,jit){var best=null,bs=1e9;arr.forEach(function(t,k){if(!t.alive||t.gone)return;var s=bfD(t,from)+((k*7+jit*13)%10)*.3;if(s<bs){bs=s;best=t}});return best}
-function bfH(F,x,y){if(!F.hg)return 0;var gx=Math.max(0,Math.min(BFX-1,Math.floor(x/BFC))),gy=Math.max(0,Math.min(BFY-1,Math.floor(y/BFC)));return F.hg[gy*BFX+gx]||0}
 function bfHt(F,x,y){/* smooth height inside the field, metres */if(!F.hg)return 0;var fx=Math.max(0,Math.min(BFX-1.001,x/BFC-.5)),fy=Math.max(0,Math.min(BFY-1.001,y/BFC-.5)),ix0=Math.floor(fx),iy0=Math.floor(fy),tx=fx-ix0,ty=fy-iy0,ix1=Math.min(BFX-1,ix0+1),iy1=Math.min(BFY-1,iy0+1),H=F.hg;
   return (H[iy0*BFX+ix0]*(1-tx)+H[iy0*BFX+ix1]*tx)*(1-ty)+(H[iy1*BFX+ix0]*(1-tx)+H[iy1*BFX+ix1]*tx)*ty}
 function bfMeleeMod(F,u,holding,t){var g=GROUND[bfCell(F,u.x,u.y)]||GROUND.o,m=g.ml||0;if(holding&&g.ln)m+=g.ln;if(t&&F.hg)m+=Math.max(-8,Math.min(8,(bfHt(F,u.x,u.y)-bfHt(F,t.x,t.y))*.5));return m}

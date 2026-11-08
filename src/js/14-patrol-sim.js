@@ -16,6 +16,6 @@ function makeUnit(c){
 /* ---------- zoomed tile detail ---------- */
 function seeded(n){var a=n>>>0;return function(){a=(a+0x6D2B79F5)>>>0;var t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
 var MICRO={};['tree','bush','reed','puddle','lily','ripple','tuft','flowerY','flowerW','sheep','stone','hut'].forEach(function(k){MICRO[k]=ART16['m_'+k]});
-function microAt(t,x,y){var o='';t.r.forEach(function(q){o+='<rect x="'+(x+q[1]).toFixed(1)+'" y="'+(y+q[2]).toFixed(1)+'" width="'+q[3]+'" height="'+q[4]+'" fill="'+t.c[q[0]]+'"/>'});return o}
+function microSvg(t,x,y){var o='';t.r.forEach(function(q){o+='<rect x="'+(x+q[1]).toFixed(1)+'" y="'+(y+q[2]).toFixed(1)+'" width="'+q[3]+'" height="'+q[4]+'" fill="'+t.c[q[0]]+'"/>'});return o}
 function hexPts(c,r,k){var p=center(c,r),pts=[];for(var i=0;i<6;i++){var a=Math.PI/180*(60*i-30);pts.push((p[0]+SH*(k||.97)*Math.cos(a)).toFixed(1)+','+(p[1]+SH*(k||.97)*Math.sin(a)).toFixed(1))}return pts.join(' ')}
 

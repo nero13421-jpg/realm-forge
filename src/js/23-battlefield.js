@@ -1,5 +1,5 @@
 /* ---------- battlefield ground and drawing ---------- */
-var BFW=280,BFH=192,BFC=4,BFX=70,BFY=48,BPW=140,BPH=96;
+var BFW=280,BFH=192,BFC=4,BFX=70,BFY=48,BPW=140,BPH=96,D4=[[1,0],[-1,0],[0,1],[0,-1]];/* the four grid steps */
 var GROUND={
   o:{n:'Open',mv:1,sh:1,cv:1,t:'full speed, best for archers'},
   f:{n:'Footbridge',mv:.9,sh:1,cv:1,t:'a plank path one man wide over the stream: crossing single file, no wading'},
@@ -61,7 +61,7 @@ function bfGenAt(cx,cy,seed){
   var open=function(k){return (GROUND[g[k]]||GROUND.o).mv>0};
   for(var tries=0;tries<6;tries++){
     var seen=new Array(g.length),qq=[];for(y=0;y<BFY;y++){var k0=y*BFX;if(open(k0)){seen[k0]=1;qq.push(k0)}}
-    while(qq.length){var k1=qq.shift(),cx1=k1%BFX,cy1=(k1-cx1)/BFX;[[1,0],[-1,0],[0,1],[0,-1]].forEach(function(dd){var X=cx1+dd[0],Y=cy1+dd[1];if(X<0||Y<0||X>=BFX||Y>=BFY)return;var kk=Y*BFX+X;if(!seen[kk]&&open(kk)){seen[kk]=1;qq.push(kk)}})}
+    while(qq.length){var k1=qq.shift(),cx1=k1%BFX,cy1=(k1-cx1)/BFX;D4.forEach(function(dd){var X=cx1+dd[0],Y=cy1+dd[1];if(X<0||Y<0||X>=BFX||Y>=BFY)return;var kk=Y*BFX+X;if(!seen[kk]&&open(kk)){seen[kk]=1;qq.push(kk)}})}
     var ok=false;for(y=0;y<BFY;y++)if(seen[y*BFX+BFX-1])ok=true;if(ok)break;
     var ty=Math.floor(BFY*(.3+rn()*.4)),tyy=ty;for(x=0;x<BFX;x++){if(rn()<.3)tyy=Math.max(1,Math.min(BFY-2,tyy+(rn()<.5?-1:1)));[tyy,tyy+1].forEach(function(Y){var kk=Y*BFX+x;if(!open(kk))g[kk]=base==='swamp'?'m':base==='woodland'?'w':'o'})}
   }
@@ -114,17 +114,17 @@ function bfSvg(F,P,click){
   var C=camOf(),rn=seeded(F.seed+17),op=OPEN[F.base]||OPEN.field,o='<svg class="bfield" viewBox="0 '+(-C.pad)+' '+C.W+' '+(C.H*C.k+C.pad)+'" shape-rendering="crispEdges" role="img" aria-label="Battlefield, '+esc(F.n)+'"><defs>';
   o+='<pattern id="'+P+'gp-o" width="2" height="2" patternUnits="userSpaceOnUse"><rect width="2" height="2" fill="'+op[0]+'"/><rect width="1" height="1" fill="'+op[1]+'"/></pattern>';
   Object.keys(GFILL).forEach(function(k){var f=GFILL[k];o+='<pattern id="'+P+'gp-'+k+'" width="2" height="2" patternUnits="userSpaceOnUse"><rect width="2" height="2" fill="'+f[0]+'"/><rect x="1" y="1" width="1" height="1" fill="'+f[1]+'"/></pattern>'});
-  [['tree',.62],['bush',.38],['reed',.32],['puddle',.45],['tuft',.3],['stone',.25],['ripple',.45],['flowerY',.3],['sheep',.28]].forEach(function(q){o+='<g id="'+P+'d-'+q[0]+'" transform="scale('+q[1]+')">'+microAt(MICRO[q[0]],-MICRO[q[0]].w/2,-MICRO[q[0]].h)+'</g>'});
+  [['tree',.62],['bush',.38],['reed',.32],['puddle',.45],['tuft',.3],['stone',.25],['ripple',.45],['flowerY',.3],['sheep',.28]].forEach(function(q){o+='<g id="'+P+'d-'+q[0]+'" transform="scale('+q[1]+')">'+microSvg(MICRO[q[0]],-MICRO[q[0]].w/2,-MICRO[q[0]].h)+'</g>'});
   o+='<g id="'+P+'d-pine"><polygon points="0,-3.2 1.5,0 -1.5,0" fill="#22402c"/><polygon points="0,-5 1.1,-2 -1.1,-2" fill="#2c5236"/><rect x="-.18" y="0" width=".36" height=".7" fill="#4a3220"/></g>';
   o+='<g id="'+P+'d-bog"><ellipse cx="0" cy="0" rx="1.6" ry=".7" fill="#120e08"/><circle cx=".6" cy="-.2" r=".25" fill="#5a5030"/><circle cx="-.7" cy=".1" r=".18" fill="#5a5030"/></g>';
-  o+='<g id="'+P+'d-hut" transform="scale(.55)">'+microAt(MICRO.hut,-MICRO.hut.w/2,-MICRO.hut.h)+'</g>'+fortDefs(P)+'</defs>';
+  o+='<g id="'+P+'d-hut" transform="scale(.55)">'+microSvg(MICRO.hut,-MICRO.hut.w/2,-MICRO.hut.h)+'</g>'+fortDefs(P)+'</defs>';
   o+='<g transform="'+camMatrix()+'"><rect width="'+BFW+'" height="'+BFH+'" fill="url(#'+P+'gp-o)"/>';
   for(var y=0;y<BFY;y++){var x=0;while(x<BFX){var k=F.g.charAt(y*BFX+x),x2=x;while(x2<BFX&&F.g.charAt(y*BFX+x2)===k)x2++;if(k!=='o'&&k!=='h')o+='<rect x="'+x*BFC+'" y="'+y*BFC+'" width="'+(x2-x)*BFC+'" height="'+BFC+'" fill="url(#'+P+'gp-'+k+')"/>';x=x2}}
   if(F.hg){var sh2='',ct='',ctb='';for(var y2=0;y2<BFY;y2++){var run=null,rs=0;for(var x2=0;x2<=BFX;x2++){var lv=null;if(x2<BFX){var q=y2*BFX+x2,H=F.hg,hl=H[q-(x2>0?1:0)],hr=H[q+(x2<BFX-1?1:0)],hu=H[q-(y2>0?BFX:0)],hd=H[q+(y2<BFY-1?BFX:0)],gx=(hr-hl)/(2*BFC*.9144),gy=(hd-hu)/(2*BFC*.9144);lv=Math.max(-3,Math.min(3,Math.round((-gx-gy)*6)))}
       if(lv!==run){if(run)sh2+='<rect x="'+rs*BFC+'" y="'+y2*BFC+'" width="'+(x2-rs)*BFC+'" height="'+BFC+'" fill="'+(run>0?'#fff':'#000')+'" opacity="'+(Math.abs(run)*.07).toFixed(2)+'"/>';run=lv;rs=x2}}}
     for(var y3=0;y3<BFY;y3++)for(var x3=0;x3<BFX;x3++){var q3=y3*BFX+x3,a3=Math.floor(F.hg[q3]/5);if(x3<BFX-1){var b3=Math.floor(F.hg[q3+1]/5);if(a3!==b3){var seg='M'+(x3+1)*BFC+' '+y3*BFC+'v'+BFC;if(Math.max(a3,b3)%5===0)ctb+=seg;else ct+=seg}}if(y3<BFY-1){var c3=Math.floor(F.hg[q3+BFX]/5);if(a3!==c3){var sg2='M'+x3*BFC+' '+(y3+1)*BFC+'h'+BFC;if(Math.max(a3,c3)%5===0)ctb+=sg2;else ct+=sg2}}}
     o+='<g shape-rendering="crispEdges">'+sh2+(ct?'<path d="'+ct+'" stroke="#3a2410" stroke-width=".35" opacity=".55" fill="none"/>':'')+(ctb?'<path d="'+ctb+'" stroke="#3a2410" stroke-width=".7" opacity=".7" fill="none"/>':'')+'</g>'}
-  if(F.hg){var wf='';for(var y4=0;y4<BFY;y4++)for(var x4=0;x4<BFX;x4++){var q4=y4*BFX+x4,c4=F.g.charAt(q4);if(c4!=='s'&&c4!=='f')continue;var H4=F.hg,gm=0;[[1,0],[-1,0],[0,1],[0,-1]].forEach(function(dd){var X=x4+dd[0],Y=y4+dd[1];if(X<0||Y<0||X>=BFX||Y>=BFY)return;var k2=Y*BFX+X;if(F.g.charAt(k2)==='s'||F.g.charAt(k2)==='a')gm=Math.max(gm,Math.abs(H4[q4]-H4[k2])/(BFC*.9144))});
+  if(F.hg){var wf='';for(var y4=0;y4<BFY;y4++)for(var x4=0;x4<BFX;x4++){var q4=y4*BFX+x4,c4=F.g.charAt(q4);if(c4!=='s'&&c4!=='f')continue;var H4=F.hg,gm=0;D4.forEach(function(dd){var X=x4+dd[0],Y=y4+dd[1];if(X<0||Y<0||X>=BFX||Y>=BFY)return;var k2=Y*BFX+X;if(F.g.charAt(k2)==='s'||F.g.charAt(k2)==='a')gm=Math.max(gm,Math.abs(H4[q4]-H4[k2])/(BFC*.9144))});
       if(gm>FALL_G&&c4==='s')wf+='<rect x="'+x4*BFC+'" y="'+y4*BFC+'" width="'+BFC+'" height="'+BFC+'"/>'}
     if(wf)o+='<g class="wfall">'+wf+'</g><g class="wfall w2">'+wf+'</g>'}
   o+='</g>';var items=[];

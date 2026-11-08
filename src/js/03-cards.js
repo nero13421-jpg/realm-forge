@@ -54,7 +54,7 @@ var STATS=[
 function statBase(k){for(var i=0;i<STATS.length;i++)if(STATS[i][0]===k)return STATS[i][3];return 0}
 function stats(c,wt,eq){
   eq=eq||gearOf(c);if(wt==null){wt=0;eq.forEach(function(x){wt+=wtOf(x.key)})}
-  var b=function(k){return 1+bo(c,k)},has=function(k){return eq.some(function(x){return x.key===k})},X={},rg=function(k){return has(k)?1+RING_B:1};
+  var b=function(k){return 1+bo(c,k,eq)},has=function(k){return eq.some(function(x){return x.key===k})},X={},rg=function(k){return has(k)?1+RING_B:1};
   X.mEnd=statBase('mEnd')*b('stag');X.mdEnd=statBase('mdEnd')*b('stag')*rg('ring_endur');X.spEnd=statBase('spEnd')*b('rabbit')*rg('ring_swift');X.cEnd=statBase('cEnd');X.rec=statBase('rec');
   X.walk=PACE.walk;X.jog=PACE.jog;X.sprint=PACE.sprint*b('rabbit')*rg('ring_swift');X.creep=PACE.creep;X.carry=statBase('carry')*rg('ring_str');X.jd=statBase('jd');X.jh=statBase('jh');
   X.strike=statBase('strike');X.str=statBase('str')*b('wolf')*rg('ring_str');X.range=statBase('range');X.hp=Math.round(statBase('hp')*b('boar'));
@@ -86,7 +86,7 @@ function killHuman(h){removeFromUnit(h.id);S.cards.forEach(function(c){if(c.eq==
 /* the animal shown at the altar: the one you picked, else the kind this man already carries, else the first you hold */
 function sacPick(T,cnt){if(UI.sacA&&cnt[UI.sacA])return UI.sacA;if(T&&T.boon&&cnt[T.boon.k])return T.boon.k;return Object.keys(cnt)[0]||null}
 var BOON={rabbit:{n:'Rabbit',a:'Swiftness',lo:3,hi:6,t:'sprint speed and sprint endurance: charges, flanking runs and falling back. Not road marching.'},stag:{n:'Stag',a:'Stamina',lo:3,hi:6,t:'marching and middle-distance endurance'},boar:{n:'Boar',a:'Hardiness',lo:3,hi:6,t:'durability, more health'},wolf:{n:'Wolf',a:'Ferocity',lo:3,hi:6,t:'strength, more melee and bow damage'},hawk:{n:'Hawk',a:'Keen eye',lo:3,hi:6,t:'bow hit chance and sight range'}};
-function bo(c,k){var v=c&&c.boon&&c.boon.k===k?c.boon.p/100:0;if(c&&c.key==='human')S.cards.forEach(function(x){if(x.eq===c.id&&x.boon&&x.boon.k===k)v+=x.boon.p/100});return v}
+function bo(c,k,eq){var v=c&&c.boon&&c.boon.k===k?c.boon.p/100:0;if(c&&c.key==='human')(eq||gearOf(c)).forEach(function(x){if(x.boon&&x.boon.k===k)v+=x.boon.p/100});return v}
 /* gear can be blessed only while it has never been worn */
 function blessable(c){return c&&isItem(c)&&!c.worn&&c.eq==null&&['animal','altar','mat','crystal','gnosis','parch','tattoo'].indexOf(kindOf(c))<0}
 function resText(c){return c.boon?BOON[c.boon.k].a+' +'+c.boon.p+'% · resonance '+(c.res||0):''}

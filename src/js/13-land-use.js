@@ -3,11 +3,14 @@
    prairie for fodder and hay. A supply tile counts if it is within an hour's walk, and each tile serves one claimant. */
 var WOOD={forest:1.5,woodland:1,pwood:.75,pforest:.75,swamp:.5},SPEC={orchard:1},NEED={hamlet:{woodT:1,past:2},village:{fire:8,spec:3},camp:{fire:2}},WOODT={forest:1,woodland:1,pwood:1,pforest:1},WALK_S=3600,PRAIRIE_CAP=2;
 /* seconds to walk from a set of hexes to every hex within an hour, over placed ground (roads faster, slopes slower) */
-function walkFrom(src){var N=COLS*ROWS,T=new Float64Array(N).fill(Infinity),done=new Uint8Array(N),RS=roadSet(),q=[];src.forEach(function(k){T[k]=0;q.push(k)});
+/* a small binary min-heap of [cost, key] pairs */
+function heap(){var a=[];return{n:function(){return a.length},push:function(t,k){a.push([t,k]);var i=a.length-1;while(i){var p=(i-1)>>1;if(a[p][0]<=a[i][0])break;var x=a[p];a[p]=a[i];a[i]=x;i=p}},
+  pop:function(){var top=a[0],last=a.pop();if(a.length){a[0]=last;var i=0;for(;;){var l=2*i+1,r=l+1,m=i;if(l<a.length&&a[l][0]<a[m][0])m=l;if(r<a.length&&a[r][0]<a[m][0])m=r;if(m===i)break;var x=a[m];a[m]=a[i];a[i]=x;i=m}}return top[1]}}}
+function walkFrom(src){var N=COLS*ROWS,T=new Float64Array(N).fill(Infinity),done=new Uint8Array(N),RS=roadSet(),q=heap();src.forEach(function(k){T[k]=0;q.push(0,k)});
   var spd=function(k){if(!placedAt(k%COLS,Math.floor(k/COLS)))return 0;return S.grid[k]?(RS[k]?ROAD_SP:TERR[S.grid[k]].sp):1};
-  while(q.length){var bi=0;for(var j=1;j<q.length;j++)if(T[q[j]]<T[q[bi]])bi=j;var k=q.splice(bi,1)[0];if(done[k])continue;done[k]=1;var s1=spd(k)||1,h1=hgtAt(k),c=k%COLS,r=Math.floor(k/COLS);
+  while(q.n()){var k=q.pop();if(done[k])continue;done[k]=1;var s1=spd(k)||1,h1=hgtAt(k),c=k%COLS,r=Math.floor(k/COLS);
     nbrs(c,r).forEach(function(p){var m=ix(p[0],p[1]);if(done[m])return;var s2=spd(m);if(!s2)return;var h2=hgtAt(m),gr=h1&&h2?((h2.b+(h2.r||0)/2)-(h1.b+(h1.r||0)/2))/(HEX_YD*.9144):0,G=gradeMul(gr),
-      t=(HEX_YD/2)/(PACE.walk*s1)+(HEX_YD/2)/(PACE.walk*s2);t=G.cap!=null?Math.max(t,HEX_YD/G.cap):t/G.m;var nt=T[k]+t;if(nt<T[m]&&nt<=WALK_S){T[m]=nt;q.push(m)}})}
+      t=(HEX_YD/2)/(PACE.walk*s1)+(HEX_YD/2)/(PACE.walk*s2);t=G.cap!=null?Math.max(t,HEX_YD/G.cap):t/G.m;var nt=T[k]+t;if(nt<T[m]&&nt<=WALK_S){T[m]=nt;q.push(nt,m)}})}
   return T}
 function setHexes(s){return [ix(s.c,s.r)].concat(s.c2!=null?[ix(s.c2,s.r2)]:[])}
 /* who gets which tile: settlements in the order they were founded take the nearest free tiles they need, then pastures take prairie */

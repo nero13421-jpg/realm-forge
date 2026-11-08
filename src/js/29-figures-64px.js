@@ -145,7 +145,7 @@ function a64draw(who,eq,pose,L){var N=A64N,c=document.createElement('canvas');c.
   var o=out.slice();
   for(y=0;y<N;y++)for(x=0;x<N;x++){var a=at(x,y);if(!a||A64DET[a])continue;var r=at(x+1,y),d2=at(x,y+1);if((r&&r!==a&&!A64DET[r]&&pal[r]!==pal[a])||(d2&&d2!==a&&!A64DET[d2]&&pal[d2]!==pal[a]))o[y*N+x]=o[y*N+x].map(function(v,i){return v*.5+A64OUT[i]*.38})}
   var img=g.createImageData(N,N),D=img.data,glowy=pose==='cast';
-  for(y=0;y<N;y++)for(x=0;x<N;x++){var q=y*N+x,col=o[q];if(!col&&[[1,0],[-1,0],[0,1],[0,-1]].some(function(z){var X=x+z[0],Y=y+z[1];return X>=0&&Y>=0&&X<N&&Y<N&&out[Y*N+X]}))col=(glowy&&[[1,0],[-1,0],[0,1],[0,-1]].some(function(z){var X=x+z[0],Y=y+z[1];return X>=0&&Y>=0&&X<N&&Y<N&&(map[Y*N+X]==='glow2'||map[Y*N+X]==='glow')}))?[120,200,255]:A64OUT;if(!col)continue;D[q*4]=col[0];D[q*4+1]=col[1];D[q*4+2]=col[2];D[q*4+3]=255}
+  for(y=0;y<N;y++)for(x=0;x<N;x++){var q=y*N+x,col=o[q];if(!col&&D4.some(function(z){var X=x+z[0],Y=y+z[1];return X>=0&&Y>=0&&X<N&&Y<N&&out[Y*N+X]}))col=(glowy&&D4.some(function(z){var X=x+z[0],Y=y+z[1];return X>=0&&Y>=0&&X<N&&Y<N&&(map[Y*N+X]==='glow2'||map[Y*N+X]==='glow')}))?[120,200,255]:A64OUT;if(!col)continue;D[q*4]=col[0];D[q*4+1]=col[1];D[q*4+2]=col[2];D[q*4+3]=255}
   g.putImageData(img,0,0);return c}
 function a64dead(src){/* the fallen body: the standing figure laid on its back, with a dark pool under it */var N=A64N,c=document.createElement('canvas');c.width=c.height=N;var g=c.getContext('2d');g.imageSmoothingEnabled=false;
   g.fillStyle='#5a1410';g.beginPath();g.ellipse(30,61,14,2.4,0,0,7);g.fill();g.fillStyle='#7a1a14';g.fillRect(22,60,10,2);g.fillRect(36,61,6,1);
