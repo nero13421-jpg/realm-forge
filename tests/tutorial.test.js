@@ -12,7 +12,7 @@ await next('welcome');
 const placeTiles=async(k,n)=>{await p.click('[data-tab="realm"]');await p.click(`[data-act="plc"][data-t="t"][data-k="${k}"]`);let placed=0;
   for(let g=0;g<200&&placed<n;g++){const cand=await S(()=>{const s=__S(),W=s.bw,H=s.bh,out=[];const taken=(c,r)=>s.grid[r*W+c]||s.setl.some(x=>(x.c===c&&x.r===r)||(x.c2===c&&x.r2===r));const any=s.grid.some(Boolean)||s.setl.length;
     for(let r=0;r<H;r++)for(let c=0;c<W;c++){if(taken(c,r))continue;const nb=(r&1)?[[1,0],[-1,0],[0,-1],[1,-1],[0,1],[1,1]]:[[1,0],[-1,0],[-1,-1],[0,-1],[-1,1],[0,1]];const t=nb.some(d=>{const C=c+d[0],R=r+d[1];return C>=0&&R>=0&&C<W&&R<H&&taken(C,R)});if(t||!any)out.push([c,r,Math.abs(c-W/2)+Math.abs(r-H/2)])}out.sort((a,b)=>a[2]-b[2]);return out[0]});
-    if(!cand)break;const before=await S(()=>__S().grid.filter(Boolean).length);await p.click(`[data-act="hex"][data-c="${cand[0]}"][data-r="${cand[1]}"]`);const after=await S(()=>__S().grid.filter(Boolean).length);if(after>before)placed++;else{console.log('place fail',await p.innerText('.msg').catch(()=>''));break}}
+    if(!cand)break;const before=await S(()=>__S().grid.filter(Boolean).length);await p.$eval(`[data-act="hex"][data-c="${cand[0]}"][data-r="${cand[1]}"]`,e=>e.dispatchEvent(new MouseEvent('click',{bubbles:true})));const after=await S(()=>__S().grid.filter(Boolean).length);if(after>before)placed++;else{console.log('place fail',await p.innerText('.msg').catch(()=>''));break}}
   return placed};
 const hamlet=async()=>{await p.click('[data-tab="realm"]');await p.click('[data-act="plc"][data-t="s"][data-k="hamlet"]');const cand=await S(()=>{const s=__S(),W=s.bw,H=s.bh;const taken=(c,r)=>s.grid[r*W+c]||s.setl.some(x=>x.c===c&&x.r===r);for(let r=0;r<H;r++)for(let c=0;c<W;c++){if(taken(c,r))continue;const nb=(r&1)?[[1,0],[-1,0],[0,-1],[1,-1],[0,1],[1,1]]:[[1,0],[-1,0],[-1,-1],[0,-1],[-1,1],[0,1]];const ns=nb.map(d=>[c+d[0],r+d[1]]).filter(q=>q[0]>=0&&q[1]>=0&&q[0]<W&&q[1]<H);if(ns.some(q=>taken(q[0],q[1]))&&!ns.some(q=>s.setl.some(x=>x.c===q[0]&&x.r===q[1])))return[c,r]}});await p.click(`[data-act="hex"][data-c="${cand[0]}"][data-r="${cand[1]}"]`);console.log('hamlet',await p.innerText('.msg').catch(()=>''))};
 console.log('placed',await placeTiles('cultivated',8));await next('farmland');
@@ -31,7 +31,7 @@ await next('squad');
 await p.selectOption(`#urt${uid}`,'defend');await next('defend');
 await p.click('[data-tab="patrol"]');await p.click('[data-act="fmnew"]');await p.click('[data-act="fmshape"][data-s="ranks"] >> nth=1');await next('formations');
 // encounters
-const fight=async(n,opts)=>{for(let tryN=0;tryN<4;tryN++){await p.click('[data-act="tutenc"]');let did={},last=null;
+const fight=async(n,opts)=>{console.log('before',n,'squads',await S(()=>__S().units.map(U=>U.hids.filter(h=>__S().cards.some(c=>c.id===h)).length).join('+')));for(let tryN=0;tryN<4;tryN++){await p.click('[data-act="tutenc"]');let did={},last=null;
   for(let k=0;k<1500;k++){await p.waitForTimeout(150);if(!(await S(()=>!!__S().match)))break;
     if(await p.$('[data-act="bfight"]')){if(opts.deploy)await opts.deploy(did);await p.click('[data-act="bfight"]').catch(()=>{});await p.waitForTimeout(300)}
     const inFight=await S(()=>{const M=__S().match;return !!(M&&M.battles&&M.battles.some(b=>!b.done&&b.phase==='fight'))});
