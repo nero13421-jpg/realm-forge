@@ -84,7 +84,7 @@ console.log('part 1 end',await p.innerText('.tut h2'),'tabs',await p.$$eval('#ta
 await p.click('[data-act="tutend1"][data-v="p2"]');console.log('part 2 title',await S(()=>__S().tut&&__S().tut.title),'perm kept',await p.evaluate(()=>!!localStorage.getItem('realmforge-chal-1-perm')));
 fs.writeFileSync('tut-p2.json',JSON.stringify(await p.evaluate(()=>({a:localStorage.getItem('realmforge-chal-1'),b:localStorage.getItem('realmforge-chal-1-perm')}))));}
 // ---------- part 2: a fresh Chalcolithic realm ----------
-await p.click('[data-act="tutbegin"]');await p.click('[data-act="open"][data-k="starter"]');await next('pack2');
+await p.click('[data-act="tutbegin"]');await p.click('[data-act="open"][data-k="starter"]');await next('pack2');await next('flanks');
 console.log('placed',await placeTiles('pond',1));
 await p.click('[data-tab="realm"]');await p.click('[data-act="draw"][data-k="stream"]');const pd=await S(()=>{const s=__S(),i=s.grid.indexOf('pond');return[i%s.bw,Math.floor(i/s.bw)]});
 await hexTap(`[data-act="hex"][data-c="${pd[0]+2}"][data-r="${pd[1]}"]`);await hexTap(`[data-act="hex"][data-c="${pd[0]+1}"][data-r="${pd[1]}"]`);await hexTap(`[data-act="hex"][data-c="${pd[0]}"][data-r="${pd[1]}"]`);if(await p.$('[data-act="dfinish"]'))await p.click('[data-act="dfinish"]');console.log('stream',await p.innerText('.msg'));await next('stream');
