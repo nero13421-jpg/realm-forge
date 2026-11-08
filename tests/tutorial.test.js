@@ -6,9 +6,8 @@ await p.evaluate(()=>{window.__S=function(){return __ev('S')};window.__UI=functi
 const S=(f,a)=>p.evaluate(f,a);const step=async()=>S(()=>__S().tut&&__S().tut.step);
 const next=async(label)=>{if(await p.$('[data-act="lootok"]')){console.log('loot popup:',(await p.innerText('.lootcard')).replace(/\n/g,' ').slice(0,160));await p.click('[data-act="lootok"]')}const st=await step();const dis=await p.$eval('[data-act="tutnext"]',e=>e.disabled).catch(()=>'none');if(dis!==false){console.log('NOT DONE at',st,label,await p.innerText('.tutgoal').catch(()=>''));await p.click('[data-act="tutskip"]')}else await p.click('[data-act="tutnext"]');console.log('step',st,'→',await step(),label)};
 const t0=Date.now();
+const hexTap=sel=>p.$eval(sel,e=>e.dispatchEvent(new MouseEvent('click',{bubbles:true}))).catch(e=>console.log('hex miss',sel));
 await p.click('[data-act="tutstart"] >> nth=0');await p.click('[data-act="tutstart"] >> nth=0');console.log('tut started',await step());
-await next('welcome');
-// farmland: a block around the board centre
 const placeTiles=async(k,n)=>{await p.click('[data-tab="realm"]');await p.click(`[data-act="plc"][data-t="t"][data-k="${k}"]`);let placed=0;const bad=new Set();
   for(let g=0;g<400&&placed<n;g++){const cand=await S(([bad,k])=>{const s=__S(),W=s.bw,H=s.bh,out=[];const taken=(c,r)=>s.grid[r*W+c]||s.setl.some(x=>(x.c===c&&x.r===r)||(x.c2===c&&x.r2===r));const any=s.grid.some(Boolean)||s.setl.length;
     const NB=(c,r)=>((r&1)?[[1,0],[-1,0],[0,-1],[1,-1],[0,1],[1,1]]:[[1,0],[-1,0],[-1,-1],[0,-1],[-1,1],[0,1]]).map(d=>[c+d[0],r+d[1]]).filter(q=>q[0]>=0&&q[1]>=0&&q[0]<W&&q[1]<H);
@@ -20,23 +19,8 @@ const placeTiles=async(k,n)=>{await p.click('[data-tab="realm"]');await p.click(
       out.push([c,r,sc])}out.sort((a,b)=>a[2]-b[2]);return out[0]},[[...bad],k]);
     if(!cand)break;const before=await S(()=>__S().grid.filter(Boolean).length);await p.$eval(`[data-act="hex"][data-c="${cand[0]}"][data-r="${cand[1]}"]`,e=>e.dispatchEvent(new MouseEvent('click',{bubbles:true})));const after=await S(()=>__S().grid.filter(Boolean).length);if(after>before)placed++;else{bad.add(cand[0]+','+cand[1]);if(bad.size>40){console.log('place fail',await p.innerText('.msg').catch(()=>''));break}}}
   return placed};
-const hamlet=async()=>{await p.click('[data-tab="realm"]');await p.click('[data-act="plc"][data-t="s"][data-k="hamlet"]');const cand=await S(()=>{const s=__S(),W=s.bw,H=s.bh;const taken=(c,r)=>s.grid[r*W+c]||s.setl.some(x=>x.c===c&&x.r===r);for(let r=0;r<H;r++)for(let c=0;c<W;c++){if(taken(c,r))continue;const nb=(r&1)?[[1,0],[-1,0],[0,-1],[1,-1],[0,1],[1,1]]:[[1,0],[-1,0],[-1,-1],[0,-1],[-1,1],[0,1]];const ns=nb.map(d=>[c+d[0],r+d[1]]).filter(q=>q[0]>=0&&q[1]>=0&&q[0]<W&&q[1]<H);if(ns.some(q=>taken(q[0],q[1]))&&!ns.some(q=>s.setl.some(x=>x.c===q[0]&&x.r===q[1])))return[c,r]}});await p.click(`[data-act="hex"][data-c="${cand[0]}"][data-r="${cand[1]}"]`);console.log('hamlet',await p.innerText('.msg').catch(()=>''))};
-console.log('placed',await placeTiles('pond',1),await placeTiles('cultivated',8));await next('farmland');
-await hamlet();await next('hamlet');
-await p.click('[data-tab="packs"]');await p.click('[data-act="assignall"]');await next('assign');
-await p.click('[data-tab="settle"]');await p.fill('#snm','Riverbend');await p.press('#snm','Tab');await next('name');
+const hamlet=async()=>{await p.click('[data-tab="realm"]');await p.click('[data-act="plc"][data-t="s"][data-k="hamlet"]');const cand=await S(()=>{const s=__S(),W=s.bw,H=s.bh;const taken=(c,r)=>s.grid[r*W+c]||s.setl.some(x=>x.c===c&&x.r===r);for(let r=0;r<H;r++)for(let c=0;c<W;c++){if(taken(c,r))continue;const nb=(r&1)?[[1,0],[-1,0],[0,-1],[1,-1],[0,1],[1,1]]:[[1,0],[-1,0],[-1,-1],[0,-1],[-1,1],[0,1]];const ns=nb.map(d=>[c+d[0],r+d[1]]).filter(q=>q[0]>=0&&q[1]>=0&&q[0]<W&&q[1]<H);if(ns.some(q=>taken(q[0],q[1]))&&!ns.some(q=>s.setl.some(x=>x.c===q[0]&&x.r===q[1])))return[c,r]}});await hexTap(`[data-act="hex"][data-c="${cand[0]}"][data-r="${cand[1]}"]`);console.log('hamlet',await p.innerText('.msg').catch(()=>''))};
 const equip=async(hid,key)=>{await p.click(`[data-act="selhum"][data-id="${hid}"]`);const ids=await p.$$eval('[data-act="equip"]:not(.sel)',e=>e.map(x=>+x.dataset.id));const id=await S(([k,ids])=>{const c=ids.map(i=>__S().cards.find(x=>x.id===i)).find(x=>x&&x.key===k);return c&&c.id},[key,ids]);if(id)await p.click(`[data-act="equip"][data-id="${id}"]`);if(process.env.DBG)console.log('eq',hid,key,id,await p.innerText('.msg').catch(()=>'-'))};
-const men=await S(()=>__S().cards.filter(c=>c.key==='human').map(c=>c.id));
-for(let i=0;i<4;i++){await equip(men[i],'spear');if(i<2)await equip(men[i],'hide_armor')}
-for(let i=4;i<8;i++){await equip(men[i],'shortbow');await equip(men[i],'short_arrows');await equip(men[i],'knife')}
-await next('arm');if(process.env.DBG){await b.close();return}
-await p.click('[data-tab="units"]');await p.click('[data-act="newunit"]');const uid=await S(()=>__S().units[0].id);
-for(const m of men){await p.click(`[data-act="selh"][data-id="${m}"]`);await p.click(`[data-act="putin"][data-u="${uid}"] >> nth=0`)}
-await p.click(`[data-act="addtm"][data-u="${uid}"]`);for(const m of men.slice(4)){await p.click(`[data-act="selh"][data-id="${m}"]`);await p.click(`[data-act="putin"][data-u="${uid}"][data-t="2"]`)}
-await next('squad');
-await p.selectOption(`#urt${uid}`,'defend');await next('defend');
-await p.click('[data-tab="patrol"]');await p.click('[data-act="fmnew"]');await p.click('[data-act="fmshape"][data-s="ranks"] >> nth=1');await next('formations');
-// encounters
 const fight=async(n,opts)=>{console.log('before',n,'squads',await S(()=>__S().units.map(U=>U.hids.filter(h=>__S().cards.some(c=>c.id===h)).length).join('+')));for(let tryN=0;tryN<4;tryN++){await p.click('[data-act="tutenc"]');let did={},last=null;
   for(let k=0;k<1500;k++){await p.waitForTimeout(150);if(!(await S(()=>!!__S().match)))break;
     if(await p.$('[data-act="bfight"]')){if(opts.deploy)await opts.deploy(did);await p.click('[data-act="bfight"]').catch(()=>{});await p.waitForTimeout(300)}
@@ -49,16 +33,35 @@ const fight=async(n,opts)=>{console.log('before',n,'squads',await S(()=>__S().un
     if(need){await S(k=>__ev(`(function(){var m=campByKey('${k}');var U=S.units.filter(function(U){return U.hids.length&&!(U.live&&U.live.battle)})[0];if(!U||!m)return;tutFlag('bn');if(!U.live)initLive(U);var L=U.live;L.mode='raze';L.target='${k}';L.path=[];L.chase=null;L.tk=null;mlog(U.name+' marches to destroy the camp.','dim');render()})()`),need);console.log('burn ordered',n)}}
   if(await S(()=>!!__S().match))console.log('STUCK',errs.slice(0,3),await S(()=>[__S().match.speed,__S().match.halt]),JSON.stringify(await S(()=>{const M=__S().match;return{clock:M.clock,camps:M.camps.map(m=>({razed:m.razed,n:m.mobs.length,roam:m.roam,pos:m.pos,lair:m.lair,W:M.W})),units:__S().units.map(U=>({rem:U.live.rem,wait:U.live.wait,busy:U.live.busy,raze:U.live.raze,endur:U.live.endur,lairTerr:__S().grid[__S().match.camps[0].lair],sp:U.live.ub&&U.live.ub.sp,mode:U.live.mode,st:U.live.status,pos:U.live.pos,raze:U.live.raze,path:U.live.path.length,tg:U.live.target})),log:M.log.slice(-8).map(x=>x.t+' '+x.m)}})));
   const won=await S(n=>!!__S().tut.won[n],n);console.log('encounter',n,'try',tryN+1,won?'WON':'lost',JSON.stringify(last),(await p.innerText('.verdict').catch(()=>'')));if(won)return true}return false};
+let uid,uid2;
+if(process.env.P2){await p.evaluate(st=>localStorage.setItem('realmforge-chal-1',st),fs.readFileSync('tut-p2.json','utf8'));await p.reload();await p.evaluate(()=>{window.__S=function(){return __ev('S')};window.__UI=function(){return __ev('UI')}});uid=await S(()=>__S().units[0].id);uid2=await S(()=>__S().units[1].id);console.log('resumed at step',await step())}else{
+await next('welcome');
+// farmland: a block around the board centre
+console.log('placed',await placeTiles('pond',1),await placeTiles('cultivated',8));await next('farmland');
+await hamlet();await next('hamlet');
+await p.click('[data-tab="packs"]');await p.click('[data-act="assignall"]');await next('assign');
+await p.click('[data-tab="settle"]');await p.fill('#snm','Riverbend');await p.press('#snm','Tab');await next('name');
+const men=await S(()=>__S().cards.filter(c=>c.key==='human').map(c=>c.id));
+for(let i=0;i<4;i++){await equip(men[i],'spear');if(i<2)await equip(men[i],'hide_armor')}
+for(let i=4;i<8;i++){await equip(men[i],'shortbow');await equip(men[i],'short_arrows');await equip(men[i],'knife')}
+await next('arm');if(process.env.DBG){await b.close();return}
+await p.click('[data-tab="units"]');await p.click('[data-act="newunit"]');uid=await S(()=>__S().units[0].id);
+for(const m of men){await p.click(`[data-act="selh"][data-id="${m}"]`);await p.click(`[data-act="putin"][data-u="${uid}"] >> nth=0`)}
+await p.click(`[data-act="addtm"][data-u="${uid}"]`);for(const m of men.slice(4)){await p.click(`[data-act="selh"][data-id="${m}"]`);await p.click(`[data-act="putin"][data-u="${uid}"][data-t="2"]`)}
+await next('squad');
+await p.selectOption(`#urt${uid}`,'defend');await next('defend');
+await p.click('[data-tab="patrol"]');await p.click('[data-act="fmnew"]');await p.click('[data-act="fmshape"][data-s="ranks"] >> nth=1');await next('formations');
+// encounters
 await fight(1,{deploy:async()=>{await p.click('[data-act="bfauto"]').catch(()=>{})}});await next('E1');
 await p.click('[data-tab="packs"]');await p.click('[data-act="open"][data-k="booster"]');await next('packA');
 console.log('placed',await placeTiles('pond',1),await placeTiles('cultivated',8));await hamlet();await next('hamlet2');
 // road between: draw across two placed tiles using zoom clicks
-await p.click('[data-tab="realm"]');await p.click('[data-act="draw"][data-k="road"]');const st0=await S(()=>{const s=__S().setl[0];return[s.c,s.r]});await p.click(`[data-act="hex"][data-c="${st0[0]}"][data-r="${st0[1]}"]`);
-await p.click(`[data-act="hex"][data-c="${st0[0]+1}"][data-r="${st0[1]}"]`);await p.click('[data-act="dfinish"]');console.log('road',await p.innerText('.msg'));await next('road');
+await p.click('[data-tab="realm"]');await p.click('[data-act="draw"][data-k="road"]');const st0=await S(()=>{const s=__S().setl[0];return[s.c,s.r]});await hexTap(`[data-act="hex"][data-c="${st0[0]}"][data-r="${st0[1]}"]`);
+await hexTap(`[data-act="hex"][data-c="${st0[0]+1}"][data-r="${st0[1]}"]`);await p.click('[data-act="dfinish"]');console.log('road',await p.innerText('.msg'));await next('road');
 const s2=await S(()=>__S().setl[1].id);await p.click('[data-tab="packs"]');await p.selectOption('#asel',String(s2));await p.click('[data-act="assignall"]');
 const new3=await S(s2=>__S().cards.filter(c=>c.key==='human'&&c.at===s2&&c.sex!=='f').map(c=>c.id),s2);
 await p.click('[data-tab="settle"]');await p.click(`[data-act="selset"][data-id="${s2}"]`);await equip(new3[0],'longbow');await equip(new3[0],'long_arrows');await equip(new3[1],'spear');await equip(new3[2],'spear');if(new3[3])await equip(new3[3],'knife');await equip(new3[1],'hide_shield');await equip(new3[2],'hide_helmet');
-await p.click('[data-tab="units"]');await p.selectOption('#nus',String(s2));await p.click('[data-act="newunit"]');const uid2=await S(()=>__S().units[1].id);
+await p.click('[data-tab="units"]');await p.selectOption('#nus',String(s2));await p.click('[data-act="newunit"]');uid2=await S(()=>__S().units[1].id);
 for(const m of new3.slice(0,4)){await p.click(`[data-act="selh"][data-id="${m}"]`);await p.click(`[data-act="putin"][data-u="${uid2}"] >> nth=0`)}await p.selectOption(`#urt${uid2}`,'defend');await next('squad2');fs.writeFileSync('tut15-new.json',await p.evaluate(()=>localStorage.getItem('realmforge-chal-1')));if(process.env.STOP15){await b.close();return}
 
 
@@ -79,6 +82,8 @@ console.log('palisade',await p.evaluate(()=>__ev(`(function(){var s=S.setl[0],C=
 await p.click('[data-tab="realm"]');await next('palisade');
 await fight(3,{live:async()=>{await p.click('#bctl [data-act="mspd"][data-s="0"]');await p.waitForSelector('#bview svg');const tk=await S(()=>{const b=__S().match.battles.find(x=>!x.done);return b.teams[0].k});await p.click(`[data-act="bfsel"][data-k="t:${tk}"]`);await p.click('[data-act="bford"][data-o="move"]');const fb=await (await p.$('#bview svg')).boundingBox();await p.mouse.click(fb.x+fb.width*.5,fb.y+fb.height*.5);await p.click('#bctl [data-act="mspd"][data-s="10"]');return true}});await next('E3');
 await fight(4,{live:async()=>{await p.click(`[data-act="mu"][data-u="${uid2}"]`).catch(()=>{});const sel=await p.$(`#rf${uid2}`);if(sel){await p.selectOption(`#rf${uid2}`,String(uid));return true}return false}});await next('E4');
+fs.writeFileSync('tut-p2.json',await p.evaluate(()=>localStorage.getItem('realmforge-chal-1')));}
+
 // part 2
 await p.click('[data-tab="packs"]');await p.click('[data-act="open"][data-k="booster"]');await next('packC');
 const s3b=await S(()=>__S().setl[2].id);await p.selectOption('#asel',String(s3b));await p.click('[data-act="assignall"]');
@@ -90,13 +95,13 @@ for(const k of ['orange_crystal','gnosis','p_arrow'])await equip(new6[5],k);cons
 // a gentle slope beside the realm
 await p.click('[data-tab="realm"]');await p.click('[data-act="plc"][data-t="e"][data-k="gs_field"]').catch(e=>console.log('no slope btn',e.message));
 const sp=await S(()=>{const s=__S(),W=s.bw,H=s.bh;const taken=(c,r)=>s.grid[r*W+c]||s.setl.some(x=>(x.c===c&&x.r===r)||(x.c2===c&&x.r2===r));for(let r=0;r<H;r++)for(let c=0;c<W;c++){if(taken(c,r))continue;const nb=(r&1)?[[1,0],[-1,0],[0,-1],[1,-1],[0,1],[1,1]]:[[1,0],[-1,0],[-1,-1],[0,-1],[-1,1],[0,1]];if(nb.some(d=>{const C=c+d[0],R=r+d[1];return C>=0&&R>=0&&C<W&&R<H&&taken(C,R)}))return[c,r]}});
-await p.click(`[data-act="hex"][data-c="${sp[0]}"][data-r="${sp[1]}"]`);console.log('slope:',await p.innerText('.msg').catch(()=>''));await next('hill');
+await hexTap(`[data-act="hex"][data-c="${sp[0]}"][data-r="${sp[1]}"]`);console.log('slope:',await p.innerText('.msg').catch(()=>''));await next('hill');
 // farmland for a village, then the village on two empty hexes side by side
-console.log('placed',await placeTiles('pond',2),await placeTiles('cultivated',22),await placeTiles('orchard',3));
+console.log('placed',await placeTiles('pond',4),await placeTiles('cultivated',22),await placeTiles('orchard',3));
 await p.click('[data-tab="realm"]');await p.click('[data-act="plc"][data-t="s"][data-k="village"]');
 const vp=await S(()=>{const s=__S(),W=s.bw,H=s.bh;const taken=(c,r)=>s.grid[r*W+c]||s.setl.some(x=>(x.c===c&&x.r===r)||(x.c2===c&&x.r2===r));const NB=(c,r)=>((r&1)?[[1,0],[-1,0],[0,-1],[1,-1],[0,1],[1,1]]:[[1,0],[-1,0],[-1,-1],[0,-1],[-1,1],[0,1]]).map(d=>[c+d[0],r+d[1]]).filter(q=>q[0]>=0&&q[1]>=0&&q[0]<W&&q[1]<H);const nearSet=(c,r)=>NB(c,r).some(q=>s.setl.some(x=>(x.c===q[0]&&x.r===q[1])||(x.c2===q[0]&&x.r2===q[1])));
   for(let r=0;r<H;r++)for(let c=0;c<W;c++){if(taken(c,r)||nearSet(c,r)||!NB(c,r).some(q=>taken(q[0],q[1])))continue;for(const q of NB(c,r))if(!taken(q[0],q[1])&&!nearSet(q[0],q[1]))return[c,r,q[0],q[1]]}});
-console.log('village at',vp);if(vp){await p.click(`[data-act="hex"][data-c="${vp[0]}"][data-r="${vp[1]}"]`);await p.click(`[data-act="hex"][data-c="${vp[2]}"][data-r="${vp[3]}"]`)}console.log('village:',await p.innerText('.msg').catch(()=>''));await next('village');
+console.log('village at',vp);if(vp){await hexTap(`[data-act="hex"][data-c="${vp[0]}"][data-r="${vp[1]}"]`);await hexTap(`[data-act="hex"][data-c="${vp[2]}"][data-r="${vp[3]}"]`)}console.log('village:',await p.innerText('.msg').catch(()=>''));await next('village');
 // a third squad from the new men
 await p.click('[data-tab="units"]');await p.selectOption('#nus',String(s3b));await p.click('[data-act="newunit"]');const uid3=await S(()=>__S().units[__S().units.length-1].id);
 for(const m of new6){await p.click(`[data-act="selh"][data-id="${m}"]`);await p.click(`[data-act="putin"][data-u="${uid3}"] >> nth=0`)}await p.selectOption(`#urt${uid3}`,'defend');
