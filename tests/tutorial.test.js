@@ -1,6 +1,6 @@
 const path=require('path');{const o=path.join(__dirname,'out');require('fs').mkdirSync(o,{recursive:true});process.chdir(o)}
 const {chromium}=require('playwright');const fs=require('fs');
-(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1100,height:1400}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+(async()=>{const b=await chromium.launch({dumpio:!!process.env.DUMPIO});const p=await b.newPage({viewport:{width:1100,height:1400}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
 await p.goto('file://'+path.resolve(__dirname,'..','dist','test-wrap.html'));await p.evaluate(()=>localStorage.clear());await p.reload();
 await p.evaluate(()=>{window.__S=function(){return __ev('S')};window.__UI=function(){return __ev('UI')}});
 const S=(f,a)=>p.evaluate(f,a);const step=async()=>S(()=>__S().tut&&__S().tut.step);
@@ -114,7 +114,7 @@ const march=async(n)=>{for(let tryN=0;tryN<4&&!(await S(n=>!!__S().tut.won[n],n)
     if(need){await S(k=>__ev(`(function(){var m=campByKey('${k}');var U=S.units.filter(function(U){return U.hids.length&&!(U.live&&U.live.battle)})[0];if(!U||!m)return;tutFlag('bn');if(!U.live)initLive(U);var L=U.live;L.mode='raze';L.target='${k}';L.path=[];L.chase=null;L.tk=null;mlog(U.name+' marches to destroy the camp.','dim');render()})()`),need);}}
   console.log('encounter',n,'try',tryN+1,await S(n=>!!__S().tut.won[n],n),(await p.innerText('.verdict').catch(()=>'')),await S(()=>{const M=__S().match;return M?M.log.slice(-3).map(l=>l.m).join(' / '):''}))}};
 await march(6);await next('E6');
-await march(7);await next('E7');
+fs.writeFileSync('tut-f7.json',await p.evaluate(()=>localStorage.getItem('realmforge-chal-1')));await march(7);await next('E7');
 await fight(8,{deploy:async()=>{await p.click('[data-act="bfauto"]').catch(()=>{})}});await next('E8');
 console.log('final step',await step(),await p.innerText('.tut h2'));
 await p.click('[data-act="mergego"]');let ok=false;for(let i=0;i<40&&!ok;i++){ok=!(await p.$('[data-act="mjoin"][disabled]'));if(!ok)await p.click(`[data-act="mnudge"][data-v="${i<20?3:5}"]`)}
