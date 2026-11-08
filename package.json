@@ -1,0 +1,14 @@
+{
+  "name": "realmforge",
+  "private": true,
+  "description": "RealmForge: a hex-tile realm builder and battle planner, as single-file browser games.",
+  "scripts": {
+    "build": "python tools/build.py --test",
+    "test:smoke": "node tests/smoke.test.js",
+    "test:tutorial": "node tests/tutorial.test.js",
+    "test": "python tools/build.py --test && node tests/smoke.test.js"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
