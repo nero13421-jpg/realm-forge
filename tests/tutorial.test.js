@@ -9,13 +9,19 @@ const t0=Date.now();
 await p.click('[data-act="tutstart"] >> nth=0');await p.click('[data-act="tutstart"] >> nth=0');console.log('tut started',await step());
 await next('welcome');
 // farmland: a block around the board centre
-const placeTiles=async(k,n)=>{await p.click('[data-tab="realm"]');await p.click(`[data-act="plc"][data-t="t"][data-k="${k}"]`);let placed=0;
-  for(let g=0;g<200&&placed<n;g++){const cand=await S(()=>{const s=__S(),W=s.bw,H=s.bh,out=[];const taken=(c,r)=>s.grid[r*W+c]||s.setl.some(x=>(x.c===c&&x.r===r)||(x.c2===c&&x.r2===r));const any=s.grid.some(Boolean)||s.setl.length;
-    for(let r=0;r<H;r++)for(let c=0;c<W;c++){if(taken(c,r))continue;const nb=(r&1)?[[1,0],[-1,0],[0,-1],[1,-1],[0,1],[1,1]]:[[1,0],[-1,0],[-1,-1],[0,-1],[-1,1],[0,1]];const t=nb.some(d=>{const C=c+d[0],R=r+d[1];return C>=0&&R>=0&&C<W&&R<H&&taken(C,R)});if(t||!any)out.push([c,r,Math.abs(c-W/2)+Math.abs(r-H/2)])}out.sort((a,b)=>a[2]-b[2]);return out[0]});
-    if(!cand)break;const before=await S(()=>__S().grid.filter(Boolean).length);await p.$eval(`[data-act="hex"][data-c="${cand[0]}"][data-r="${cand[1]}"]`,e=>e.dispatchEvent(new MouseEvent('click',{bubbles:true})));const after=await S(()=>__S().grid.filter(Boolean).length);if(after>before)placed++;else{console.log('place fail',await p.innerText('.msg').catch(()=>''));break}}
+const placeTiles=async(k,n)=>{await p.click('[data-tab="realm"]');await p.click(`[data-act="plc"][data-t="t"][data-k="${k}"]`);let placed=0;const bad=new Set();
+  for(let g=0;g<400&&placed<n;g++){const cand=await S(([bad,k])=>{const s=__S(),W=s.bw,H=s.bh,out=[];const taken=(c,r)=>s.grid[r*W+c]||s.setl.some(x=>(x.c===c&&x.r===r)||(x.c2===c&&x.r2===r));const any=s.grid.some(Boolean)||s.setl.length;
+    const NB=(c,r)=>((r&1)?[[1,0],[-1,0],[0,-1],[1,-1],[0,1],[1,1]]:[[1,0],[-1,0],[-1,-1],[0,-1],[-1,1],[0,1]]).map(d=>[c+d[0],r+d[1]]).filter(q=>q[0]>=0&&q[1]>=0&&q[0]<W&&q[1]<H);
+    const wet=[];s.grid.forEach((g,i)=>{if(g==='pond'||g==='swamp'||g==='water')wet.push([i%W,Math.floor(i/W)])});
+    const hd=(a,b)=>{const aq=a[0]-(a[1]-(a[1]&1))/2,bq=b[0]-(b[1]-(b[1]&1))/2,dq=aq-bq,dr=a[1]-b[1];return (Math.abs(dq)+Math.abs(dr)+Math.abs(dq+dr))/2};
+    for(let r=0;r<H;r++)for(let c=0;c<W;c++){if(taken(c,r)||bad.indexOf(c+','+r)>=0)continue;if(!(NB(c,r).some(q=>taken(q[0],q[1]))||!any))continue;
+      const wd=wet.length?Math.min(...wet.map(w=>hd(w,[c,r]))):9;let sc=Math.abs(c-W/2)+Math.abs(r-H/2);
+      if(k==='pond'){if(NB(c,r).some(q=>s.grid[q[1]*W+q[0]]==='pond'))continue;sc+=wd<=2?20:0}else if(k==='cultivated'||k==='orchard'){if(wd>2)continue}
+      out.push([c,r,sc])}out.sort((a,b)=>a[2]-b[2]);return out[0]},[[...bad],k]);
+    if(!cand)break;const before=await S(()=>__S().grid.filter(Boolean).length);await p.$eval(`[data-act="hex"][data-c="${cand[0]}"][data-r="${cand[1]}"]`,e=>e.dispatchEvent(new MouseEvent('click',{bubbles:true})));const after=await S(()=>__S().grid.filter(Boolean).length);if(after>before)placed++;else{bad.add(cand[0]+','+cand[1]);if(bad.size>40){console.log('place fail',await p.innerText('.msg').catch(()=>''));break}}}
   return placed};
 const hamlet=async()=>{await p.click('[data-tab="realm"]');await p.click('[data-act="plc"][data-t="s"][data-k="hamlet"]');const cand=await S(()=>{const s=__S(),W=s.bw,H=s.bh;const taken=(c,r)=>s.grid[r*W+c]||s.setl.some(x=>x.c===c&&x.r===r);for(let r=0;r<H;r++)for(let c=0;c<W;c++){if(taken(c,r))continue;const nb=(r&1)?[[1,0],[-1,0],[0,-1],[1,-1],[0,1],[1,1]]:[[1,0],[-1,0],[-1,-1],[0,-1],[-1,1],[0,1]];const ns=nb.map(d=>[c+d[0],r+d[1]]).filter(q=>q[0]>=0&&q[1]>=0&&q[0]<W&&q[1]<H);if(ns.some(q=>taken(q[0],q[1]))&&!ns.some(q=>s.setl.some(x=>x.c===q[0]&&x.r===q[1])))return[c,r]}});await p.click(`[data-act="hex"][data-c="${cand[0]}"][data-r="${cand[1]}"]`);console.log('hamlet',await p.innerText('.msg').catch(()=>''))};
-console.log('placed',await placeTiles('cultivated',8));await next('farmland');
+console.log('placed',await placeTiles('pond',1),await placeTiles('cultivated',8));await next('farmland');
 await hamlet();await next('hamlet');
 await p.click('[data-tab="packs"]');await p.click('[data-act="assignall"]');await next('assign');
 await p.click('[data-tab="settle"]');await p.fill('#snm','Riverbend');await p.press('#snm','Tab');await next('name');
@@ -45,7 +51,7 @@ const fight=async(n,opts)=>{console.log('before',n,'squads',await S(()=>__S().un
   const won=await S(n=>!!__S().tut.won[n],n);console.log('encounter',n,'try',tryN+1,won?'WON':'lost',JSON.stringify(last),(await p.innerText('.verdict').catch(()=>'')));if(won)return true}return false};
 await fight(1,{deploy:async()=>{await p.click('[data-act="bfauto"]').catch(()=>{})}});await next('E1');
 await p.click('[data-tab="packs"]');await p.click('[data-act="open"][data-k="booster"]');await next('packA');
-console.log('placed',await placeTiles('cultivated',8));await hamlet();await next('hamlet2');
+console.log('placed',await placeTiles('pond',1),await placeTiles('cultivated',8));await hamlet();await next('hamlet2');
 // road between: draw across two placed tiles using zoom clicks
 await p.click('[data-tab="realm"]');await p.click('[data-act="draw"][data-k="road"]');const st0=await S(()=>{const s=__S().setl[0];return[s.c,s.r]});await p.click(`[data-act="hex"][data-c="${st0[0]}"][data-r="${st0[1]}"]`);
 await p.click(`[data-act="hex"][data-c="${st0[0]+1}"][data-r="${st0[1]}"]`);await p.click('[data-act="dfinish"]');console.log('road',await p.innerText('.msg'));await next('road');
@@ -63,7 +69,7 @@ const fem=await S(()=>__S().cards.find(c=>c.sex==='f').id);await p.click('[data-
 await p.click('[data-tab="settle"]');await p.click(`[data-act="selset"][data-id="${s2}"]`);await p.click(`[data-act="priest"][data-h="${fem}"]`);await next('priestess');
 await p.click('[data-act="sacA"][data-k="rabbit"]');console.log('sac form',await p.innerText('.upanel:has(#sacV)').catch(()=>'none'));await p.click('[data-act="sacrifice"]');console.log(await p.innerText('.msg'));await next('sacrifice');
 await p.click('[data-tab="packs"]');await p.click('[data-act="open"][data-k="booster"]');await next('packB');
-console.log('placed',await placeTiles('cultivated',8));await hamlet();
+console.log('placed',await placeTiles('pond',1),await placeTiles('cultivated',8));await hamlet();
 const s3=await S(()=>__S().setl[2].id);await p.click('[data-tab="packs"]');await p.selectOption('#asel',String(s3));await p.click('[data-act="assignall"]');await next('hamlet3');
 await p.click('[data-tab="settle"]');await p.click(`[data-act="selset"][data-id="${S0=await S(()=>__S().setl[0].id)}"]`);
 for(const k of ['tat_antler','red_crystal','gnosis','p_bolt'])await equip(men[0],k);console.log(await p.innerText('.msg'));await next('powerup');
@@ -86,7 +92,7 @@ await p.click('[data-tab="realm"]');await p.click('[data-act="plc"][data-t="e"][
 const sp=await S(()=>{const s=__S(),W=s.bw,H=s.bh;const taken=(c,r)=>s.grid[r*W+c]||s.setl.some(x=>(x.c===c&&x.r===r)||(x.c2===c&&x.r2===r));for(let r=0;r<H;r++)for(let c=0;c<W;c++){if(taken(c,r))continue;const nb=(r&1)?[[1,0],[-1,0],[0,-1],[1,-1],[0,1],[1,1]]:[[1,0],[-1,0],[-1,-1],[0,-1],[-1,1],[0,1]];if(nb.some(d=>{const C=c+d[0],R=r+d[1];return C>=0&&R>=0&&C<W&&R<H&&taken(C,R)}))return[c,r]}});
 await p.click(`[data-act="hex"][data-c="${sp[0]}"][data-r="${sp[1]}"]`);console.log('slope:',await p.innerText('.msg').catch(()=>''));await next('hill');
 // farmland for a village, then the village on two empty hexes side by side
-console.log('placed',await placeTiles('cultivated',22),await placeTiles('orchard',3));
+console.log('placed',await placeTiles('pond',2),await placeTiles('cultivated',22),await placeTiles('orchard',3));
 await p.click('[data-tab="realm"]');await p.click('[data-act="plc"][data-t="s"][data-k="village"]');
 const vp=await S(()=>{const s=__S(),W=s.bw,H=s.bh;const taken=(c,r)=>s.grid[r*W+c]||s.setl.some(x=>(x.c===c&&x.r===r)||(x.c2===c&&x.r2===r));const NB=(c,r)=>((r&1)?[[1,0],[-1,0],[0,-1],[1,-1],[0,1],[1,1]]:[[1,0],[-1,0],[-1,-1],[0,-1],[-1,1],[0,1]]).map(d=>[c+d[0],r+d[1]]).filter(q=>q[0]>=0&&q[1]>=0&&q[0]<W&&q[1]<H);const nearSet=(c,r)=>NB(c,r).some(q=>s.setl.some(x=>(x.c===q[0]&&x.r===q[1])||(x.c2===q[0]&&x.r2===q[1])));
   for(let r=0;r<H;r++)for(let c=0;c<W;c++){if(taken(c,r)||nearSet(c,r)||!NB(c,r).some(q=>taken(q[0],q[1])))continue;for(const q of NB(c,r))if(!taken(q[0],q[1])&&!nearSet(q[0],q[1]))return[c,r,q[0],q[1]]}});
