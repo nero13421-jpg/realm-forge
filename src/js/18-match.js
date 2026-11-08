@@ -2,7 +2,10 @@
 var RAID_AT=300;
 function raidAt(){return S.match&&S.match.raidAt!=null?S.match.raidAt:RAID_AT}
 function syncDims(){COLS=S.match?S.match.W:(S.bw||9);ROWS=S.match?S.match.H:(S.bh||7)}
-function mlog(m,c){var M=S.match;M.log.push({t:mmss(M.clock),m:m,c:c||''});if(M.log.length>80)M.log.shift()}
+/* a lone pigger is one animal: fix the grammar the group messages were written for */
+var PIGV={are:'is',have:'has',reach:'reaches','break':'breaks',walk:'walks',leave:'leaves',go:'goes',remain:'remains',find:'finds',swarm:'swarms',batter:'batters',hack:'hacks',start:'starts',cannot:'cannot',move:'moves'};
+function pigFix(m){return m.replace(/\b(1 |The |the )pigger((?: at [A-Z]+\d+| of [A-Z]+\d+)?) (are|have|reach|break|walk|leave|go|remain|find|batter|hack|start|move)\b/g,function(a,p,at,v){return p+'pigger'+at+' '+PIGV[v]}).replace(/pigger((?: at [A-Z]+\d+)?) has found the (\w+) at ([A-Z]+\d+) and go for it/g,'pigger$1 has found the $2 at $3 and goes for it').replace(/The pigger is destroyed/g,'The pigger is dead')}
+function mlog(m,c){var M=S.match;m=pigFix(String(m));M.log.push({t:mmss(M.clock),m:m,c:c||''});if(M.log.length>80)M.log.shift()}
 function matchCamps(){
   return S.match.camps.filter(function(m){return !(m.type==='pigger'&&!m.roam)}).map(function(m){
     return{key:m.key,hexes:m.hexes,type:m.type,lair:m.lair,reward:m.reward,razed:!!m.razed,active:m.mobs.length>0,roam:m.roam&&m.mobs.length>0,pos:m.pos,m:m,n:m.mobs.length};

@@ -58,7 +58,7 @@ function rangesOf(h){
   var eq=eqKeys(h),X=stats(h),o=[];
   eq=eq.map(wkey);var ml=MELEE.filter(function(k){return eq.indexOf(k)>=0})[0];if(ml)o.push({k:'melee',n:CD[ml].n+' reach',r:WEAP[ml].reach});
   BOWS.forEach(function(b){if(eq.indexOf(b)>=0)o.push({k:'bow',n:CD[b].n+(eq.indexOf(WEAP[b].ammo)>=0?'':' (no '+CD[WEAP[b].ammo].n.toLowerCase()+')'),r:Math.round(WEAP[b].reach*X.range)})});
-  (h.spells||[]).forEach(function(k){if(SPELL_RNG[k])o.push({k:k,n:SPELL[k].n,r:SPELL_RNG[k]})});
+  var rm=1+gearOf(h).reduce(function(m,c){var w=WEAP[wkey(c.key)];return Math.max(m,w&&w.rod||0)},0);(h.spells||[]).forEach(function(k){if(SPELL_RNG[k])o.push({k:k,n:SPELL[k].n,r:Math.round(SPELL_RNG[k]*rm)})});
   return o.sort(function(a,b){return a.r-b.r});
 }
 /* the picked man's reach drawn to scale around him, with the rest of the formation as dots */

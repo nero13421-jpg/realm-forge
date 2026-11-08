@@ -83,8 +83,9 @@ function a64parts(who,eq,pose,L){var P=[],add=function(id,fn){P.push([id,fn])};a
   var sk=gob?'gskin':pig?'pskin':'skin',ar=gob?'gskin':pig?'pskin':fem?'robe':brig?'btunic':'tunic',S0=gob?[31,32]:[30.6,18];
   var hand=function(pts){add(ar,ln(pts,gob?2.6:2.8));var h=pts[pts.length-1];add(sk,el(h[0],h[1],1.5,1.5));if(L.tt&&!gob&&!fem)add('tat',rc((pts[0][0]+pts[1][0])/2,(pts[0][1]+pts[1][1])/2,1,1.4));return h};
   var stone=function(pts){add('stone',poly(pts))};
-  if(cast){hand([S0,[34,14],[38,10]]);add('glow2',el(39.2,9.4,2.6,2.6));add('glow',el(39.2,9.4,1.3,1.3));add('glow2',el(35,10.4,1.6,1.6));if(wp==='spear')add('wood',ln([[29,60],[33,6]],1.5))}
+  if(cast){hand([S0,[34,14],[38,10]]);add('glow2',el(39.2,9.4,2.6,2.6));add('glow',el(39.2,9.4,1.3,1.3));add('glow2',el(35,10.4,1.6,1.6));if(wp==='spear')add('wood',ln([[29,60],[33,6]],1.5));if(wp==='rod_wood'||wp==='rod_cu'){add('wood',ln([[36.4,13],[41.4,1.6]],1.4));if(wp==='rod_cu')add('stone',el(41.6,1.4,1.7,1.7))}}
   else if(fem)hand([S0,[31,25],[32.4,30.4]]);
+  else if(wp==='rod_wood'||wp==='rod_cu'){var hr=pose==='a2'?hand([S0,[35,20],[39.6,19]]):hand([S0,[33,24],[36,26]]);var rt=pose==='a2'?[[34,30],[48,8]]:[[35,40],[38.4,6]];add('wood',ln(rt,1.4));if(wp==='rod_cu'){add('stone',el(rt[1][0],rt[1][1]-.4,1.9,1.9));add('stone',rc(hr[0]-.8,hr[1]-3.6,1.8,1.2))}else add('wood',el(rt[1][0],rt[1][1]-.4,1.6,2))}
   else if(wp==='spear'){if(pose==='a1'){hand([S0,[30,24],[33,25]]);add('wood',ln([[20,25.6],[48,23.4]],1.5));stone([[47,21.6],[52.6,23],[47,25]]);add('cord',rc(45.4,22.4,1.4,2.2))}
     else if(pose==='a2'){hand([S0,[35,21],[40,22]]);add('wood',ln([[27,23.4],[58,21.4]],1.5));stone([[57,19.6],[62.6,21],[57,23]]);add('cord',rc(55.4,20.4,1.4,2.2))}
     else if(pig){hand([S0,[33,24],[37,27]]);add('wood',ln([[24,50],[50,28]],1.8));stone([[48.6,26.4],[54.6,24.4],[50.8,30]]);add('cord',rc(47.6,27.6,2.4,1.4))}
@@ -133,7 +134,7 @@ function P_FROG(add){return add.P}
 function a64draw(who,eq,pose,L){var N=A64N,c=document.createElement('canvas');c.width=c.height=N;var g=c.getContext('2d');if(!g)return null;var map=new Array(N*N).fill(null),pal={};for(var k in A64PAL)pal[k]=A64PAL[k];
   pal.skin=L.sk;pal.hair=pal.beard=L.hr;pal.tunic=L.dye;pal.accent=L.bead[0];pal.accent2=L.bead[1];pal.hood=L.hood;pal.robe=L.robe;if(who==='gob'){pal.gskin=L.gob[0];pal.gskinB=L.gob[1]}if(who==='frog'){pal.fskin=L.frog[0];pal.fskinB=L.frog[1];pal.fspot=L.frog[2]}if(who==='pig'){pal.pskin=L.pig[0];pal.pskinB=L.pig[1]}
   var sh=function(h,m){var v=[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)].map(function(x){return Math.round(x*m)});return '#'+v.map(function(x){return ('0'+Math.max(0,Math.min(255,x)).toString(16)).slice(-2)}).join('')};
-  var W0=weapPick(eq),pk0=eq.filter(function(x){return wkey(x)===W0.p})[0],m0=pk0?wmat(pk0):null;if(m0&&m0.hd==='cu')pal.stone='#c27a40';if(m0&&m0.wd==='pine')pal.wood='#c89858';
+  var W0=weapPick(eq),pk0=eq.filter(function(x){return wkey(x)===W0.p})[0],m0=pk0?wmat(pk0):null;if((m0&&m0.hd==='cu')||W0.p==='rod_cu')pal.stone='#c27a40';if(m0&&m0.wd==='pine')pal.wood='#c89858';
   if(eq.indexOf('leather_armor')>=0)pal.vest='#8a5834';if(eq.indexOf('leather_helmet')>=0)pal.helm='#8a5834';if(eq.indexOf('oak_helmet')>=0)pal.helm='#9a6c3a';if(eq.indexOf('leather_shield')>=0){pal.shield='#8a5834';pal.shieldR='#4a2c18'}if(eq.indexOf('oak_shield')>=0){pal.shield='#b07a40';pal.shieldR='#5e3a1e'}pal.greave='#8a5834';pal.greaveB='#6e4428';
   pal.skinB=sh(L.sk,.82);pal.leg=sh(L.sk,.92);pal.legB=sh(L.sk,.75);pal.armB=sh(L.dye,.82);pal.btunic=sh(L.hood,1.15);
   a64parts(who,eq,pose,L).forEach(function(p){g.clearRect(0,0,N,N);g.fillStyle=g.strokeStyle='#000';p[1](g);var d=g.getImageData(0,0,N,N).data;for(var i=0;i<N*N;i++)if(d[i*4+3]>120)map[i]=p[0]});

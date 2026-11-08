@@ -54,10 +54,10 @@ var STATS=[
 function statBase(k){for(var i=0;i<STATS.length;i++)if(STATS[i][0]===k)return STATS[i][3];return 0}
 function stats(c,wt,eq){
   eq=eq||gearOf(c);if(wt==null){wt=0;eq.forEach(function(x){wt+=wtOf(x.key)})}
-  var b=function(k){return 1+bo(c,k)},has=function(k){return eq.some(function(x){return x.key===k})},X={};
-  X.mEnd=statBase('mEnd')*b('stag');X.mdEnd=statBase('mdEnd')*b('stag');X.spEnd=statBase('spEnd')*b('rabbit');X.cEnd=statBase('cEnd');X.rec=statBase('rec');
-  X.walk=PACE.walk;X.jog=PACE.jog;X.sprint=PACE.sprint*b('rabbit');X.creep=PACE.creep;X.carry=statBase('carry');X.jd=statBase('jd');X.jh=statBase('jh');
-  X.strike=statBase('strike');X.str=statBase('str')*b('wolf');X.range=statBase('range');X.hp=Math.round(statBase('hp')*b('boar'));
+  var b=function(k){return 1+bo(c,k)},has=function(k){return eq.some(function(x){return x.key===k})},X={},rg=function(k){return has(k)?1+RING_B:1};
+  X.mEnd=statBase('mEnd')*b('stag');X.mdEnd=statBase('mdEnd')*b('stag')*rg('ring_endur');X.spEnd=statBase('spEnd')*b('rabbit')*rg('ring_swift');X.cEnd=statBase('cEnd');X.rec=statBase('rec');
+  X.walk=PACE.walk;X.jog=PACE.jog;X.sprint=PACE.sprint*b('rabbit')*rg('ring_swift');X.creep=PACE.creep;X.carry=statBase('carry')*rg('ring_str');X.jd=statBase('jd');X.jh=statBase('jh');
+  X.strike=statBase('strike');X.str=statBase('str')*b('wolf')*rg('ring_str');X.range=statBase('range');X.hp=Math.round(statBase('hp')*b('boar'));
   var ad=0,ag=0;eq.forEach(function(x){var A=ARM[x.key];if(A){ad+=A.def;ag+=A.dodge}});X.def=statBase('def')+ad;X.dodge=(statBase('dodge')+ag)/100;
   X.grit=statBase('grit');X.heal=statBase('heal');X.sight=statBase('sight')*b('hawk');X.react=statBase('react');X.press=statBase('press')/100;
   X.mana=c.mana||1;X.gnosis=c.gnosis||0;X.cast=statBase('cast');X.keen=b('hawk');
@@ -95,7 +95,7 @@ function packCount(k){return k==='booster'?(S.packs||0):((S.pk||{})[k]||0)}
 function packAdd(k,n){if(k==='booster')S.packs=(S.packs||0)+n;else{S.pk=S.pk||{};S.pk[k]=(S.pk[k]||0)+n}}
 function openPackOf(k){
   UI.fresh=[];packAdd(k,-1);
-  if(k==='starter'){STARTER.forEach(function(x){for(var j=0;j<x[1];j++)UI.fresh.push(mk(x[0]).id)});if(!S.tut){var wf=mk('human');wf.sex='f';UI.fresh.push(wf.id)}}
+  if(k==='starter'){(S.tut?TUT_STARTER:STARTER).forEach(function(x){for(var j=0;j<x[1];j++)UI.fresh.push(mk(x[0]).id)});if(!S.tut){var wf=mk('human');wf.sex='f';UI.fresh.push(wf.id)}}
   else if(k==='booster'&&S.tut&&S.tut.pk&&S.tut.pk.length){S.tut.pk.shift().forEach(function(key){var nc=mk(key==='human_f'?'human':key);if(key==='human_f'){nc.sex='f';nc.name='Ama'}UI.fresh.push(nc.id)});S.tut.opened++}
   else for(var i=0;i<PACKS[k].size;i++){var nc=mk(rollKey());if(nc.key==='human'&&Math.random()<FEMALE_P)nc.sex='f';UI.fresh.push(nc.id)}
   UI.opened=PACKS[k].n;
@@ -103,19 +103,21 @@ function openPackOf(k){
 function rollKey(){
   var g=wpick(PACK);
   if(g==='terrain'){if(Math.random()<.35){var ek=wpick([['gs',5],['ms',2],['sm',4],['lm',2]]);return 'e_'+ek+'_'+pick(EKIND)}return 't_'+wpick(TERR_PAIRS)}
+  if(g==='weapon'&&Math.random()<.08)return Math.random()<.35?'rod_cu':'rod_wood';
   if(g==='weapon'||g==='ammo'){var t=pick(WEAPON_KEYS),hd=Math.random()<.35?'cu':'fl',wd=Math.random()<.4?'pine':'oak';return wvar(t,hd,wd)}
   if(g==='armor')return pick(['hide_armor','leather_armor']);
   if(g==='shield')return pick(['hide_shield','leather_shield','oak_shield']);
   if(g==='helmet')return pick(['hide_helmet','leather_helmet','oak_helmet']);
   if(g==='greaves')return 'leather_greaves';
   if(g==='mat')return wpick([['lumber',4],['gravel',4],['stimber',2],['ltimber',1]]);
-  if(g==='crystal')return 'red_crystal';
+  if(g==='crystal')return Math.random()<.3?'orange_crystal':'red_crystal';
+  if(g==='ring')return pick(Object.keys(RING));
   if(g==='animal')return pick(Object.keys(BOON));
   if(g==='tattoo')return pick(Object.keys(TATTOO));
   if(g==='parch')return pick(Object.keys(SPELL));
   return g;
 }
-var ITEMK={greaves:1,weapon:1,ammo:1,armor:1,helmet:1,shield:1,mat:1,crystal:1,gnosis:1,parch:1,animal:1,altar:1,tattoo:1};
+var ITEMK={ring:1,greaves:1,weapon:1,ammo:1,armor:1,helmet:1,shield:1,mat:1,crystal:1,gnosis:1,parch:1,animal:1,altar:1,tattoo:1};
 function isItem(c){return !!ITEMK[kindOf(c)]}
 function pool(){return S.cards.filter(isItem)}
 function inHand(){return S.cards.filter(function(c){return c.at===null})}

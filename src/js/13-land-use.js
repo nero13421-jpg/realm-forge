@@ -1,7 +1,7 @@
 /* ---------- land use ----------
    Villages and camps burn firewood; villages also need specialty food (orchards for now); every pasture needs half a
    prairie for fodder and hay. A supply tile counts if it is within an hour's walk, and each tile serves one claimant. */
-var WOOD={forest:1.5,woodland:1,pwood:.75,pforest:.75,swamp:.5},SPEC={orchard:1},NEED={village:{fire:8,spec:3},camp:{fire:2}},WALK_S=3600,PRAIRIE_CAP=2;
+var WOOD={forest:1.5,woodland:1,pwood:.75,pforest:.75,swamp:.5},SPEC={orchard:1},NEED={hamlet:{woodT:1,past:2},village:{fire:8,spec:3},camp:{fire:2}},WOODT={forest:1,woodland:1,pwood:1,pforest:1},WALK_S=3600,PRAIRIE_CAP=2;
 /* seconds to walk from a set of hexes to every hex within an hour, over placed ground (roads faster, slopes slower) */
 function walkFrom(src){var N=COLS*ROWS,T=new Float64Array(N).fill(Infinity),done=new Uint8Array(N),RS=roadSet(),q=[];src.forEach(function(k){T[k]=0;q.push(k)});
   var spd=function(k){if(!placedAt(k%COLS,Math.floor(k/COLS)))return 0;return S.grid[k]?(RS[k]?ROAD_SP:TERR[S.grid[k]].sp):1};
@@ -14,25 +14,33 @@ function setHexes(s){return [ix(s.c,s.r)].concat(s.c2!=null?[ix(s.c2,s.r2)]:[])}
 var SUPC=null;
 function supply(){var key=COLS+'|'+S.grid.join(',')+'|'+(S.hgt||[]).map(function(h){return h?h.b+'.'+(h.r||0):''}).join(',')+'|'+S.setl.map(function(x){return x.id+'.'+x.type+'.'+x.c+'.'+x.r}).join(',')+'|'+(S.lines||[]).filter(function(l){return l.type==='road'}).map(function(l){return l.hexes.join('.')}).join(';');if(SUPC&&SUPC.k===key)return SUPC.v;var v=supply0();SUPC={k:key,v:v};return v}
 function supply0(){var N=COLS*ROWS,used={},prc={},out={set:{},past:{},claim:{}},k;
-  S.setl.forEach(function(st){var nd=NEED[st.type];if(!nd)return;var T=walkFrom(setHexes(st)),R={fire:0,spec:0,need:nd,tiles:[]};
-    var near=[];for(k=0;k<N;k++)if(T[k]<Infinity&&!used[k]&&(WOOD[S.grid[k]]||SPEC[S.grid[k]])&&!setAt(k%COLS,Math.floor(k/COLS)))near.push(k);near.sort(function(a,b){return T[a]-T[b]});
-    near.forEach(function(k2){var g=S.grid[k2];if(nd.fire&&WOOD[g]&&R.fire<nd.fire){R.fire+=WOOD[g];used[k2]=1;R.tiles.push(k2);out.claim[k2]={by:st.id,kind:'fire'}}else if(nd.spec&&SPEC[g]&&R.spec<nd.spec){R.spec+=SPEC[g];used[k2]=1;R.tiles.push(k2);out.claim[k2]={by:st.id,kind:'spec'}}});
-    R.ok=R.fire>=(nd.fire||0)-1e-9&&R.spec>=(nd.spec||0);out.set[st.id]=R});
+  /* hamlets: one wood tile and two pastures (clothing); villages: 8 firewood and 3 orchards; camps: 2 firewood */
+  S.setl.forEach(function(st){var nd=NEED[st.type];if(!nd)return;var T=walkFrom(setHexes(st)),R={fire:0,spec:0,woodT:0,past:0,need:nd,tiles:[]};
+    var near=[];for(k=0;k<N;k++)if(T[k]<Infinity&&!used[k]&&(WOOD[S.grid[k]]||SPEC[S.grid[k]]||S.grid[k]==='pasture')&&!setAt(k%COLS,Math.floor(k/COLS)))near.push(k);near.sort(function(a,b){return T[a]-T[b]});
+    var take=function(k2,kind){used[k2]=1;R.tiles.push(k2);out.claim[k2]={by:st.id,kind:kind}};
+    near.forEach(function(k2){var g=S.grid[k2];
+      if(nd.woodT&&WOODT[g]&&R.woodT<nd.woodT){R.woodT++;take(k2,'fire')}
+      else if(nd.fire&&WOOD[g]&&R.fire<nd.fire){R.fire+=WOOD[g];take(k2,'fire')}
+      else if(nd.spec&&SPEC[g]&&R.spec<nd.spec){R.spec+=SPEC[g];take(k2,'spec')}
+      else if(nd.past&&g==='pasture'&&R.past<nd.past){R.past++;take(k2,'cloth')}});
+    R.ok=R.fire>=(nd.fire||0)-1e-9&&R.spec>=(nd.spec||0)&&R.woodT>=(nd.woodT||0)&&R.past>=(nd.past||0);out.set[st.id]=R});
   for(k=0;k<N;k++){if(S.grid[k]!=='pasture')continue;var T2=walkFrom([k]),best=-1;for(var m=0;m<N;m++)if(S.grid[m]==='field'&&!used[m]&&T2[m]<Infinity&&(prc[m]||0)<PRAIRIE_CAP&&(best<0||T2[m]<T2[best]))best=m;
     if(best>=0){prc[best]=(prc[best]||0)+1;out.past[k]={ok:true,by:best};out.claim[best]={by:'p',kind:'prairie',n:prc[best]}}else out.past[k]={ok:false}}
   return out}
+function needText(R){var n=R.need,o=[];if(n.woodT)o.push('woodland <b>'+R.woodT+'/'+n.woodT+'</b>');if(n.past)o.push('pastures <b>'+R.past+'/'+n.past+'</b>');if(n.fire)o.push('firewood <b>'+(Math.round(R.fire*100)/100)+'/'+n.fire+'</b>');if(n.spec)o.push('orchards <b>'+R.spec+'/'+n.spec+'</b>');return ' · '+o.join(' · ')}
+function needSay(nd){var o=[];if(nd.woodT)o.push(nd.woodT+' woodland tile');if(nd.past)o.push(nd.past+' pastures (for clothing)');if(nd.fire)o.push(nd.fire+' firewood');if(nd.spec)o.push(nd.spec+' orchards');return o.join(', ')}
 function supplyPanel(){if(S.match||S.tut)return '';var SU=supply(),rows=[];
-  S.setl.forEach(function(st){var R=SU.set[st.id];if(!R)return;rows.push('<div class="row suprow'+(R.ok?'':' bad')+'"><button class="btn sm'+(UI.supSel===st.id?' on':'')+'" data-act="supsel" data-id="'+st.id+'">'+esc(setName(st))+'</button><span>'+SETT[st.type].n+' · firewood <b>'+(Math.round(R.fire*100)/100)+'/'+R.need.fire+'</b>'+(R.need.spec?' · orchards <b>'+R.spec+'/'+R.need.spec+'</b>':'')+(R.ok?' ✓':' · short')+'</span></div>')});
+  S.setl.forEach(function(st){var R=SU.set[st.id];if(!R)return;rows.push('<div class="row suprow'+(R.ok?'':' bad')+'"><button class="btn sm'+(UI.supSel===st.id?' on':'')+'" data-act="supsel" data-id="'+st.id+'">'+esc(setName(st))+'</button><span>'+SETT[st.type].n+needText(R)+(R.ok?' ✓':' · short')+'</span></div>')});
   var ps=Object.keys(SU.past),pk=ps.filter(function(k){return SU.past[k].ok}).length;
   if(ps.length)rows.push('<div class="row suprow'+(pk<ps.length?' bad':'')+'"><button class="btn sm'+(UI.supSel==='p'?' on':'')+'" data-act="supsel" data-id="p">Pastures</button><span>'+pk+' of '+ps.length+' fed by prairie (1 field feeds 2)'+(pk<ps.length?' · '+(ps.length-pk)+' short':' ✓')+'</span></div>');
-  return '<p class="label">Land use · within an hour\'s walk, one claim per tile</p>'+(rows.join('')||'<p class="note">Hamlets need nothing extra. Villages need 8 firewood and 3 orchards; camps 2 firewood; every pasture half a prairie.</p>')+(UI.supSel!=null?'<p class="note">Rings on the map: brown feeds firewood, red an orchard, yellow a prairie. Firewood: oak forest 1.5, oak woodland 1, pine 0.75, swamp peat 0.5.</p>':'')}
+  return '<p class="label">Land use · within an hour\'s walk, one claim per tile</p>'+(rows.join('')||'<p class="note">Hamlets need 1 woodland tile and 2 pastures. Villages need 8 firewood and 3 orchards; camps 2 firewood; every pasture half a prairie.</p>')+(UI.supSel!=null?'<p class="note">Rings on the map: brown feeds firewood, white a pasture for clothing, red an orchard, yellow a prairie. Firewood: oak forest 1.5, oak woodland 1, pine 0.75, swamp peat 0.5.</p>':'')}
 function supplyMarks(){if(S.match||UI.supSel==null||UI.tab!=='realm')return '';var SU=supply(),o='';Object.keys(SU.claim).forEach(function(k){var C=SU.claim[k];if(UI.supSel==='p'?C.kind!=='prairie':C.by!==UI.supSel)return;o+='<polygon class="sup-ring sup-'+C.kind+'" points="'+hexPts(k%COLS,Math.floor(k/COLS),.86)+'"/>'});
   if(UI.supSel==='p')Object.keys(SU.past).forEach(function(k){o+='<polygon class="sup-ring sup-past'+(SU.past[k].ok?'':' bad')+'" points="'+hexPts(k%COLS,Math.floor(k/COLS),.86)+'"/>'});
   else{var st=setById(UI.supSel);if(st)setHexes(st).forEach(function(k){o+='<polygon class="sup-ring sup-home" points="'+hexPts(k%COLS,Math.floor(k/COLS),.86)+'"/>'})}
   return o}
 function found(type,c,r,c2,r2){
   if(NEED[type]&&!S.tut){var tmp={id:-7,type:type,c:c,r:r};if(c2!=null){tmp.c2=c2;tmp.r2=r2}S.setl.push(tmp);var SUf=supply(),Rf=SUf.set[-7];S.setl.pop();
-    if(!Rf.ok){var nf=NEED[type];say('A '+SETT[type].n.toLowerCase()+' needs '+nf.fire+' firewood'+(nf.spec?' and '+nf.spec+' orchards':'')+' within an hour\'s walk that no other settlement already uses. In reach: '+(Math.round(Rf.fire*100)/100)+' firewood'+(nf.spec?', '+Rf.spec+' orchards':'')+'.',true);if(UI.place)UI.place.first=null;return render()}}
+    if(!Rf.ok){var nf=NEED[type];say('A '+SETT[type].n.toLowerCase()+' needs '+needSay(nf)+' within an hour\'s walk that no other settlement already uses. In reach:'+needText(Rf).replace(/<\/?b>/g,'')+'.',true);if(UI.place)UI.place.first=null;return render()}}
   S.hgt=S.hgt||[];S.hgt[ix(c,r)]={s:'flat',b:baseFor(c,r,'flat',0,0)};if(c2!=null)S.hgt[ix(c2,r2)]={s:'flat',b:S.hgt[ix(c,r)].b};
   var d=SETT[type],cards=S.cards.filter(function(x){return x.at===null&&x.key==='setcard'});
   for(var n=0;n<d.cards;n++)S.cards.splice(S.cards.indexOf(cards[n]),1);
@@ -56,6 +64,10 @@ function toggleEquip(id){
   if(k==='helmet'&&mine.some(function(c){return kindOf(c)==='helmet'})){say('Already wearing a helmet.',true);return render()}
   if(k==='shield'&&mine.some(function(c){return kindOf(c)==='shield'})){say('Already carrying a shield.',true);return render()}
   if(k==='greaves'&&mine.some(function(c){return kindOf(c)==='greaves'})){say('Already wearing greaves.',true);return render()}
+  if(k==='ring'&&mine.some(function(c){return c.key===it.key})){say('He already wears a '+CD[it.key].n.toLowerCase()+'. One of each kind.',true);return render()}
+  if(k==='weapon'&&WEAP[wkey(it.key)].rod&&mine.some(function(c){return WEAP[wkey(c.key)]&&WEAP[wkey(c.key)].rod})){say('One rod at most.',true);return render()}
+  if(k==='weapon'&&WEAP[wkey(it.key)].rod&&mine.some(function(c){return MELEE.indexOf(wkey(c.key))>=0})){say('A rod has to be his primary carry: give it to a man without a melee weapon. A bow alongside it is fine.',true);return render()}
+  if(k==='weapon'&&MELEE.indexOf(wkey(it.key))>=0&&!WEAP[wkey(it.key)].rod&&mine.some(function(c){return WEAP[wkey(c.key)]&&WEAP[wkey(c.key)].rod})){say('He carries a rod as his primary. He can add a bow, not another hand weapon.',true);return render()}
   if(k==='shield'&&mine.some(function(c){return WEAP[wkey(c.key)]&&WEAP[wkey(c.key)].two})){say('A battle axe takes both hands. He cannot carry a shield with it.',true);return render()}
   if(WEAP[wkey(it.key)]&&WEAP[wkey(it.key)].two&&mine.some(function(c){return kindOf(c)==='shield'})){say('A battle axe takes both hands, and he already carries a shield for good. Give the axe to a man without one.',true);return render()}
   if(k==='weapon'&&nw===0){var stt=setById(h.at),cap=stt?SETT[stt.type].def:null;if(cap&&!unitOf(h.id)&&soldiersAt(h.at)>=cap){say('This '+SETT[stt.type].n.toLowerCase()+' holds '+cap+' soldiers at most.',true);return render()}}
@@ -76,7 +88,7 @@ function toggleEquip(id){
   }
   if(k==='crystal'){
     if(S.prestige<1){say('Using a crystal costs 1 prestige.',true);return render()}
-    S.prestige-=1;h.mana=(h.mana||1)+1;S.cards.splice(S.cards.indexOf(it),1);
+    S.prestige-=1;h.mana=(h.mana||1)+(CRYSTAL[it.key]||1);S.cards.splice(S.cards.indexOf(it),1);
     say('The crystal is consumed. '+hname(h)+' now has '+h.mana+' mana, permanently. 1 prestige sunk.');save();return render();
   }
   if(k==='gnosis'){

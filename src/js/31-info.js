@@ -11,7 +11,7 @@ function icoLine(k){var o='<svg class="ico" viewBox="0 0 24 24" width="30" heigh
   else o+='<path d="M2 18 Q8 8 13 13 T22 5" stroke="#2d6c9a" stroke-width="4.6" fill="none"/><path d="M2 18 Q8 8 13 13 T22 5" stroke="#6fb4e8" stroke-width="2.6" fill="none"/>';
   if(k==='bridge')o+='<g transform="translate(12 11) rotate(-35)"><rect x="-3" y="-7" width="6" height="14" fill="#8a6338" stroke="#2a1c0e"/><line x1="-3" y1="-2" x2="3" y2="-2" stroke="#5a3f22"/><line x1="-3" y1="2" x2="3" y2="2" stroke="#5a3f22"/></g>';
   return o+'</svg>'}
-function icoArt(k){var a=ART[k]||ART[wkey(k)]||ART[{leather_armor:'hide_armor',leather_greaves:'hide_armor',leather_helmet:'hide_helmet',oak_helmet:'hide_helmet',leather_shield:'hide_shield',oak_shield:'hide_shield'}[k]];if(!a)return '';var m=wmat(k),f=(m.hd==='cu'?'sepia(1) saturate(3) hue-rotate(-12deg)':'')+(m.wd==='pine'&&WEAP[wkey(k)]?' brightness(1.18)':'')+(/^leather_/.test(k)?' brightness(.8) saturate(1.3)':/^oak_/.test(k)?' sepia(.6) brightness(.9)':'');return '<span style="display:inline-block;filter:'+f+'">'+svgWrap(rects(a,0,0),30)+'</span>'}
+function icoArt(k){var a=ART[k]||ART[wkey(k)];if(!a)return '';return svgWrap(rects(a,0,0),30)}
 function icoMob(kind,b){return icoWrap(mobInner(kind,b),16,34)}
 function icoMan(eq){return icoWrap(humanInner(eq||[]),16,34)}
 function icoSet(k){return icoWrap('<rect width="12" height="12" fill="'+DITHER.settle[0]+'"/>'+rects(SPR['set_'+k],0,0),12,30)}
