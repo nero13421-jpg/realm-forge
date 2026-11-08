@@ -1758,7 +1758,7 @@ function walled(c,r){return null}/* the old palisade card is gone: walls are dra
 function step(m){
   if(m.inBattle||battleAt(m.pos))return;
   var st=setAt(m.pos[0],m.pos[1]);
-  if(st){siege(m,st);return}
+  if(st&&!(S.match.tutEnc&&S.match.tutEnc<=4&&st!==S.setl[0])){siege(m,st);return}
   if(m.wait>0){m.wait--;return}
   if(m.batter){if(--m.batter.t>0)return;var BT=m.batter,MM=S.match;m.batter=null;if(BT.g!=null){MM.ghp=MM.ghp||{};MM.ghp[BT.g]=0}else{var BW=wallById(BT.w);if(BW){var BH=panHP(BW,wallGeo(BW));if(BH)BH[BT.i]=0}}m.thru=BT.k;mlog('The '+mobWord(m,1)+' break through the '+(BT.g!=null?'gate':'palisade')+' near '+lab(m.pos[0],m.pos[1])+'.','bad');UI.needRender=true;return}
   /* a palisade keeps them out of the settlement's hex: they attack the wall from the next tile */
