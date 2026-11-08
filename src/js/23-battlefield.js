@@ -185,10 +185,10 @@ function bfMoves(P,ev,dur){
     else bfAnim(P,ev.a,[{transform:'none'},{transform:'translate('+(f*7)+'px,-1px) rotate('+(f*14)+'deg)',offset:.4},{transform:'none'}],260);
   }
   else if(ev.k==='r')bfAnim(P,ev.a,[{transform:'none'},{transform:'translate('+(-f*2)+'px,0)',offset:.3},{transform:'none'}],200);
-  else if(ev.k==='b'||ev.k==='sh')bfAnim(P,ev.a,[{filter:'drop-shadow(0 0 4px #9fd8ff) brightness(1.6)'},{filter:'none'}],420);
+  else if(ev.k==='b'||ev.k==='sh')bfAnim(P,ev.a,[{opacity:.55},{opacity:1}],420);
   if(ev.k==='sh')return;
   if(ev.lab==='dodged')bfAnim(P,ev.t,[{transform:'none'},{transform:'translate(0,-5px)',offset:.4},{transform:'none'}],240,hd);
-  else if(ev.d>0)bfAnim(P,ev.t,[{transform:'none',filter:'brightness(2.6) saturate(0)'},{transform:'translate('+(dir*ts*(X==='battle_axe'||X==='p_push'?7:4))+'px,0)',filter:'none',offset:.5},{transform:'none',filter:'none'}],230,hd);
+  else if(ev.d>0)bfAnim(P,ev.t,[{transform:'none',opacity:.35},{transform:'translate('+(dir*ts*(X==='battle_axe'||X==='p_push'?7:4))+'px,0)',opacity:1,offset:.5},{transform:'none',opacity:1}],230,hd);
   else if(ev.d===0)bfAnim(P,ev.t,[{transform:'none'},{transform:'translate('+(dir*ts*2)+'px,0)',offset:.5},{transform:'none'}],180,hd);
 }
 /* effects drawn on the field itself, in yards */

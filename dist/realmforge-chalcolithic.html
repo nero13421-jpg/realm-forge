@@ -114,9 +114,9 @@ button.tag:hover{background:#f3ead3}
 @keyframes bob{0%{transform:translateY(0)}50%{transform:translateY(-1px)}}
 .lw{transition:transform .1s}
 .lw.lungeR{transform:translateX(6px)}.lw.lungeL{transform:translateX(-6px)}
-.bob.hit{filter:brightness(2.6) saturate(0)}
+.bob.hit{opacity:.4}
 .ent .bob{transform-box:fill-box;transform-origin:center}
-.ent.dead .bob{transform:rotate(90deg) translateX(8px);opacity:.55;filter:grayscale(1);animation:none}
+.ent.dead .bob{transform:rotate(90deg) translateX(8px);opacity:.5;animation:none}
 .ent.dead .hpb,.ent.dead .hpbg{display:none}
 .ent.gone{opacity:0;transition:opacity .4s}
 .hpbg{fill:#2a2018}.hpb{fill:var(--verd)}.side-e .hpb{fill:var(--oxide)}
@@ -128,7 +128,7 @@ button.tag:hover{background:#f3ead3}
 .bfwrap{background:var(--ground);border:1px solid var(--line);overflow:hidden}
 .bfield{width:100%;height:auto;display:block;touch-action:manipulation}
 .pbview .bfield{max-width:100%}
-.bfe .bob{transform-box:fill-box;transform-origin:50% 100%;transition:transform .45s ease-in,opacity .45s}.bfe.dead .bob{opacity:.9;filter:grayscale(.55) brightness(.8);animation:none}.pa1,.pa2,.pc,.pg,.pd{display:none}.bfe.atk .lA,.bfe.atk .lB,.bfe.cst .lA,.bfe.cst .lB,.bfe.guard .lA,.bfe.guard .lB,.bfe.dead .lA,.bfe.dead .lB{display:none}.bfe.atk .pa1{display:inline;animation:pfa var(--pd,320ms) steps(1) forwards}.bfe.atk .pa2{display:inline;opacity:0;animation:pfb var(--pd,320ms) steps(1) forwards}@keyframes pfa{0%{opacity:1}42%{opacity:0}100%{opacity:0}}@keyframes pfb{0%{opacity:0}42%{opacity:1}100%{opacity:1}}.bfe.cst .pc{display:inline}.bfe.guard:not(.atk):not(.cst):not(.dead) .pg{display:inline}.bfe.dead .pd{display:inline}.bfe.dead.atk .pa1,.bfe.dead.atk .pa2,.bfe.dead .pg,.bfe.dead .pc{display:none}.fx-dust{fill:#cbb88a;opacity:.6}.fx-blood{fill:#8a1a14}.bfe .gsh{display:none}.bfe.guard .gsh{display:inline}.bfe.dead .hpb,.bfe.dead .hpbg{display:none}.bfe.dead .bfr{opacity:.3}
+.bfe .bob{transform-box:fill-box;transform-origin:50% 100%;transition:transform .45s ease-in,opacity .45s}.bfe.dead .bob{opacity:.8;animation:none}.pa1,.pa2,.pc,.pg,.pd{display:none}.bfe.atk .lA,.bfe.atk .lB,.bfe.cst .lA,.bfe.cst .lB,.bfe.guard .lA,.bfe.guard .lB,.bfe.dead .lA,.bfe.dead .lB{display:none}.bfe.atk .pa1{display:inline;animation:pfa var(--pd,320ms) steps(1) forwards}.bfe.atk .pa2{display:inline;opacity:0;animation:pfb var(--pd,320ms) steps(1) forwards}@keyframes pfa{0%{opacity:1}42%{opacity:0}100%{opacity:0}}@keyframes pfb{0%{opacity:0}42%{opacity:1}100%{opacity:1}}.bfe.cst .pc{display:inline}.bfe.guard:not(.atk):not(.cst):not(.dead) .pg{display:inline}.bfe.dead .pd{display:inline}.bfe.dead.atk .pa1,.bfe.dead.atk .pa2,.bfe.dead .pg,.bfe.dead .pc{display:none}.fx-dust{fill:#cbb88a;opacity:.6}.fx-blood{fill:#8a1a14}.bfe .gsh{display:none}.bfe.guard .gsh{display:inline}.bfe.dead .hpb,.bfe.dead .hpbg{display:none}.bfe.dead .bfr{opacity:.3}
 .bfe.gone{display:none}.bfe.sel .bfr{stroke:#fff;stroke-width:.18}
 .bfe.walk .lA{animation:legA .36s steps(1) infinite}.bfe.walk .lB{animation:legB .36s steps(1) infinite}
 .bflab{font:600 3px var(--f-mono);fill:#fff;text-anchor:middle;paint-order:stroke;stroke:#000;stroke-width:.6}
@@ -136,8 +136,8 @@ button.tag:hover{background:#f3ead3}
 .fx-thrust{stroke:#f4ead2;stroke-width:.22;stroke-linecap:round}
 .fx-swing{fill:none;stroke:#fff6dc;stroke-width:.28;stroke-linecap:round}.fx-swing.big{stroke-width:.42;stroke:#ffe7a8}
 .fx-stab{fill:#fff6dc}.fx-claw{stroke:#ff7a5c;stroke-width:.14;stroke-linecap:round}
-.fx-bolt{fill:#c9b6ff;filter:drop-shadow(0 0 1.2px #8e6cff)}
-.fx-arcarrow{stroke:#9fe3ff;stroke-width:.28;stroke-linecap:round;filter:drop-shadow(0 0 1px #5fc4ff)}
+.fx-bolt{fill:#c9b6ff;stroke:#8e6cff;stroke-width:.3}
+.fx-arcarrow{stroke:#9fe3ff;stroke-width:.28;stroke-linecap:round}
 .fx-burst{fill:none;stroke:#9fe3ff;stroke-width:.28;transform-box:fill-box;transform-origin:center}.fx-burst.bolt{stroke:#c9b6ff;stroke-width:.4}
 .fx-slash{fill:none;stroke:#9fe3ff;stroke-width:.3;stroke-linecap:round;stroke-dasharray:5}
 .fx-wave{fill:none;stroke:#bfe9ff;stroke-width:.35;transform-box:fill-box;transform-origin:center}
@@ -2732,10 +2732,10 @@ function bfMoves(P,ev,dur){
     else bfAnim(P,ev.a,[{transform:'none'},{transform:'translate('+(f*7)+'px,-1px) rotate('+(f*14)+'deg)',offset:.4},{transform:'none'}],260);
   }
   else if(ev.k==='r')bfAnim(P,ev.a,[{transform:'none'},{transform:'translate('+(-f*2)+'px,0)',offset:.3},{transform:'none'}],200);
-  else if(ev.k==='b'||ev.k==='sh')bfAnim(P,ev.a,[{filter:'drop-shadow(0 0 4px #9fd8ff) brightness(1.6)'},{filter:'none'}],420);
+  else if(ev.k==='b'||ev.k==='sh')bfAnim(P,ev.a,[{opacity:.55},{opacity:1}],420);
   if(ev.k==='sh')return;
   if(ev.lab==='dodged')bfAnim(P,ev.t,[{transform:'none'},{transform:'translate(0,-5px)',offset:.4},{transform:'none'}],240,hd);
-  else if(ev.d>0)bfAnim(P,ev.t,[{transform:'none',filter:'brightness(2.6) saturate(0)'},{transform:'translate('+(dir*ts*(X==='battle_axe'||X==='p_push'?7:4))+'px,0)',filter:'none',offset:.5},{transform:'none',filter:'none'}],230,hd);
+  else if(ev.d>0)bfAnim(P,ev.t,[{transform:'none',opacity:.35},{transform:'translate('+(dir*ts*(X==='battle_axe'||X==='p_push'?7:4))+'px,0)',opacity:1,offset:.5},{transform:'none',opacity:1}],230,hd);
   else if(ev.d===0)bfAnim(P,ev.t,[{transform:'none'},{transform:'translate('+(dir*ts*2)+'px,0)',offset:.5},{transform:'none'}],180,hd);
 }
 /* effects drawn on the field itself, in yards */
