@@ -8,8 +8,8 @@ PALS.s.yd=PALS.s.m/.9144;PALS.l.yd=PALS.l.m/.9144;
 var PAL_M=560,PAL_TIM=300,PANEL_M=PAL_M/PAL_TIM,PAL_LAB_M=100,COVER=.25,GATE_SEE=40;
 var GATE={n:'Gate',cost:150,tim:4,mats:{gravel:1},lab:1},TOWER={n:'Watchtower',cost:150,tim:20,mats:{gravel:1},lab:1,cap:4,m:4.57},MBR={n:'Medium footbridge',cost:250,mats:{lumber:3,gravel:2},lab:2};
 /* smart enemies go for a gate they can see, or scout along the wall for one; dumb ones hit the nearest panel */
-var INTEL={goblin:'smart',brigand:'smart'};
-var WALLX={goblin:.1,brigand:.15,pigger:.3};/* share of a blow that bites into a palisade: claws and spears do little to logs */
+var INTEL={goblin:'smart',brigand:'smart',dogman:'smart'};
+var WALLX={goblin:.1,brigand:.15,pigger:.3,dogman:.3};/* share of a blow that bites into a palisade: claws and spears do little to logs */
 var CORE={hamlet:{ha:2.5,lh:8},village:{ha:7.5,lh:24}},LH_M=[22,7];
 var CD={
   human:{n:'Human',k:'human'},
@@ -20,7 +20,7 @@ var CD={
   red_crystal:{n:'Red crystal',k:'crystal'},orange_crystal:{n:'Orange crystal',k:'crystal'},gnosis:{n:'Gnosis',k:'gnosis'},
   rod_wood:{n:'Pine rod',k:'weapon'},rod_cu:{n:'Copper rod · pine core',k:'weapon'},
   ring_swift:{n:'Copper ring of swiftness',k:'ring'},ring_endur:{n:'Copper ring of endurance',k:'ring'},ring_str:{n:'Copper ring of strength',k:'ring'},
-  p_jab:{n:'Parchment: Arcane Jab',k:'parch'},p_shield:{n:'Parchment: Mystic Shield',k:'parch'},p_slash:{n:'Parchment: Arcane Slash',k:'parch'},p_bolt:{n:'Parchment: Arcane Bolt',k:'parch'},p_push:{n:'Parchment: Gnostic Push',k:'parch'},p_arrow:{n:'Parchment: Arcane Arrow',k:'parch'},p_pull:{n:'Parchment: Gnostic Pull',k:'parch'},
+  p_bark:{n:'Parchment: Arcane Bark',k:'parch'},p_jab:{n:'Parchment: Arcane Jab',k:'parch'},p_shield:{n:'Parchment: Mystic Shield',k:'parch'},p_slash:{n:'Parchment: Arcane Slash',k:'parch'},p_bolt:{n:'Parchment: Arcane Bolt',k:'parch'},p_push:{n:'Parchment: Gnostic Push',k:'parch'},p_arrow:{n:'Parchment: Arcane Arrow',k:'parch'},p_pull:{n:'Parchment: Gnostic Pull',k:'parch'},
   setcard:{n:'Settlement card',k:'setcard'},
   altar:{n:'Flint altar',k:'altar'},tat_spiral:{n:'Spiral tattoo',k:'tattoo'},tat_antler:{n:'Antler tattoo',k:'tattoo'},tat_serpent:{n:'Serpent tattoo',k:'tattoo'},tat_eye:{n:'Eye tattoo',k:'tattoo'},tat_hand:{n:'Hand tattoo',k:'tattoo'},rabbit:{n:'Rabbit',k:'animal'},stag:{n:'Stag',k:'animal'},boar:{n:'Boar',k:'animal'},wolf:{n:'Wolf',k:'animal'},hawk:{n:'Hawk',k:'animal'}
 };
@@ -35,7 +35,7 @@ var MADE={rod_wood:['Pine wood'],rod_cu:['Copper','Pine wood'],ring_swift:['Copp
 function madeOf(k){var t=wkey(k);if((WEAP[t]||HEADED[t])&&!MADE[t]){var m=wmat(k);return (m.hd?HEADS[m.hd].m+' · ':'')+WOODS[m.wd].m}if(/^leather_/.test(k))return 'Cow leather';if(/^oak_/.test(k))return 'Oak wood';return MADE[k]?MADE[k].join(' · '):''}
 var MAGIC_SCHOOL='Generic magic';
 var SPELL_CD={p_jab:1,p_slash:2,p_push:2,p_arrow:2,p_shield:3,p_bolt:3,p_pull:3};
-var SPELL={p_push:{n:'Gnostic Push',t:'1 mana · −15 hp · shoves the target 10 yd back · 30 yd range'},p_arrow:{n:'Arcane Arrow',t:'1 mana · −25 hp · 150 yd range'},p_pull:{n:'Gnostic Pull',t:'2 mana · drags one enemy out of his formation to the caster · 40 yd range'},p_jab:{n:'Arcane Jab',t:'1 mana · −20 hp'},p_shield:{n:'Mystic Shield',t:'1 mana · blocks 25 damage once'},p_slash:{n:'Arcane Slash',t:'1 mana · −10 hp · far range'},p_bolt:{n:'Arcane Bolt',t:'2 mana · −75 hp'}};
+var SPELL={p_bark:{n:'Arcane Bark',t:'its rite is not yet understood: no one can learn it yet',later:1},p_push:{n:'Gnostic Push',t:'1 mana · −15 hp · shoves the target 10 yd back · 30 yd range'},p_arrow:{n:'Arcane Arrow',t:'1 mana · −25 hp · 150 yd range'},p_pull:{n:'Gnostic Pull',t:'2 mana · drags one enemy out of his formation to the caster · 40 yd range'},p_jab:{n:'Arcane Jab',t:'1 mana · −20 hp'},p_shield:{n:'Mystic Shield',t:'1 mana · blocks 25 damage once'},p_slash:{n:'Arcane Slash',t:'1 mana · −10 hp · far range'},p_bolt:{n:'Arcane Bolt',t:'2 mana · −75 hp'}};
 var KIND={ring:'Ring',greaves:'Greaves',tattoo:'Tattoo',animal:'Animal',altar:'Altar',human:'Human',weapon:'Weapon',ammo:'Ammo',armor:'Armor',helmet:'Helmet',shield:'Shield',mat:'Material',crystal:'Crystal',gnosis:'Gnosis',parch:'Parchment',terrain:'Terrain',setcard:'Settlement'};
 var WEAP={
   knife:{dmg:15,apm:60,reach:1,rng:false,wt:.5},

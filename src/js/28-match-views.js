@@ -2,6 +2,7 @@
 function terrName(c,r){var s=setAt(c,r),t=terrAt(c,r);return s?SETT[s.type].n:t?TERR[t].n:'Open ground'}
 function mobDesc(m){
   if(m.type==='goblin')return m.mobs.length+' goblins, 50 hp each';
+  if(m.type==='dogman')return 'a dog man, '+(m.mobs[0]?Math.round(m.mobs[0].hp):600)+' hp';
   if(m.type==='pigger')return 'a pigger, '+(m.mobs[0]?Math.round(m.mobs[0].hp):300)+' hp';
   if(m.type==='tiggle'){var nb=m.mobs.filter(function(b){return b.w==='bow'}).length;return m.mobs.length+' tiggles ('+nb+' little bows, '+(m.mobs.length-nb)+' daggers)'}
   var w={};m.mobs.forEach(function(b){w[b.w]=(w[b.w]||0)+1});

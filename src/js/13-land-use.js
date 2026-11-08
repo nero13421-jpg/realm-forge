@@ -77,6 +77,7 @@ function toggleEquip(id){
   if(k==='weapon'&&nw===0){var stt=setById(h.at),cap=stt?SETT[stt.type].def:null;if(cap&&!unitOf(h.id)&&soldiersAt(h.at)>=cap){say('This '+SETT[stt.type].n.toLowerCase()+' holds '+cap+' soldiers at most.',true);return render()}}
   if(k==='parch'){
     h.spells=h.spells||[];
+    if(SPELL[it.key].later){say('No one can read the '+SPELL[it.key].n+' parchment yet. Keep it: its rite will be understood in time.',true);return render()}
     if(h.spells.indexOf(it.key)>=0){say(hname(h)+' already knows '+SPELL[it.key].n+'.',true);return render()}
     if(!(h.gnosis>0)){say(hname(h)+' has no gnosis. Learning a spell costs 1 gnosis. Use a gnosis card on him first.',true);return render()}
     if(S.prestige<1){say('Using a parchment costs 1 prestige.',true);return render()}

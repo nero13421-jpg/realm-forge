@@ -97,6 +97,7 @@ function tutEncCamps(g,n){
     cand.sort(function(a,b){return Math.abs(dist[a]-want)-Math.abs(dist[b]-want)||dist[a]-dist[b]});var best=cand.length?cand[0]:s0;used[best]=1;nb(best).forEach(function(m){used[m]=1});
     var key='tut'+n+'_'+ci,o={key:key,type:C.type,hexes:[best],lair:best,reward:100,mobs:[],roam:false,pos:null,path:[],rem:0,wait:0};
     if(C.type==='pigger'){o.hexes=[];o.razed=true;o.spawnAt=5;o.mobs=[{k:'pigger',hp:300,w:'spear'}];g.grid[best]='woodland'}
+    else if(C.type==='dogman'){o.hexes=[];o.razed=true;o.spawnAt=8;o.reward=200;o.mobs=[{k:'dogman',hp:600}];g.grid[best]='forest';nb(best).forEach(function(m){if(!g.mine[m]&&g.grid[m]!=='pond')g.grid[m]='forest'})}
     else if(C.type==='tiggle'){/* a swamp of their own, a little way off, joined up so it is one territory */
       var blob=[best],bs={};bs[best]=1;while(blob.length<8){var f=[];blob.forEach(function(k2){nb(k2).forEach(function(m){if(!g.mine[m]&&!bs[m]&&dist[m]>=2)f.push(m)})});if(!f.length)break;var m2=f[Math.floor(Math.random()*f.length)];bs[m2]=1;blob.push(m2)}
       blob.forEach(function(k2){g.grid[k2]='swamp';if(g.hgt[k2])g.hgt[k2]={s:'flat',b:g.hgt[k2].b}});o.hexes=blob.slice();o.terr=blob.slice();o.roam=true;o.pos=[best%W,Math.floor(best/W)];
@@ -140,8 +141,8 @@ function endMatch(out){
   if(S.tut&&M.tutEnc){var TR=TUT_ENC[M.tutEnc].reward;if(out==='won'&&TR&&!S.tut.won[M.tutEnc]){Object.keys(TR).forEach(function(k){for(var q=0;q<TR[k];q++)loot.push(k)});UI.mres.summary+=' Their stockpile is yours: '+matsText(TR)+'.'}if(out==='won')S.tut.won[M.tutEnc]=1;else{S.tut.tries[M.tutEnc]=(S.tut.tries[M.tutEnc]||0)+1}}
   var b=M.base;COLS=9;ROWS=7;Object.keys(b).forEach(function(k){S[k]=b[k]});S.prestige+=M.earned;loot.forEach(function(k){mk(k)});var LP=out==='won'?{p:M.earned,lc:(function(){var c={};loot.forEach(function(k){c[k]=(c[k]||0)+1});return c})(),camps:cleared,mobs:M.mobs0-left,t:mmss(M.clock)}:null;delete S.match;syncDims();initUI();UI.lootPop=LP;UI.manim=null;UI.tab='match';UI.confirm=false;UI.tile=null;UI.fresh=[];UI.place=null;UI.res=null;UI.mview='mine';say('');save();render();
 }
-var MOBL={goblin:'G',brigand:'B',pigger:'P',tiggle:'T'};
-var LOOT={pigger:[['lumber',3,3],['gravel',3,3],['stimber',1,1],['ltimber',1,1]],tiggle:[['knife',1,2],['short_arrows',1,2],['shortbow',1,1],['red_crystal',1,1],['gnosis',1,1],['p_jab',1,1],['p_slash',1,1],['hide_armor',1,1],['leather_shield',1,1],['tat_serpent',1,1],['lumber',2,1],['gravel',2,1]],goblin:[['gravel',3,3],['lumber',3,3],['knife',1,2],['club',1,1],['short_arrows',1,1]],brigand:[['lumber',3,2],['gravel',3,2],['spear',1,2],['club',1,1],['short_arrows',1,2],['hide_armor',1,1],['hide_shield',1,1]]};
+var MOBL={goblin:'G',brigand:'B',pigger:'P',tiggle:'T',dogman:'D'};
+var LOOT={dogman:[['p_bark',1,1]],pigger:[['lumber',3,3],['gravel',3,3],['stimber',1,1],['ltimber',1,1]],tiggle:[['knife',1,2],['short_arrows',1,2],['shortbow',1,1],['red_crystal',1,1],['gnosis',1,1],['p_jab',1,1],['p_slash',1,1],['hide_armor',1,1],['leather_shield',1,1],['tat_serpent',1,1],['lumber',2,1],['gravel',2,1]],goblin:[['gravel',3,3],['lumber',3,3],['knife',1,2],['club',1,1],['short_arrows',1,1]],brigand:[['lumber',3,2],['gravel',3,2],['spear',1,2],['club',1,1],['short_arrows',1,2],['hide_armor',1,1],['hide_shield',1,1]]};
 var RAZE_S=30,MOB_SIGHT=3;
 /* killing a camp's mobs: its reward and one bundle of loot. Burning the camp: its reward again and two bundles */
 function giveLoot(m,big){var M=S.match,L=LOOT[m.type],ks=[],i,j;for(i=0;i<(big?2:1);i++){var t=0;L.forEach(function(x){t+=x[2]});var r=Math.random()*t,e=L[0];for(j=0;j<L.length;j++){if(r<L[j][2]){e=L[j];break}r-=L[j][2]}for(j=0;j<e[1];j++)ks.push(e[0])}M.loot=(M.loot||[]).concat(ks);var c={};ks.forEach(function(k){c[k]=(c[k]||0)+1});return matsText(c)}
@@ -162,6 +163,7 @@ function newMobs(type){
   return o;
 }
 function mkFoe(b,i,x){
+  if(b.k==='dogman')return{side:'e',kind:'dogman',dodge:.15,hp:b.hp,x:x,spd:DOG_SP,dmg:32,apm:55,reach:2.2,rng:false,skill:35,armor:false,shield:false,cd:0,alive:true,id:i,ref:b};
   if(b.k==='pigger')return{side:'e',kind:'pigger',dodge:.05,hp:b.hp,x:x,spd:GOB_SP,dmg:25,apm:50,reach:2,rng:false,skill:25,armor:false,shield:false,cd:0,alive:true,id:i,ref:b};
   if(b.k==='tiggle')return b.w==='bow'?{side:'e',kind:'tiggle',dodge:.15,hp:b.hp,x:x,spd:3.6,dmg:8,apm:30,reach:12,rng:true,skill:15,armor:false,shield:false,cd:0,alive:true,id:i,ref:b}:{side:'e',kind:'tiggle',dodge:.15,hp:b.hp,x:x,spd:3.6,dmg:8,apm:60,reach:1,rng:false,skill:15,armor:false,shield:false,cd:0,alive:true,id:i,ref:b};
   if(b.k==='goblin')return{side:'e',kind:'goblin',dodge:.1,hp:b.hp,x:x,spd:GOB_SP,dmg:15,apm:60,reach:1,rng:false,skill:20,armor:false,shield:false,cd:0,alive:true,id:i,ref:b};
@@ -288,7 +290,7 @@ function step(m){
     m.path=best;m.rem=HEX_YD;
     var sw0=streamWait(ck,ix(best[0][0],best[0][1]));if(sw0){m.wait=sw0;return}
   }
-  var nx=m.path[0],mw=walkPos(m),mc=center(nx[0],nx[1]),spd=gradeSpeed((m.type==='goblin'||m.type==='pigger'?GOB_SP:PACE.jog)*hexSpeed(ix(nx[0],nx[1])),gradeAt(mw[0],mw[1],mc[0]-mw[0],mc[1]-mw[1]));
+  var nx=m.path[0],mw=walkPos(m),mc=center(nx[0],nx[1]),spd=gradeSpeed((m.type==='goblin'||m.type==='pigger'?GOB_SP:m.type==='dogman'?DOG_SP:PACE.jog)*hexSpeed(ix(nx[0],nx[1])),gradeAt(mw[0],mw[1],mc[0]-mw[0],mc[1]-mw[1]));
   m.rem-=spd;
   if(m.thru!==ix(nx[0],nx[1])&&hasWalls()){var WH=wallCross(mw,walkPos(m));if(WH){m.rem+=spd;return wallMeet(m,WH)}}
   if(m.rem<=0){m.thru=null;m.pos=m.path.shift();m.rem=HEX_YD;if(m.path.length)m.wait=streamWait(ix(m.pos[0],m.pos[1]),ix(m.path[0][0],m.path[0][1]))}
@@ -312,7 +314,7 @@ function advance(dt){
     if(M.clock%60===0)S.cards.forEach(function(c){if(c.dmg>0)c.dmg=Math.max(0,c.dmg-statBase('heal')/60)});
     M.camps.forEach(function(m){
       if(M.over||!m.mobs.length)return;
-      if(m.type==='pigger'&&!m.roam){if(M.clock>=m.spawnAt){m.roam=true;m.pos=lairPos(m);m.path=[];m.rem=HEX_YD;mlog('A pigger crashes out of the woods at '+lab(m.pos[0],m.pos[1])+'.','bad');UI.needRender=true}return}
+      if((m.type==='pigger'||m.type==='dogman')&&!m.roam){if(M.clock>=m.spawnAt){m.roam=true;m.pos=lairPos(m);m.path=[];m.rem=HEX_YD;mlog(m.type==='dogman'?'Something big comes out of the deep woods at '+lab(m.pos[0],m.pos[1])+' on all fours: a dog man.':'A pigger crashes out of the woods at '+lab(m.pos[0],m.pos[1])+'.','bad');UI.needRender=true}return}
       if(m.type==='tiggle'){if(!m.inBattle)stepTiggle(m);return}
       if(!m.roam){
         if(M.clock>=raidAt()){m.roam=true;m.pos=lairPos(m);m.path=[];m.rem=HEX_YD;mlog('The '+mobWord(m,1)+' of '+lab(m.pos[0],m.pos[1])+' leave their camp and start exploring.','bad');UI.needRender=true}

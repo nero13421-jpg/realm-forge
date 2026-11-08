@@ -5,13 +5,13 @@ function weapPick(eq){eq=(eq||[]).map(wkey);var ws=MELEE.concat(BOWS).filter(fun
    Each figure is built from parts on a 64-pixel grid, then shaded (light from the upper left, three tones), given dark
    lines where parts meet and a warm dark-brown outline. Every person has a look of his own (skin, hair, beard, dyes,
    beads, tattoos) and seven frames: two walk frames, two attack frames, a casting pose, a guard pose and a fallen body. */
-var A64={},A64N=64,A64OUT=[43,20,16];
+var A64={},A64N=64,DOG_N=84,A64OUT=[43,20,16];
 var A64PAL={skin:'#eeb48e',skinB:'#c98f6c',hair:'#6b4426',beard:'#6b4426',brow:'#4a2a1a',eyew:'#f4ecdc',pupil:'#2a1610',tunic:'#8a5a3c',btunic:'#5e5040',robe:'#e8dcc4',fur:'#f4ecdc',belt:'#5a3424',accent:'#e0782c',accent2:'#3aa0c8',scarf:'#c8382c',
   leg:'#d49a74',legB:'#a8765a',wrap:'#7a4a30',boot:'#7a4e34',bootB:'#5e3a26',armB:'#9a6448',wood:'#a06a3c',stone:'#b8bcc2',cord:'#d8c8a8',string:'#f0e6cc',quiver:'#6a4026',fletch:'#f0e6cc',
   vest:'#5e3a22',lace:'#e8d4a8',helm:'#7a5634',shield:'#a8804a',shieldR:'#5e3a22',hood:'#4e4a3c',mask:'#3a362e',cloak:'#3e4232',gskin:'#93bf52',gskinB:'#6f9a3a',giris:'#f0c030',mouth:'#5a1a10',tooth:'#fff8e0',rag:'#7a6a44',antler:'#c89a64',
   pskin:'#d8968a',pskinB:'#b07464',snout:'#eab0a2',nostril:'#5a2a22',tusk:'#f4ecd8',bristle:'#6a4234',fskin:'#7a9a46',fskinB:'#5a7a34',fbelly:'#d8d090',fspot:'#4a6428',web:'#9ab85a',
-  tat:'#2c5a6e',glow:'#bfeaff',glow2:'#6fc8ff',blood:'#7a1a14',arrow:'#c8b088'};
-var A64DET={eyew:1,pupil:1,brow:1,lace:1,tooth:1,mouth:1,giris:1,tat:1,glow:1,glow2:1,nostril:1,tusk:1,fspot:1};
+  tat:'#2c5a6e',glow:'#bfeaff',glow2:'#6fc8ff',blood:'#7a1a14',arrow:'#c8b088',dfur:'#6e6258',dfurB:'#4e443c',dmane:'#3a322c',dbelly:'#867a6c',claw:'#ece4cc',deye:'#f2c030',dnose:'#1a1410',dmouth:'#7a2020'};
+var A64DET={deye:1,dnose:1,dmouth:1,claw:1,eyew:1,pupil:1,brow:1,lace:1,tooth:1,mouth:1,giris:1,tat:1,glow:1,glow2:1,nostril:1,tusk:1,fspot:1};
 var LK_FROG=[['#7a9a46','#5a7a34','#4a6428'],['#6a8a3e','#4e6a2c','#3a5220'],['#8a9a4e','#6a7a36','#5a6a28'],['#5e8a52','#44683a','#34542c'],['#9aa058','#78803e','#5e6630']],LK_PIG=[['#d8968a','#b07464'],['#c48678','#9c6454'],['#b8806a','#8e5e4a'],['#e0a898','#b8806e'],['#a87a62','#80583e']];
 var LK_SKIN=['#f4c8a4','#eeb48e','#e0a47e','#c98a62','#a8704c','#82543a'],LK_HAIR=['#2a1a10','#3e2616','#5a3820','#7a4c2a','#a06a36','#c9a26c','#8e3a1e','#8a8680'],
     LK_DYE=['#8a5a3c','#7a6a44','#6e4a3a','#9a7448','#5e5a48','#8a4a34','#6a5a50','#7e5a2e'],LK_BEAD=[['#c8382c','#3aa0c8'],['#e0782c','#2e8a6a'],['#d8b040','#a03a5a'],['#3aa0c8','#e0782c'],['#e8e0d0','#c8382c'],['#7a3a8a','#d8b040']],
@@ -28,6 +28,7 @@ function a64parts(who,eq,pose,L){var P=[],add=function(id,fn){P.push([id,fn])};a
       arc=function(x,y,r,a0,a1,w){return function(g){g.lineWidth=w;g.beginPath();g.arc(x,y,r,a0,a1);g.stroke()}},
       qd=function(pts,w){return function(g){g.lineWidth=w;g.lineCap='round';g.beginPath();g.moveTo(pts[0][0],pts[0][1]);g.quadraticCurveTo(pts[1][0],pts[1][1],pts[2][0],pts[2][1]);g.stroke()}};
   if(who==='frog')return frogParts(eq,pose,L,add,poly,el,rc,ln,arc);
+  if(who==='dog')return dogParts(pose==='guard'||pose==='cast'?'a1':pose,add,poly,el,rc,ln);
   var pig=who==='pig',PMB=[1.16,.58,-4.8,25.6],PMH=[1.62,1.6,-18.6,11.3],PM=PMB;/* the pigger is drawn chibi: a squat body under a huge head */
   if(pig){var add0=add;add=function(id,fn){var m=PM;add0(id,function(g){g.save();g.transform(m[0],0,0,m[1],m[2],m[3]);fn(g);g.restore()})}}
   var gob=who==='gob',fem=who==='woman',brig=who==='brig',W=weapPick(eq),wp=W.p,ws=W.s,bow=wp==='shortbow'||wp==='longbow',ammo=has('short_arrows')||has('long_arrows')||(brig&&bow),grv=eq.indexOf('leather_greaves')>=0,oakSh=eq.indexOf('oak_shield')>=0,oakH=eq.indexOf('oak_helmet')>=0,lthH=eq.indexOf('leather_helmet')>=0;
@@ -131,7 +132,7 @@ function frogParts(eq,pose,L,add,poly,el,rc,ln,arc){/* a tiggle: knee-high frog-
     add('wood',rc(h[0]-.5,h[1]-.7,1.6,1.4));if(pose==='a1')stone([[h[0]-.6,h[1]-1],[h[0]+.4,h[1]-5.6],[h[0]+1.2,h[1]-1]]);else stone([[h[0]+1.1,h[1]-1.1],[h[0]+5,h[1]],[h[0]+1.1,h[1]+.7]])}
   return P_FROG(add)}
 function P_FROG(add){return add.P}
-function a64draw(who,eq,pose,L){var N=A64N,c=document.createElement('canvas');c.width=c.height=N;var g=c.getContext('2d');if(!g)return null;var map=new Array(N*N).fill(null),pal={};for(var k in A64PAL)pal[k]=A64PAL[k];
+function a64draw(who,eq,pose,L){var N=who==='dog'?DOG_N:A64N,c=document.createElement('canvas');c.width=c.height=N;var g=c.getContext('2d');if(!g)return null;var map=new Array(N*N).fill(null),pal={};for(var k in A64PAL)pal[k]=A64PAL[k];
   pal.skin=L.sk;pal.hair=pal.beard=L.hr;pal.tunic=L.dye;pal.accent=L.bead[0];pal.accent2=L.bead[1];pal.hood=L.hood;pal.robe=L.robe;if(who==='gob'){pal.gskin=L.gob[0];pal.gskinB=L.gob[1]}if(who==='frog'){pal.fskin=L.frog[0];pal.fskinB=L.frog[1];pal.fspot=L.frog[2]}if(who==='pig'){pal.pskin=L.pig[0];pal.pskinB=L.pig[1]}
   var sh=function(h,m){var v=[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)].map(function(x){return Math.round(x*m)});return '#'+v.map(function(x){return ('0'+Math.max(0,Math.min(255,x)).toString(16)).slice(-2)}).join('')};
   var W0=weapPick(eq),pk0=eq.filter(function(x){return wkey(x)===W0.p})[0],m0=pk0?wmat(pk0):null;if((m0&&m0.hd==='cu')||W0.p==='rod_cu')pal.stone='#c27a40';if(m0&&m0.wd==='pine')pal.wood='#c89858';
@@ -147,7 +148,7 @@ function a64draw(who,eq,pose,L){var N=A64N,c=document.createElement('canvas');c.
   var img=g.createImageData(N,N),D=img.data,glowy=pose==='cast';
   for(y=0;y<N;y++)for(x=0;x<N;x++){var q=y*N+x,col=o[q];if(!col&&D4.some(function(z){var X=x+z[0],Y=y+z[1];return X>=0&&Y>=0&&X<N&&Y<N&&out[Y*N+X]}))col=(glowy&&D4.some(function(z){var X=x+z[0],Y=y+z[1];return X>=0&&Y>=0&&X<N&&Y<N&&(map[Y*N+X]==='glow2'||map[Y*N+X]==='glow')}))?[120,200,255]:A64OUT;if(!col)continue;D[q*4]=col[0];D[q*4+1]=col[1];D[q*4+2]=col[2];D[q*4+3]=255}
   g.putImageData(img,0,0);return c}
-function a64dead(src){/* the fallen body: the standing figure laid on its back, with a dark pool under it */var N=A64N,c=document.createElement('canvas');c.width=c.height=N;var g=c.getContext('2d');g.imageSmoothingEnabled=false;
+function a64dead(src){/* the fallen body: the standing figure laid on its back, with a dark pool under it */var N=src.width,c=document.createElement('canvas');c.width=c.height=N;var g=c.getContext('2d');g.imageSmoothingEnabled=false;
   g.fillStyle='#5a1410';g.beginPath();g.ellipse(30,61,14,2.4,0,0,7);g.fill();g.fillStyle='#7a1a14';g.fillRect(22,60,10,2);g.fillRect(36,61,6,1);
   g.save();g.translate(32,32);g.rotate(-Math.PI/2);g.translate(-32,-32);g.drawImage(src,-20,0);g.restore();
   var d=g.getImageData(0,0,N,N),D=d.data;for(var i=0;i<D.length;i+=4){if(!D[i+3])continue;D[i+3]=255}g.putImageData(d,0,0);return c}
@@ -155,8 +156,8 @@ var A64POSES=['w0','w1','a1','a2','cast','guard'];
 function a64set(who,eq,seed,tt){eq=(eq||[]).slice().sort();var key=who+'|'+eq.join(',')+'|'+(seed|0)+'|'+(tt|0);if(A64[key])return A64[key];var L=lookOf(who,seed,tt),o={};
   A64POSES.forEach(function(p){var cv=a64draw(who,eq,p,L);try{o[p]=cv?cv.toDataURL('image/png'):''}catch(e){o[p]=''}if(p==='w0'&&cv){try{o.dead=a64dead(cv).toDataURL('image/png')}catch(e){o.dead=''}}});
   A64[key]=o;return o}
-function a64img(u,cl){return u?'<image class="'+cl+'" href="'+u+'" x="0" y="0" width="16" height="16" preserveAspectRatio="none" style="image-rendering:pixelated"/>':''}
-function a64fig(who,eq,seed,tt){var o=a64set(who,eq,seed,tt);return '<g class="lA">'+a64img(o.w0,'pw')+'</g><g class="lB">'+a64img(o.w1,'pw')+'</g>'+a64img(o.a1,'pa1')+a64img(o.a2,'pa2')+a64img(o.cast,'pc')+a64img(o.guard,'pg')+a64img(o.dead,'pd')}
+function a64img(u,cl,sz){sz=sz||16;var o=(16-sz)/2;return u?'<image class="'+cl+'" href="'+u+'" x="'+o+'" y="'+(16-sz)+'" width="'+sz+'" height="'+sz+'" preserveAspectRatio="none" style="image-rendering:pixelated"/>':''}
+function a64fig(who,eq,seed,tt){var o=a64set(who,eq,seed,tt),z=who==='dog'?16*DOG_N/A64N:16;return '<g class="lA">'+a64img(o.w0,'pw',z)+'</g><g class="lB">'+a64img(o.w1,'pw',z)+'</g>'+a64img(o.a1,'pa1',z)+a64img(o.a2,'pa2',z)+a64img(o.cast,'pc',z)+a64img(o.guard,'pg',z)+a64img(o.dead,'pd',z)}
 function hSeed(h){return h&&(h.id!=null?h.id:h.c&&h.c.id)||0}
 function hTat(h){if(!h)return 0;if(h.tt!=null)return h.tt;return (h.tat||[]).filter(function(t){return t&&(t.v||t.k)}).length}
 function humanInner(eq,f,h){return a64fig(f?'woman':'man',f?[]:(eq||[]),hSeed(h),f?0:hTat(h))}
@@ -165,5 +166,47 @@ function goblinInner(b){return a64fig('gob',['club'],mobSeed(b),0)}
 function brigandInner(b){b=b||{w:'club'};var eq=[b.w==='bow'?'shortbow':b.w];if(b.armor)eq.push('hide_armor');if(b.shield)eq.push('hide_shield');return a64fig('brig',eq,mobSeed(b),0)}
 function piggerInner(b){return a64fig('pig',['spear'],mobSeed(b),0)}
 function tiggleInner(b){b=b||{};return a64fig('frog',[b.w==='bow'?'shortbow':'knife'],mobSeed(b),0)}
-function mobInner(kind,b){return kind==='goblin'?goblinInner(b):kind==='pigger'?piggerInner(b):kind==='tiggle'?tiggleInner(b):brigandInner(b)}
+/* the dog man: a towering wolf-headed beast, drawn on a bigger 84px frame. He runs on all fours (walk poses) and rears up to fight (attack poses) */
+function dogParts(pose,add,poly,el,rc,ln){
+  var P0=add.P,run=pose==='w0'||pose==='w1',alt=pose==='w1',a2=pose==='a2';
+  var M=[1.2,1.27,1,4.5],add0=add;
+  add=function(id,fn){var m=M;add0(id,function(g){g.save();g.transform(m[0],0,0,m[1],m[2],m[3]);fn(g);g.restore()})};
+  var claws=function(x,y,dx,dy){for(var i=-1;i<=1;i++)add('claw',ln([[x+i*1.2,y+i*.6],[x+dx+i*1.4,y+dy+i*.8]],1))};
+  if(run){
+    /* on all fours, long and low, head out front */
+    var f=alt?1:-1;
+    add('dfurB',ln([[22,44],[16+f*3,52],[13+f*2,61]],3.6));claws(13+f*2,61,-2,0);       /* far hind leg */
+    add('dfurB',ln([[42,44],[46-f*3,53],[48-f*4,61]],3.2));claws(48-f*4,61,2,0);        /* far fore leg */
+    add('dfur',poly([[14,36],[24,31],[40,30],[47,33],[46,44],[36,47],[22,47],[14,43]]));   /* body */
+    add('dbelly',poly([[24,45],[38,45],[34,48],[26,48]]));
+    add('dmane',poly([[34,28],[44,26],[50,30],[48,38],[40,36]]));                          /* shoulder mane */
+    add('dfur',ln([[14,38],[7,34],[3,30]],2.8));                                              /* tail */
+    add('dfur',ln([[20,44],[22-f*4,53],[20-f*5,61]],3.8));claws(20-f*5,61,-2,0);         /* near hind */
+    add('dfur',ln([[44,42],[40+f*4,52],[42+f*5,61]],3.4));claws(42+f*5,61,2,0);          /* near fore */
+    
+    add('dfur',el(52,31,5.2,4.6));add('dfur',poly([[54,28],[62,31],[62,34],[54,35]]));     /* skull, snout */
+    add('dmouth',poly([[56,34],[62,34],[60,36],[55,36]]));add('claw',rc(58,34,1,1));add('claw',rc(60,34,1,1));
+    add('dnose',rc(61,31,1.6,1.4));add('deye',rc(54,29.4,1.4,1.2));
+    add('dfurB',poly([[48,27],[49,20],[52,26]]));add('dfur',poly([[50,27],[52.6,20],[54,27]])); /* ears laid back */
+  }else{
+    /* up on two legs: hunched, digitigrade, arms down to the knees */
+    var sw=pose==='a1'?0:a2?1:.4;
+    add('dfurB',ln([[28,40],[24,50],[29,56],[26,62]],3.6));claws(26,62,-2,0);              /* far leg */
+    var fa=a2?[[36,20],[30,30],[24,36]]:[[36,20],[32,28],[30,36]];add('dfurB',ln(fa,3.2));claws(fa[2][0],fa[2][1],-1,3); /* far arm */
+    add('dfur',ln([[26,38],[17,43],[12,40]],2.8));                                             /* tail */
+    add('dfur',poly([[25,16],[39,15],[41,22],[37,40],[27,41],[24,30]]));                       /* torso */
+    add('dbelly',poly([[31,25],[37,24],[35.4,37],[31.4,37]]));
+    add('dmane',poly([[24,13],[33,9],[42,13],[42,20],[34,19],[25,22]]));                       /* mane */
+    add('dfur',ln([[33,40],[36,49],[31,55],[35,62]],4));claws(35,62,2,0);                    /* near leg */
+    var na=pose==='a1'?[[38,18],[45,12],[50,5]]:a2?[[38,18],[48,26],[56,36]]:[[38,18],[44,26],[42,34]];
+    add('dfur',ln(na,3.6));claws(na[2][0],na[2][1],pose==='a1'?2:3,pose==='a1'?-3:3);
+    if(a2){add('claw',ln([[47,5],[57,17],[59,31]],.6));add('claw',ln([[44,7],[54,19],[56,33]],.6))}  /* swipe trail */
+    add('dfur',el(40,11,5.4,5));add('dfur',poly([[42,8],[51,11],[51,14],[42,15]]));          /* skull, snout */
+    add('dmouth',poly([[44,14],[51,14],[49,16.4],[43,16]]));add('claw',rc(46,14,1,1.2));add('claw',rc(48.6,14,1,1.2));
+    add('dnose',rc(50,10.6,1.8,1.6));add('deye',rc(42.4,8.6,1.6,1.2));
+    add('dfurB',poly([[35,8],[35,0],[39,6]]));add('dfur',poly([[38,7],[40,-1],[42.6,7]]));    /* ears up */
+  }
+  return P0}
+function dogmanInner(b){return a64fig('dog',[],mobSeed(b),0)}
+function mobInner(kind,b){return kind==='dogman'?dogmanInner(b):kind==='goblin'?goblinInner(b):kind==='pigger'?piggerInner(b):kind==='tiggle'?tiggleInner(b):brigandInner(b)}
 

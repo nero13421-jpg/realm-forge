@@ -3,7 +3,7 @@ var REC=null;
 function recStart(units,foes,extra){
   REC={ents:[],frames:[],ev:[]};
   units.forEach(function(u){u._ri=REC.ents.length;REC.ents.push({s:'p',eq:u.eqk||[],f:u.c.sex==='f',n:hname(u.c),m:u.mhp})});
-  foes.forEach(function(e){e._ri=REC.ents.length;REC.ents.push({s:'e',k:e.kind,b:e.ref||null,m:e.kind==='goblin'?50:e.kind==='pigger'?300:e.kind==='tiggle'?30:100})});
+  foes.forEach(function(e){e._ri=REC.ents.length;REC.ents.push({s:'e',k:e.kind,b:e.ref||null,m:e.kind==='goblin'?50:e.kind==='dogman'?600:e.kind==='pigger'?300:e.kind==='tiggle'?30:100})});
   REC.all=units.concat(foes);
   if(extra)Object.keys(extra).forEach(function(k){REC[k]=extra[k]});
   recFrame();

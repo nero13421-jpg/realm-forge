@@ -4,10 +4,10 @@ function raidAt(){return S.match&&S.match.raidAt!=null?S.match.raidAt:RAID_AT}
 function syncDims(){COLS=S.match?S.match.W:(S.bw||9);ROWS=S.match?S.match.H:(S.bh||7)}
 /* a lone pigger is one animal: fix the grammar the group messages were written for */
 var PIGV={are:'is',have:'has',reach:'reaches','break':'breaks',walk:'walks',leave:'leaves',go:'goes',remain:'remains',find:'finds',swarm:'swarms',batter:'batters',hack:'hacks',start:'starts',cannot:'cannot',move:'moves'};
-function pigFix(m){return m.replace(/\b(1 |The |the )pigger((?: at [A-Z]+\d+| of [A-Z]+\d+)?) (are|have|reach|break|walk|leave|go|remain|find|batter|hack|start|move)\b/g,function(a,p,at,v){return p+'pigger'+at+' '+PIGV[v]}).replace(/pigger((?: at [A-Z]+\d+)?) has found the (\w+) at ([A-Z]+\d+) and go for it/g,'pigger$1 has found the $2 at $3 and goes for it').replace(/The pigger is destroyed/g,'The pigger is dead')}
+function pigFix(m){m=m.replace(/dogman/g,'dog man');m=m.replace(/\b(1 |The |the )dog m[ae]n((?: at [A-Z]+\d+| of [A-Z]+\d+)?) (are|have|reach|break|walk|leave|go|remain|find|batter|hack|start|move)\b/g,function(a,p,at,v){return p+'dog man'+at+' '+PIGV[v]}).replace(/dog man((?: at [A-Z]+\d+)?) has found the (\w+) at ([A-Z]+\d+) and go for it/g,'dog man$1 has found the $2 at $3 and goes for it').replace(/The dog man is destroyed/g,'The dog man is dead').replace(/dog mans/g,'dog men').replace(/(dog man|pigger) walks the wall and find /g,'$1 walks the wall and finds ');return m.replace(/\b(1 |The |the )pigger((?: at [A-Z]+\d+| of [A-Z]+\d+)?) (are|have|reach|break|walk|leave|go|remain|find|batter|hack|start|move)\b/g,function(a,p,at,v){return p+'pigger'+at+' '+PIGV[v]}).replace(/pigger((?: at [A-Z]+\d+)?) has found the (\w+) at ([A-Z]+\d+) and go for it/g,'pigger$1 has found the $2 at $3 and goes for it').replace(/The pigger is destroyed/g,'The pigger is dead')}
 function mlog(m,c){var M=S.match;m=pigFix(String(m));M.log.push({t:mmss(M.clock),m:m,c:c||''});if(M.log.length>80)M.log.shift()}
 function matchCamps(){
-  return S.match.camps.filter(function(m){return !(m.type==='pigger'&&!m.roam)}).map(function(m){
+  return S.match.camps.filter(function(m){return !((m.type==='pigger'||m.type==='dogman')&&!m.roam)}).map(function(m){
     return{key:m.key,hexes:m.hexes,type:m.type,lair:m.lair,reward:m.reward,razed:!!m.razed,active:m.mobs.length>0,roam:m.roam&&m.mobs.length>0,pos:m.pos,m:m,n:m.mobs.length};
   });
 }
@@ -85,6 +85,9 @@ function genWorld(){
   var woods=[];for(var wi=0;wi<N;wi++)if(!mine[wi]&&(wg[wi]==='woodland'||wg[wi]==='forest'))woods.push(wi);
   var npg=Math.min(3,Math.floor(woods.length/14*Math.random()*1.6+(Math.random()<.35?1:0)));
   for(var pi2=0;pi2<npg&&woods.length;pi2++){var wk=pick(woods);camps.push({key:'pg'+pi2,type:'pigger',hexes:[],lair:wk,reward:100,mobs:[{k:'pigger',hp:300,w:'spear'}],roam:false,pos:null,path:[],rem:0,wait:0,razed:true,spawnAt:120+rnd(900)})}
+  /* the dog man: only where 25 or more wooded tiles join into one stretch. No camp; at most one, and not every match */
+  var wd={},bigW=[];woods.forEach(function(k){wd[k]=1});var seenW={};woods.forEach(function(k){if(seenW[k])return;var comp=[],q=[k];seenW[k]=1;while(q.length){var x=q.pop();comp.push(x);nbrs(x%W,Math.floor(x/W)).forEach(function(p){var y=p[1]*W+p[0];if(wd[y]&&!seenW[y]){seenW[y]=1;q.push(y)}})}if(comp.length>=DOG_WOODS)bigW=bigW.concat(comp)});
+  if(bigW.length&&Math.random()<.5)camps.push({key:'dm0',type:'dogman',hexes:[],lair:pick(bigW),reward:200,mobs:[{k:'dogman',hp:600}],roam:false,pos:null,path:[],rem:0,wait:0,razed:true,spawnAt:240+rnd(900)});
   var wh=[],sd=Math.random()*1000;for(i=0;i<N;i++)wh.push(null);
   for(r=0;r<BH;r++)for(c=0;c<BW;c++){var hk=(S.hgt||[])[r*BW+c];if(hk&&(S.grid[r*BW+c]||setAt(c,r)))wh[ix(c+dc,r+dr)]=JSON.parse(JSON.stringify(hk))}
   for(i=0;i<N;i++){if(wh[i])continue;var cc0=i%W,rr0=Math.floor(i/W),nb0=Math.round(vn(cc0/3+sd,rr0/3+sd)*6)*5;if(wg[i]==='pond'||wg[i]==='swamp'||wg[i]==='water')nb0=Math.max(0,nb0-10);

@@ -19,7 +19,7 @@ function awaySet(){var o={};S.units.forEach(function(U){if(!atHome(U)||(U.live&&
 function goHome(U,status,mode){var L=U.live,h=homeOf(U);if(!h)return;L.path=findPath(L.pos,h,uRoads(U))||[];L.rem=HEX_YD;L.status=status;L.mode=mode||'home';L.chase=null}
 function resume(U){var L=U.live;if(L.mode==='raze'){var zc=campByKey(L.target);if(zc&&!zc.razed){L.path=[];L.status='Back to the camp';return}}if(isDefend(U)){L.chase=null;goHome(U,'Returning home');return}L.chase=null;L.path=[];L.mode=U.route?'route':'idle';if(L.cur>=0)L.si=L.cur;L.status=U.route?'Back on patrol':'At rest'}
 function campByKey(k){var M=S.match;if(!M||k==null)return null;for(var i=0;i<M.camps.length;i++)if(String(M.camps[i].key)===String(k))return M.camps[i];return null}
-function mobWord(m,pl,cap){var w=m.type;if(m.type==='pigger'&&pl&&m.mobs&&m.mobs.length<2)pl=0;if(pl)w+='s';return cap?w.charAt(0).toUpperCase()+w.slice(1):w}
+function mobWord(m,pl,cap){var w=m.type==='dogman'?'dog man':m.type;if((m.type==='pigger'||m.type==='dogman')&&pl&&m.mobs&&m.mobs.length<2)pl=0;if(pl)w=m.type==='dogman'?'dog men':w+'s';return cap?w.charAt(0).toUpperCase()+w.slice(1):w}
 function lairPos(m){return[m.lair%COLS,Math.floor(m.lair/COLS)]}
 function enemyNear(pos,U){
   var k=ix(pos[0],pos[1]),r=U?Math.max(1,Math.floor(Math.min.apply(null,U.hids.map(byId).filter(Boolean).map(function(h){return stats(h).sight}).concat([1e9]))/HEX_YD)):1,nb=nbrs(pos[0],pos[1]),best=null;

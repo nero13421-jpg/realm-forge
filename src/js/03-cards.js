@@ -8,7 +8,7 @@ function mk(key,at){
 }
 function byId(id){for(var i=0;i<S.cards.length;i++)if(S.cards[i].id===id)return S.cards[i];return null}
 function kindOf(c){return CD[c.key].k}
-var SVGNS='http://www.w3.org/2000/svg',GOB_SP=11.7;
+var SVGNS='http://www.w3.org/2000/svg',GOB_SP=11.7,DOG_SP=+(5.86*1.33).toFixed(2),DOG_WOODS=25;/* the dog man runs a third faster than a man's sprint */
 function humans(){return S.cards.filter(function(c){return c.key==='human'})}
 function gearOf(h){return S.cards.filter(function(x){return x.eq===h.id})}
 function hname(c){return c.name||('Unnamed '+(c.sex==='f'?'woman':'man')+' #'+c.num)}
