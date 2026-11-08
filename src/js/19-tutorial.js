@@ -154,7 +154,7 @@ function razeRow(c,r){var m=campOnTile(c,r);if(!m)return '';var us=S.units.filte
 function campHere(pos){var k=ix(pos[0],pos[1]),o=null;S.match.camps.forEach(function(m){if(!o&&!m.razed&&m.hexes.indexOf(k)>=0&&((m.roam&&m.type!=='tiggle')||!m.mobs.length))o=m});return o}
 function razeCamp(m,U){var M=S.match;m.razed=true;S.prestige+=m.reward;M.earned+=m.reward;var lt=giveLoot(m,true);var p=lairPos(m);mlog(U.name+' burns the '+mobWord(m)+' camp at '+lab(p[0],p[1])+'. +'+m.reward+' prestige. Loot: '+lt+'.','good');UI.needRender=true}
 function hexDist(a,b){var aq=a[0]-(a[1]-(a[1]&1))/2,bq=b[0]-(b[1]-(b[1]&1))/2,dq=aq-bq,dr=a[1]-b[1];return (Math.abs(dq)+Math.abs(dr)+Math.abs(dq+dr))/2}
-function mobSpot(m){var M=S.match,r=MOB_SIGHT+(M.mine[ix(m.pos[0],m.pos[1])]?1:0),best=null,bd=1e9;S.setl.forEach(function(x){var d=hexDist(m.pos,[x.c,x.r]);if(d<=r&&d<bd){bd=d;best=x}});return best}
+function mobSpot(m){var M=S.match,r=MOB_SIGHT+(M.mine[ix(m.pos[0],m.pos[1])]?1:0),best=null,bd=1e9;/* part 1 of the tutorial: raids are aimed at the first hamlet, where the squads and the palisade are */(M.tutEnc&&M.tutEnc<=4?S.setl.slice(0,1):S.setl).forEach(function(x){var d=hexDist(m.pos,[x.c,x.r]);if(d<=r&&d<bd){bd=d;best=x}});return best}
 function newMobs(type){
   var o=[],n,i;
   if(type==='goblin'){n=10+rnd(6);for(i=0;i<n;i++)o.push({k:'goblin',hp:50})}
