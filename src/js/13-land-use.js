@@ -97,6 +97,6 @@ function toggleEquip(id){
     say('The gnosis is consumed. '+hname(h)+' now holds '+h.gnosis+' gnosis, to spend on learning spells. 1 prestige sunk.');save();return render();
   }
   if(S.prestige<1){say('Equipping costs 1 prestige.',true);return render()}
-  S.prestige-=1;it.eq=h.id;say('Equipped '+CD[it.key].n+'. 1 prestige sunk.');save();render();
+  S.prestige-=1;it.eq=h.id;it.worn=1;say('Equipped '+CD[it.key].n+'. 1 prestige sunk.');save();render();
 }
 

@@ -31,19 +31,22 @@ document.addEventListener('click',function(e){
   if(a==='lookx'){UI.look=null;return render()}
   if(a==='cam'){UI.cam=d.v;LIVE_CACHE.nb=null;LIVE_CACHE.lk=null;LIVE_CACHE.bvmk=null;return render()}
   if(a==='claim'){packAdd(PACKS[d.k]&&d.k!=='starter'?d.k:'booster',1);save();return render()}
-  if(a==='altar'){var as=setById(+d.s),ac=pool().filter(function(c){return c.key==='altar'})[0];if(!as||as.altar||as.type==='camp'||!ac||S.match)return render();if(S.prestige<ALTAR_COST){say('An altar costs '+ALTAR_COST+' prestige.',true);return render()}S.prestige-=ALTAR_COST;S.cards.splice(S.cards.indexOf(ac),1);as.altar={pr:null};say('An altar stands in the '+SETT[as.type].n.toLowerCase()+' at '+lab(as.c,as.r)+'. '+ALTAR_COST+' prestige sunk.');save();return render()}
+  if(a==='altar'){var as=setById(+d.s),ac=pool().filter(function(c){return c.key==='altar'})[0],AK2=BOON[d.k]?d.k:null;if(!as||as.altar||as.type==='camp'||!ac||!AK2||S.match)return render();if(S.prestige<ALTAR_COST){say('An altar costs '+ALTAR_COST+' prestige.',true);return render()}
+    var ga=pool().filter(function(c){return c.key===AK2});if(ga.length<ALTAR_N){say('A '+BOON[AK2].n.toLowerCase()+' altar is raised with '+ALTAR_N+' '+BOON[AK2].n.toLowerCase()+'s. You hold '+ga.length+'.',true);return render()}
+    S.prestige-=ALTAR_COST;S.cards.splice(S.cards.indexOf(ac),1);ga.slice(0,ALTAR_N).forEach(function(c){S.cards.splice(S.cards.indexOf(c),1)});as.altar={pr:null,k:AK2};tutFlag('alt');say('A '+BOON[AK2].n.toLowerCase()+' altar stands in the '+SETT[as.type].n.toLowerCase()+' at '+lab(as.c,as.r)+', raised with '+ALTAR_N+' '+BOON[AK2].n.toLowerCase()+'s. It takes only '+BOON[AK2].n.toLowerCase()+'s now. '+ALTAR_COST+' prestige sunk.');save();return render()}
   if(a==='priest'){var ps=setById(+d.s),ph=byId(+d.h);if(ps&&ps.altar&&ph&&ph.sex==='f'&&ph.at===ps.id){ps.altar.pr=ph.id;say(hname(ph)+' is now priestess of the altar.')}save();return render()}
   if(a==='unpriest'){var us2=setById(+d.s);if(us2&&us2.altar)us2.altar.pr=null;save();return render()}
   if(a==='sacA'){UI.sacA=d.k;return render()}
-  if(a==='sacrifice'){var ss=setById(+d.s),T=byId(UI.sacT)||S.cards.filter(function(c){return c.key==='human'&&c.at===(ss&&ss.id)})[0],sc={};pool().forEach(function(c){if(kindOf(c)==='animal')sc[c.key]=1});var k=sacPick(T,sc),an=pool().filter(function(c){return c.key===k})[0];
+  if(a==='sacrifice'){var ss=setById(+d.s),T=byId(UI.sacT)||S.cards.filter(function(c){return c.key==='human'&&c.at===(ss&&ss.id)})[0],sc={};pool().forEach(function(c){if(kindOf(c)==='animal')sc[c.key]=1});if(ss&&ss.altar&&ss.altar.k)sc=sc[ss.altar.k]?(function(){var o={};o[ss.altar.k]=1;return o})():{};var k=sacPick(T,sc),an=pool().filter(function(c){return c.key===k})[0];
     if(!ss||!ss.altar||!ss.altar.pr||!T||!an||S.match)return render();
-    if(T.boon&&T.boon.k!==k){say(hname(T)+' already carries the '+BOON[T.boon.k].n.toLowerCase()+'. One animal kind per person.',true);return render()}
+    var TG=T.key!=='human';if(TG&&!blessable(T)){say('Only gear that has never been worn can be blessed.',true);return render()}
+    if(T.boon&&T.boon.k!==k){say((TG?cardName(T):hname(T))+' already carries the '+BOON[T.boon.k].n.toLowerCase()+'. One animal kind each.',true);return render()}
     if(S.prestige<SAC_COST){say('A sacrifice costs '+SAC_COST+' prestige.',true);return render()}
     var V=byId(UI.sacV);if(!V||V.key!=='human'||V.at!==ss.id||V===T||V.id===ss.altar.pr){say('Pick one more person living here to give to the gods.',true);return render()}
     var dem=sacDem(ss,k),dsh=matsShort(dem);if(dsh.length){say('The altar asks for '+matsText(dem)+'. Short on '+dsh.join(', ')+'.',true);return render()}
     var B=BOON[k],roll=Math.round((B.lo+Math.random()*(B.hi-B.lo))*10)/10,vn=hname(V);S.prestige-=SAC_COST;S.cards.splice(S.cards.indexOf(an),1);payMats(dem);delete ss.altar.dem[k];killHuman(V);UI.sacV=null;
-    T.boon=T.boon||{k:k,p:0,n:0};T.boon.p=Math.round((T.boon.p+roll)*10)/10;T.boon.n++;
-    say(hname(byId(ss.altar.pr))+' sacrifices a '+B.n.toLowerCase()+', '+vn+' and '+matsText(dem)+' for '+hname(T)+'. '+B.a+' +'+roll+'%'+(T.boon.n>1?', '+T.boon.p+'% in all from '+T.boon.n+' '+B.n.toLowerCase()+'s':'')+'. Cost: '+SAC_COST+' prestige.');save();return render()}
+    if(!ss.altar.k)ss.altar.k=k;T.boon=T.boon||{k:k,p:0,n:0};T.boon.p=Math.round((T.boon.p+roll)*10)/10;T.boon.n++;if(TG)T.res=(T.res||0)+1;
+    say(hname(byId(ss.altar.pr))+' sacrifices a '+B.n.toLowerCase()+', '+vn+' and '+matsText(dem)+' for '+(TG?'the '+cardName(T).toLowerCase()+' (resonance '+T.res+')':hname(T))+'. '+B.a+' +'+roll+'%'+(T.boon.n>1?', '+T.boon.p+'% in all from '+T.boon.n+' '+B.n.toLowerCase()+'s':'')+'. Cost: '+SAC_COST+' prestige.');save();return render()}
   if(a==='assign'){
     var c=byId(+d.id);if(!c||c.key!=='human')return;if(!S.setl.length){say('Place a settlement first.',true);return render()}
     var tsid=UI.sel||S.setl[0].id;if(c.sex==='f'&&!shrineAt(tsid)){say(womanMsg()+' Raise an altar first, or pick a settlement that has one under Assign men to.',true);return render()}

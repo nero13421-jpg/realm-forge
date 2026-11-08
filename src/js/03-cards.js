@@ -13,7 +13,7 @@ function humans(){return S.cards.filter(function(c){return c.key==='human'})}
 function gearOf(h){return S.cards.filter(function(x){return x.eq===h.id})}
 function hname(c){return c.name||('Unnamed '+(c.sex==='f'?'woman':'man')+' #'+c.num)}
 var FEMALE_P=.05;
-var GUARD_DEF=3,GUARD_SH=5,HELM=3,ALTAR_COST=500,SAC_COST=10;
+var GUARD_DEF=3,GUARD_SH=5,HELM=3,ALTAR_COST=500,SAC_COST=10,ALTAR_N=10;
 var TATTOO={tat_spiral:{n:'Spiral',t:'every endurance +10%',p:{mEnd:.1,mdEnd:.1,spEnd:.1,cEnd:.1}},tat_antler:{n:'Antler',t:'strength +10%',p:{str:.1}},tat_serpent:{n:'Serpent',t:'defense speed +5 points',a:{dodge:.05}},tat_eye:{n:'Eye',t:'sight range +25%, draw range +10%',p:{sight:.25,range:.1}},tat_hand:{n:'Hand',t:'strike speed +10%',p:{strike:.1}}};
 /* a tattoo's bonus is worked out from his stats the moment it goes on, then fixed: later changes to him or to the tattoo never move it */
 function tatHas(c,k){return !!(c&&c.tat&&c.tat.some(function(t){return t.k===k}))}
@@ -86,7 +86,10 @@ function killHuman(h){removeFromUnit(h.id);S.cards.forEach(function(c){if(c.eq==
 /* the animal shown at the altar: the one you picked, else the kind this man already carries, else the first you hold */
 function sacPick(T,cnt){if(UI.sacA&&cnt[UI.sacA])return UI.sacA;if(T&&T.boon&&cnt[T.boon.k])return T.boon.k;return Object.keys(cnt)[0]||null}
 var BOON={rabbit:{n:'Rabbit',a:'Swiftness',lo:3,hi:6,t:'sprint speed and sprint endurance: charges, flanking runs and falling back. Not road marching.'},stag:{n:'Stag',a:'Stamina',lo:3,hi:6,t:'marching and middle-distance endurance'},boar:{n:'Boar',a:'Hardiness',lo:3,hi:6,t:'durability, more health'},wolf:{n:'Wolf',a:'Ferocity',lo:3,hi:6,t:'strength, more melee and bow damage'},hawk:{n:'Hawk',a:'Keen eye',lo:3,hi:6,t:'bow hit chance and sight range'}};
-function bo(c,k){return c&&c.boon&&c.boon.k===k?c.boon.p/100:0}
+function bo(c,k){var v=c&&c.boon&&c.boon.k===k?c.boon.p/100:0;if(c&&c.key==='human')S.cards.forEach(function(x){if(x.eq===c.id&&x.boon&&x.boon.k===k)v+=x.boon.p/100});return v}
+/* gear can be blessed only while it has never been worn */
+function blessable(c){return c&&isItem(c)&&!c.worn&&c.eq==null&&['animal','altar','mat','crystal','gnosis','parch','tattoo'].indexOf(kindOf(c))<0}
+function resText(c){return c.boon?BOON[c.boon.k].a+' +'+c.boon.p+'% · resonance '+(c.res||0):''}
 function boonText(c){return c.boon?BOON[c.boon.k].a+' +'+c.boon.p+'% ('+c.boon.n+' '+BOON[c.boon.k].n.toLowerCase()+(c.boon.n>1?'s':'')+')':'none'}
 function cardName(c){return c.key==='human'?hname(c):CD[c.key].n}
 var PACKS={starter:{n:'Chalcolithic Starter Pack',t:'The kit you begin with: 3 settlement cards, 38 terrain cards, 5 elevation cards (slopes and mounds), 2 forest, 1 small open water, 3 orchards, 8 men, 1 woman to serve at a shrine (outside the tutorial, where Ama joins later), starter arms and armor, 12 small lumber, 12 small gravel, 300 small timber and 50 large timber.'},booster:{n:'Chalcolithic Booster Pack',size:10,t:'10 random cards.'},buff:{n:'Chalcolithic Buff Pack',size:25,t:'25 random cards.'}};

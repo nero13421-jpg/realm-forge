@@ -58,7 +58,7 @@ for(const m of new3.slice(0,4)){await p.click(`[data-act="selh"][data-id="${m}"]
 
 await fight(2,{live:async()=>{const ob=await p.$('[data-act="bfob"]:not([data-o="mv"]):not(.on)');if(ob){return await ob.click({timeout:2000}).then(()=>true).catch(()=>false)}return false}});await next('E2');
 console.log('woman still in hand',await S(()=>__S().cards.find(c=>c.sex==='f').at));
-await p.click('[data-tab="settle"]');await p.click(`[data-act="selset"][data-id="${s2}"]`);await p.click('[data-act="altar"]');await next('altar');
+await p.click('[data-tab="settle"]');await p.click(`[data-act="selset"][data-id="${s2}"]`);await p.click('[data-act="altar"][data-k="rabbit"]');await next('altar');
 const fem=await S(()=>__S().cards.find(c=>c.sex==='f').id);await p.click('[data-tab="packs"]');await p.selectOption('#asel',String(s2));await p.click(`[data-act="assign"][data-id="${fem}"]`);console.log('assign woman:',await p.innerText('.msg').catch(()=>''));
 await p.click('[data-tab="settle"]');await p.click(`[data-act="selset"][data-id="${s2}"]`);await p.click(`[data-act="priest"][data-h="${fem}"]`);await next('priestess');
 await p.click('[data-act="sacA"][data-k="rabbit"]');console.log('sac form',await p.innerText('.upanel:has(#sacV)').catch(()=>'none'));await p.click('[data-act="sacrifice"]');console.log(await p.innerText('.msg'));await next('sacrifice');

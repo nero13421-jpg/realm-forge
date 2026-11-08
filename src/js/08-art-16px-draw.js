@@ -25,7 +25,7 @@ function iconFor(c){
   return '';
 }
 
-function stackOf(list){var o=[],by={};list.forEach(function(c){if(c.key==='human'){o.push([c]);return}var g=by[c.key];if(!g){g=by[c.key]=[];o.push(g)}g.push(c)});return o}
+function stackOf(list){var o=[],by={};list.forEach(function(c){if(c.key==='human'||c.boon){o.push([c]);return}var g=by[c.key];if(!g){g=by[c.key]=[];o.push(g)}g.push(c)});return o}
 function tagsHtml(list,o){o=o||{};return stackOf(list).map(function(g){var c=g[0];if(AMMO_WT[c.key])c=g.slice().sort(function(a,b){return (b.n===undefined?20:b.n)-(a.n===undefined?20:a.n)})[0];return tagHtml(c,{grp:g,act:typeof o.act==='function'?o.act(c):o.act,sel:o.sel,fresh:o.fresh})}).join('')}
 function tagHtml(c,o){
   o=o||{};
@@ -41,6 +41,7 @@ function tagHtml(c,o){
   else if(k==='crystal')st='+'+(CRYSTAL[c.key]||1)+' mana, for good';
   else if(k==='ring')st=RING[c.key].t+' · copper';
   else if(k==='tattoo')st=TATTOO[c.key].t+' of his stats when applied, then fixed';
+  if(c.boon&&c.key!=='human')st+=(st?' · ':'')+'blessed: '+resText(c);
   var eq=c.eq?byId(c.eq):null,ne=g?g.filter(function(x){return x.eq}).length:0;
   if(g&&ne===g.length&&g.every(function(x){return x.eq===c.eq}))st+=(st?' · ':'')+'on '+esc(hname(eq));else if(g){if(ne)st+=(st?' · ':'')+ne+' equipped'}else if(eq)st+=(st?' · ':'')+'on '+esc(hname(eq));
   var cls='tag'+(o.sel?' sel':'')+(o.fresh?' fresh':'');
