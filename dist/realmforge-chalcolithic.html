@@ -1512,7 +1512,7 @@ var TUT_ENC={
   1:{reward:{lumber:6,gravel:6},camps:[{type:'goblin',n:6}]},
   2:{reward:{lumber:6,gravel:6},camps:[{type:'brigand',n:3}]},
   3:{reward:{lumber:4,gravel:4},camps:[{type:'goblin',n:8}]},
-  4:{reward:{lumber:6,gravel:6},camps:[{type:'goblin',n:6},{type:'brigand',n:3,d:4}]},
+  4:{reward:{lumber:6,gravel:6},camps:[{type:'goblin',n:6},{type:'brigand',n:2,d:4}]},
   5:{reward:{lumber:4,gravel:4},camps:[{type:'pigger'}]},
   6:{stay:true,reward:{lumber:4,gravel:4},camps:[{type:'tiggle',n:14}]},
   7:{stay:true,reward:{lumber:6,gravel:6},camps:[{type:'brigand',n:8,armor:1,hill:1}]},
@@ -1585,9 +1585,12 @@ function tutStart(){
 function tutEncCamps(g,n){
   var E=TUT_ENC[n],W=g.W,st=S.setl[0],s0=(st.r+g.dr)*W+(st.c+g.dc),dist={},q=[s0],used={},out=[];dist[s0]=0;
   var nb=function(k){return nbrs(k%W,Math.floor(k/W)).map(function(p){return p[1]*W+p[0]})};
-  while(q.length){var k=q.shift();nb(k).forEach(function(m){if(dist[m]!=null||g.grid[m]==='pond')return;dist[m]=dist[k]+1;q.push(m)})}
+  var bfs=function(s){var D={},Q=[s];D[s]=0;while(Q.length){var k=Q.shift();nb(k).forEach(function(m){if(D[m]!=null||g.grid[m]==='pond')return;D[m]=D[k]+1;Q.push(m)})}return D};dist=bfs(s0);
+  /* in part 1 only the first two hamlets have squads: keep camps nearer to those than to any other settlement */
+  var far=n<=4?S.setl.slice(2).map(function(x){return bfs((x.r+g.dr)*W+(x.c+g.dc))}):[],near1=n<=4&&S.setl[1]?bfs((S.setl[1].r+g.dr)*W+(S.setl[1].c+g.dc)):null;
+  var safe=function(k){var d=Math.min(dist[k],near1&&near1[k]!=null?near1[k]:1e9);return far.every(function(D){return D[k]==null||D[k]>d})};
   E.camps.forEach(function(C,ci){
-    var want=C.d||3,cand=Object.keys(dist).map(Number).filter(function(k){return !g.mine[k]&&g.grid[k]&&g.grid[k]!=='pond'&&!used[k]});
+    var want=C.d||3,cand=Object.keys(dist).map(Number).filter(function(k){return !g.mine[k]&&g.grid[k]&&g.grid[k]!=='pond'&&!used[k]});if(cand.some(safe))cand=cand.filter(safe);
     cand.sort(function(a,b){return Math.abs(dist[a]-want)-Math.abs(dist[b]-want)||dist[a]-dist[b]});var best=cand.length?cand[0]:s0;used[best]=1;nb(best).forEach(function(m){used[m]=1});
     var key='tut'+n+'_'+ci,o={key:key,type:C.type,hexes:[best],lair:best,reward:100,mobs:[],roam:false,pos:null,path:[],rem:0,wait:0};
     if(C.type==='pigger'){o.hexes=[];o.razed=true;o.spawnAt=5;o.mobs=[{k:'pigger',hp:300,w:'spear'}];g.grid[best]='woodland'}
