@@ -25,7 +25,7 @@ const hamlet=async()=>{await p.click('[data-tab="realm"]');await p.click('[data-
   console.log('hamlet',await p.innerText('.msg').catch(()=>''))};
 const equip=async(hid,key)=>{await p.click(`[data-act="selhum"][data-id="${hid}"]`);const ids=await p.$$eval('[data-act="equip"]:not(.sel)',e=>e.map(x=>+x.dataset.id));const id=await S(([k,ids])=>{const c=ids.map(i=>__S().cards.find(x=>x.id===i)).find(x=>x&&x.key===k);return c&&c.id},[key,ids]);if(id)await p.click(`[data-act="equip"][data-id="${id}"]`);if(process.env.DBG)console.log('eq',hid,key,id,await p.innerText('.msg').catch(()=>'-'))};
 const fight=async(n,opts)=>{console.log('before',n,'squads',await S(()=>__S().units.map(U=>U.hids.filter(h=>__S().cards.some(c=>c.id===h)).length).join('+')));for(let tryN=0;tryN<4;tryN++){await p.click('[data-act="tutenc"]');let did={},last=null;
-  for(let k=0;k<1500;k++){await p.waitForTimeout(150);if(!(await S(()=>!!__S().match)))break;
+  for(let k=0;k<1500;k++){await p.waitForTimeout(150);if(k%100===0)console.log('heap',n,k,await p.evaluate(()=>Math.round(performance.memory.usedJSHeapSize/1e6)+'MB '+(localStorage.getItem('realmforge-chal-1')||'').length/1e6+'MB saved').catch(()=>'?'));if(!(await S(()=>!!__S().match)))break;
     if(await p.$('[data-act="bfight"]')){if(opts.deploy)await opts.deploy(did);await p.click('[data-act="bfight"]').catch(()=>{});await p.waitForTimeout(300)}
     const inFight=await S(()=>{const M=__S().match;return !!(M&&M.battles&&M.battles.some(b=>!b.done&&b.phase==='fight'))});
     if(inFight&&opts.live&&!did.live){await p.waitForSelector('#bview svg');did.live=await opts.live()}
@@ -76,7 +76,7 @@ const s3=await S(()=>__S().setl[2].id);await p.click('[data-tab="packs"]');await
 await p.click('[data-tab="settle"]');await p.click(`[data-act="selset"][data-id="${S0=await S(()=>__S().setl[0].id)}"]`);
 for(const k of ['red_crystal','gnosis','p_bolt'])await equip(men[0],k);console.log(await p.innerText('.msg'));await next('magic');
 console.log('palisade',await p.evaluate(()=>__ev(`(function(){var s=S.setl[0],C=coreOf(s);UI.tab='realm';UI.draw={type:'wall',fk:'wall_s',h:'s',pts:[],segs:[]};for(var i=0;i<=24;i++){var a=i/24*Math.PI*2;fortClick([C.c[0]+Math.cos(a)*C.r*.97,C.c[1]+Math.sin(a)*C.r*.97])}finishWall();var m1=UI.msg,w=walls()[0];if(!w)return m1;var G=wallGeo(w);UI.draw={type:'gate',fk:'gate',pts:[]};fortClick(G.at(G.L*.3));return m1+' | '+UI.msg})()`)));
-await p.click('[data-tab="realm"]');await next('palisade');
+await p.click('[data-tab="realm"]');await next('palisade');fs.writeFileSync('tut-f3.json',await p.evaluate(()=>localStorage.getItem('realmforge-chal-1')));
 await fight(3,{live:async()=>{await p.click('#bctl [data-act="mspd"][data-s="0"]');await p.waitForSelector('#bview svg');const tk=await S(()=>{const b=__S().match.battles.find(x=>!x.done);return b.teams[0].k});await p.click(`[data-act="bfsel"][data-k="t:${tk}"]`);await p.click('[data-act="bford"][data-o="move"]');const fb=await (await p.$('#bview svg')).boundingBox();await p.mouse.click(fb.x+fb.width*.5,fb.y+fb.height*.5);await p.click('#bctl [data-act="mspd"][data-s="10"]');return true}});await next('E3');
 await fight(4,{live:async()=>{await p.click(`[data-act="mu"][data-u="${uid2}"]`).catch(()=>{});const sel=await p.$(`#rf${uid2}`);if(sel){await p.selectOption(`#rf${uid2}`,String(uid));return true}return false}});await next('E4');
 console.log('part 1 end',await p.innerText('.tut h2'),'tabs',await p.$$eval('#tabs .btn',e=>e.map(x=>x.textContent).join('|')));permGrid=await S(()=>__S().grid.filter(Boolean).length);
