@@ -2202,10 +2202,10 @@ function stepBattle(b){
       var stc=(g.mode==='guard'||g.mode==='dmarch')?'guard':g.mode==='leg'||u.hide?'hold':stanceOf(g,u,FM[u.uid]);if(stc==='shoot'&&!archer)stc='charge';
       if(stc==='guard'){u.guard=true;archer=false}
       if(stc==='charge'){archer=false;if(dn>reach+.3){mv=go(near.x,near.y,run);ran=u.endur>0}}
-      else if(stc==='shoot'){if(dn>bowR-6&&!(u.melee&&dn<5))mv=go(near.x,near.y,pace)}
+      else if(stc==='shoot'){/* close only until the nearest foe is in bow range, then stand and loose */var inR=fs.some(function(f){return bfD(u,f)<=bowR-2&&bfSeen(F,u,f)});if(!inR&&!(u.melee&&dn<5))mv=go(near.x,near.y,pace);else hold=true}
       else{sl=fmPos(g,u,g.fo,FM[u.uid]);hold=true}
     }else if(o==='advance'){
-      if(archer&&!(u.melee&&dn<5)){if(dn>bowR-6)mv=go(near.x,near.y,pace)}
+      if(archer&&!(u.melee&&dn<5)){if(!fs.some(function(f){return bfD(u,f)<=bowR-2&&bfSeen(F,u,f)}))mv=go(near.x,near.y,pace)}
       else if(dn>reach+.3)mv=go(near.x,near.y,pace);
     }else{sl=bfSlot(b,t,u.si);hold=o!=='flank';if(o==='guard'){u.guard=true;archer=false}}
     if(sl){
