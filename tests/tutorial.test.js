@@ -49,12 +49,13 @@ await p.click('[data-tab="settle"]');await p.fill('#snm','Riverbend');await p.pr
 const men=await S(()=>__S().cards.filter(c=>c.key==='human').map(c=>c.id));
 for(let i=0;i<4;i++){await equip(men[i],'spear');if(i<2)await equip(men[i],'hide_armor')}
 for(let i=4;i<8;i++){await equip(men[i],'shortbow');await equip(men[i],'short_arrows');await equip(men[i],'knife')}
-await next('arm');for(const m of men.slice(4,6))for(const k of ['orange_crystal','gnosis','p_bolt'])await equip(m,k);console.log('casters:',await p.innerText('.msg'));await next('casters');if(process.env.DBG){await b.close();return}
+await next('arm');for(const m of men.slice(4,7))for(const k of ['orange_crystal','gnosis','p_bolt'])await equip(m,k);console.log('casters:',await p.innerText('.msg'));await next('casters');if(process.env.DBG){await b.close();return}
 await p.click('[data-tab="units"]');await p.click('[data-act="newunit"]');uid=await S(()=>__S().units[0].id);
 for(const m of men){await p.click(`[data-act="selh"][data-id="${m}"]`);await p.click(`[data-act="putin"][data-u="${uid}"] >> nth=0`)}
 await p.click(`[data-act="addtm"][data-u="${uid}"]`);for(const m of men.slice(4)){await p.click(`[data-act="selh"][data-id="${m}"]`);await p.click(`[data-act="putin"][data-u="${uid}"][data-t="2"]`)}
 await p.selectOption(`#urt${uid}`,'defend');await next('squad');
 await p.click('[data-tab="patrol"]');await p.click('[data-act="fmnew"]');await p.click('[data-act="fmshape"][data-s="ranks"] >> nth=1');await next('formations');
+fs.writeFileSync('tut-f1.json',await p.evaluate(()=>localStorage.getItem('realmforge-chal-1')));if(process.env.STOP1){await b.close();return}
 await fight(1,{deploy:async()=>{await p.click('[data-act="bfauto"]').catch(()=>{})}});await next('E1');
 await p.click('[data-tab="packs"]');await p.click('[data-act="open"][data-k="booster"]');await next('packA');
 console.log('placed',await placeTiles('pond',1),await placeTiles('cultivated',8),await placeTiles('woodland',1),await placeTiles('field',1),await placeTiles('pasture',2));await hamlet();await next('hamlet2');
