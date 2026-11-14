@@ -1,7 +1,7 @@
 /* ---------- land use ----------
    Villages and camps burn firewood; villages also need specialty food (orchards for now); every pasture needs half a
    prairie for fodder and hay. A supply tile counts if it is within an hour's walk, and each tile serves one claimant. */
-var WOOD={forest:1.5,woodland:1,pwood:.75,pforest:.75,swamp:.5},SPEC={orchard:1},NEED={hamlet:{woodT:1,past:2},village:{fire:8,spec:3},camp:{fire:2}},WOODT={forest:1,woodland:1,pwood:1,pforest:1},WALK_S=3600,PRAIRIE_CAP=2;
+var WOOD={forest:1.5,woodland:1,pwood:.75,pforest:.75,swamp:.5},SPEC={orchard:1},NEED={hamlet:{woodT:1,past:2},village:{fire:8,spec:3},camp:{fire:2}},WOODT={forest:1,woodland:1,pwood:1,pforest:1,swamp:1}/* any tile that gives wood counts as a hamlet's wood tile, swamp included */,WALK_S=3600,PRAIRIE_CAP=2;
 /* seconds to walk from a set of hexes to every hex within an hour, over placed ground (roads faster, slopes slower) */
 /* a small binary min-heap of [cost, key] pairs */
 function heap(){var a=[];return{n:function(){return a.length},push:function(t,k){a.push([t,k]);var i=a.length-1;while(i){var p=(i-1)>>1;if(a[p][0]<=a[i][0])break;var x=a[p];a[p]=a[i];a[i]=x;i=p}},
@@ -21,8 +21,8 @@ function supply0(){var N=COLS*ROWS,used={},prc={},out={set:{},past:{},claim:{}},
   S.setl.forEach(function(st){var nd=NEED[st.type];if(!nd)return;var T=walkFrom(setHexes(st)),R={fire:0,spec:0,woodT:0,past:0,need:nd,tiles:[]};
     var near=[];for(k=0;k<N;k++)if(T[k]<Infinity&&!used[k]&&(WOOD[S.grid[k]]||SPEC[S.grid[k]]||S.grid[k]==='pasture')&&!setAt(k%COLS,Math.floor(k/COLS)))near.push(k);near.sort(function(a,b){return T[a]-T[b]});
     var take=function(k2,kind){used[k2]=1;R.tiles.push(k2);out.claim[k2]={by:st.id,kind:kind}};
-    /* a hamlet's wood tile: plain woodland first, so it leaves the richer oak forest to villages and camps */
-    if(nd.woodT)near.filter(function(k2){return WOODT[S.grid[k2]]}).sort(function(a,b){return (S.grid[a]==='woodland'?0:1)-(S.grid[b]==='woodland'?0:1)||T[a]-T[b]}).slice(0,nd.woodT).forEach(function(k2){R.woodT++;take(k2,'fire')});
+    /* a hamlet's wood tile: the poorest wood in reach first (swamp, pine, woodland, then oak forest), leaving the richer firewood to villages and camps */
+    if(nd.woodT)near.filter(function(k2){return WOODT[S.grid[k2]]}).sort(function(a,b){return WOOD[S.grid[a]]-WOOD[S.grid[b]]||T[a]-T[b]}).slice(0,nd.woodT).forEach(function(k2){R.woodT++;take(k2,'fire')});
     near.forEach(function(k2){var g=S.grid[k2];if(used[k2])return;
       if(nd.fire&&WOOD[g]&&R.fire<nd.fire){R.fire+=WOOD[g];take(k2,'fire')}
       else if(nd.spec&&SPEC[g]&&R.spec<nd.spec){R.spec+=SPEC[g];take(k2,'spec')}
@@ -32,12 +32,12 @@ function supply0(){var N=COLS*ROWS,used={},prc={},out={set:{},past:{},claim:{}},
     if(best>=0){prc[best]=(prc[best]||0)+1;out.past[k]={ok:true,by:best};out.claim[best]={by:'p',kind:'prairie',n:prc[best]}}else out.past[k]={ok:false}}
   return out}
 function needText(R){var n=R.need,o=[];if(n.woodT)o.push('woodland <b>'+R.woodT+'/'+n.woodT+'</b>');if(n.past)o.push('pastures <b>'+R.past+'/'+n.past+'</b>');if(n.fire)o.push('firewood <b>'+(Math.round(R.fire*100)/100)+'/'+n.fire+'</b>');if(n.spec)o.push('orchards <b>'+R.spec+'/'+n.spec+'</b>');return ' · '+o.join(' · ')}
-function needSay(nd){var o=[];if(nd.woodT)o.push(nd.woodT+' woodland tile');if(nd.past)o.push(nd.past+' pastures (for clothing)');if(nd.fire)o.push(nd.fire+' firewood');if(nd.spec)o.push(nd.spec+' orchards');return o.join(', ')}
+function needSay(nd){var o=[];if(nd.woodT)o.push(nd.woodT+' wood tile');if(nd.past)o.push(nd.past+' pastures (for clothing)');if(nd.fire)o.push(nd.fire+' firewood');if(nd.spec)o.push(nd.spec+' orchards');return o.join(', ')}
 function supplyPanel(){if(S.match)return '';var SU=supply(),rows=[];
   S.setl.forEach(function(st){var R=SU.set[st.id];if(!R)return;rows.push('<div class="row suprow'+(R.ok?'':' bad')+'"><button class="btn sm'+(UI.supSel===st.id?' on':'')+'" data-act="supsel" data-id="'+st.id+'">'+esc(setName(st))+'</button><span>'+SETT[st.type].n+needText(R)+(R.ok?' ✓':' · short')+'</span></div>')});
   var ps=Object.keys(SU.past),pk=ps.filter(function(k){return SU.past[k].ok}).length;
   if(ps.length)rows.push('<div class="row suprow'+(pk<ps.length?' bad':'')+'"><button class="btn sm'+(UI.supSel==='p'?' on':'')+'" data-act="supsel" data-id="p">Pastures</button><span>'+pk+' of '+ps.length+' fed by prairie (1 field feeds 2)'+(pk<ps.length?' · '+(ps.length-pk)+' short':' ✓')+'</span></div>');
-  return '<p class="label">Land use · within an hour\'s walk, one claim per tile</p>'+(rows.join('')||'<p class="note">Hamlets need 1 woodland tile and 2 pastures. Villages need 8 firewood and 3 orchards; camps 2 firewood; every pasture half a prairie.</p>')+(UI.supSel!=null?'<p class="note">Rings on the map: brown feeds firewood, white a pasture for clothing, red an orchard, yellow a prairie. Firewood: oak forest 1.5, oak woodland 1, pine 0.75, swamp peat 0.5.</p>':'')}
+  return '<p class="label">Land use · within an hour\'s walk, one claim per tile</p>'+(rows.join('')||'<p class="note">Hamlets need 1 wood tile (woodland, oak forest, pine or swamp) and 2 pastures. Villages need 8 firewood and 3 orchards; camps 2 firewood; every pasture half a prairie.</p>')+(UI.supSel!=null?'<p class="note">Rings on the map: brown feeds firewood, white a pasture for clothing, red an orchard, yellow a prairie. Firewood: oak forest 1.5, oak woodland 1, pine 0.75, swamp peat 0.5.</p>':'')}
 function supplyMarks(){if(S.match||UI.supSel==null||UI.tab!=='realm')return '';var SU=supply(),o='';Object.keys(SU.claim).forEach(function(k){var C=SU.claim[k];if(UI.supSel==='p'?C.kind!=='prairie':C.by!==UI.supSel)return;o+='<polygon class="sup-ring sup-'+C.kind+'" points="'+hexPts(k%COLS,Math.floor(k/COLS),.86)+'"/>'});
   if(UI.supSel==='p')Object.keys(SU.past).forEach(function(k){o+='<polygon class="sup-ring sup-past'+(SU.past[k].ok?'':' bad')+'" points="'+hexPts(k%COLS,Math.floor(k/COLS),.86)+'"/>'});
   else{var st=setById(UI.supSel);if(st)setHexes(st).forEach(function(k){o+='<polygon class="sup-ring sup-home" points="'+hexPts(k%COLS,Math.floor(k/COLS),.86)+'"/>'})}
