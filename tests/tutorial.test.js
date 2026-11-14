@@ -49,7 +49,7 @@ await p.click('[data-tab="settle"]');await p.fill('#snm','Riverbend');await p.pr
 const men=await S(()=>__S().cards.filter(c=>c.key==='human').map(c=>c.id));
 for(let i=0;i<4;i++){await equip(men[i],'spear');if(i<2)await equip(men[i],'hide_armor')}
 for(let i=4;i<8;i++){await equip(men[i],'shortbow');await equip(men[i],'short_arrows');await equip(men[i],'knife')}
-await next('arm');if(process.env.DBG){await b.close();return}
+await next('arm');for(const m of men.slice(4,6))for(const k of ['red_crystal','gnosis','p_bolt'])await equip(m,k);console.log('casters:',await p.innerText('.msg'));await next('casters');if(process.env.DBG){await b.close();return}
 await p.click('[data-tab="units"]');await p.click('[data-act="newunit"]');uid=await S(()=>__S().units[0].id);
 for(const m of men){await p.click(`[data-act="selh"][data-id="${m}"]`);await p.click(`[data-act="putin"][data-u="${uid}"] >> nth=0`)}
 await p.click(`[data-act="addtm"][data-u="${uid}"]`);for(const m of men.slice(4)){await p.click(`[data-act="selh"][data-id="${m}"]`);await p.click(`[data-act="putin"][data-u="${uid}"][data-t="2"]`)}
@@ -62,7 +62,7 @@ await p.click('[data-tab="realm"]');await p.click('[data-act="draw"][data-k="roa
 await hexTap(`[data-act="hex"][data-c="${st0[0]+1}"][data-r="${st0[1]}"]`);await p.click('[data-act="dfinish"]');console.log('road',await p.innerText('.msg'));await next('road');
 const s2=await S(()=>__S().setl[1].id);await p.click('[data-tab="packs"]');await p.selectOption('#asel',String(s2));await p.click('[data-act="assignall"]');
 const new3=await S(s2=>__S().cards.filter(c=>c.key==='human'&&c.at===s2&&c.sex!=='f').map(c=>c.id),s2);
-await p.click('[data-tab="settle"]');await p.click(`[data-act="selset"][data-id="${s2}"]`);await equip(new3[0],'longbow');await equip(new3[0],'long_arrows');await equip(new3[1],'spear');await equip(new3[2],'spear');if(new3[3])await equip(new3[3],'knife');await equip(new3[1],'hide_shield');await equip(new3[2],'hide_helmet');
+await p.click('[data-tab="settle"]');await p.click(`[data-act="selset"][data-id="${s2}"]`);await equip(new3[0],'longbow');await equip(new3[0],'long_arrows');await equip(new3[1],'spear');await equip(new3[2],'spear');if(new3[3])await equip(new3[3],'knife');await equip(new3[1],'hide_shield');await equip(new3[2],'hide_helmet');for(const m of new3.slice(0,2))for(const k of ['red_crystal','gnosis','p_bolt'])await equip(m,k);
 await p.click('[data-tab="units"]');await p.selectOption('#nus',String(s2));await p.click('[data-act="newunit"]');uid2=await S(()=>__S().units[1].id);
 for(const m of new3.slice(0,4)){await p.click(`[data-act="selh"][data-id="${m}"]`);await p.click(`[data-act="putin"][data-u="${uid2}"] >> nth=0`)}await p.selectOption(`#urt${uid2}`,'defend');await next('squad2');fs.writeFileSync('tut15-new.json',await p.evaluate(()=>localStorage.getItem('realmforge-chal-1')));if(process.env.STOP15){await b.close();return}
 await fight(2,{live:async()=>{const ob=await p.$('[data-act="bfob"]:not([data-o="mv"]):not(.on)');if(ob){return await ob.click({timeout:2000}).then(()=>true).catch(()=>false)}return false}});await next('E2');
@@ -99,7 +99,7 @@ await hexTap(`[data-act="hex"][data-c="${sp[0]}"][data-r="${sp[1]}"]`);console.l
 await p.click('[data-tab="settle"]');
 await equip(m2[0],'spear@cu.oak');await equip(m2[0],'leather_armor');await equip(m2[1],'spear@cu.oak');await equip(m2[1],'leather_armor');await equip(m2[2],'spear@cu.oak');await equip(m2[3],'spear@cu.pine');await equip(m2[4],'knife@cu.oak');
 await equip(m2[5],'longbow');await equip(m2[5],'long_arrows@cu.oak');await equip(m2[6],'longbow@-.pine');await equip(m2[6],'long_arrows@cu.oak');await equip(m2[7],'shortbow');await equip(m2[7],'short_arrows');await equip(m2[8],'shortbow');await equip(m2[8],'short_arrows');
-await equip(m2[9],'rod_cu');await equip(m2[9],'ring_endur');for(const k of ['orange_crystal','gnosis','p_arrow'])await equip(m2[9],k);console.log('copper:',await p.innerText('.msg').catch(()=>''));await next('copper');
+await equip(m2[9],'rod_cu');await equip(m2[9],'ring_endur');for(const k of ['orange_crystal','gnosis','p_arrow'])await equip(m2[9],k);console.log('copper:',await p.innerText('.msg').catch(()=>''));for(const [m,sp] of [[m2[5],'p_bolt'],[m2[6],'p_arrow'],[m2[7],'p_arrow'],[m2[0],'p_slash']])for(const k of ['red_crystal','gnosis',sp].filter((k,i)=>i||m!==m2[7]&&m!==m2[0]))await equip(m,k);await next('copper');
 await equip(m2[0],'tat_antler');console.log('tattoo:',await p.innerText('.msg').catch(()=>''));await next('tattoo');
 console.log('placed',await placeTiles('pond',2),await placeTiles('cultivated',22),await placeTiles('orchard',3),await placeTiles('forest',6));
 await p.click('[data-tab="realm"]');await p.click('[data-act="plc"][data-t="s"][data-k="village"]');
