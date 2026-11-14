@@ -49,7 +49,7 @@ await p.click('[data-tab="settle"]');await p.fill('#snm','Riverbend');await p.pr
 const men=await S(()=>__S().cards.filter(c=>c.key==='human').map(c=>c.id));
 for(let i=0;i<4;i++){await equip(men[i],'spear');if(i<2)await equip(men[i],'hide_armor')}
 for(let i=4;i<8;i++){await equip(men[i],'shortbow');await equip(men[i],'short_arrows');await equip(men[i],'knife')}
-await next('arm');for(const m of men.slice(4,6))for(const k of ['red_crystal','gnosis','p_bolt'])await equip(m,k);console.log('casters:',await p.innerText('.msg'));await next('casters');if(process.env.DBG){await b.close();return}
+await next('arm');for(const m of men.slice(4,6))for(const k of ['orange_crystal','gnosis','p_bolt'])await equip(m,k);console.log('casters:',await p.innerText('.msg'));await next('casters');if(process.env.DBG){await b.close();return}
 await p.click('[data-tab="units"]');await p.click('[data-act="newunit"]');uid=await S(()=>__S().units[0].id);
 for(const m of men){await p.click(`[data-act="selh"][data-id="${m}"]`);await p.click(`[data-act="putin"][data-u="${uid}"] >> nth=0`)}
 await p.click(`[data-act="addtm"][data-u="${uid}"]`);for(const m of men.slice(4)){await p.click(`[data-act="selh"][data-id="${m}"]`);await p.click(`[data-act="putin"][data-u="${uid}"][data-t="2"]`)}
@@ -62,7 +62,7 @@ await p.click('[data-tab="realm"]');await p.click('[data-act="draw"][data-k="roa
 await hexTap(`[data-act="hex"][data-c="${st0[0]+1}"][data-r="${st0[1]}"]`);await p.click('[data-act="dfinish"]');console.log('road',await p.innerText('.msg'));await next('road');
 const s2=await S(()=>__S().setl[1].id);await p.click('[data-tab="packs"]');await p.selectOption('#asel',String(s2));await p.click('[data-act="assignall"]');
 const new3=await S(s2=>__S().cards.filter(c=>c.key==='human'&&c.at===s2&&c.sex!=='f').map(c=>c.id),s2);
-await p.click('[data-tab="settle"]');await p.click(`[data-act="selset"][data-id="${s2}"]`);await equip(new3[0],'longbow');await equip(new3[0],'long_arrows');await equip(new3[1],'spear');await equip(new3[2],'spear');if(new3[3])await equip(new3[3],'knife');await equip(new3[1],'hide_shield');await equip(new3[2],'hide_helmet');for(const m of new3.slice(0,2))for(const k of ['red_crystal','gnosis','p_bolt'])await equip(m,k);
+await p.click('[data-tab="settle"]');await p.click(`[data-act="selset"][data-id="${s2}"]`);await equip(new3[0],'longbow');await equip(new3[0],'long_arrows');await equip(new3[1],'spear');await equip(new3[2],'spear');if(new3[3])await equip(new3[3],'knife');await equip(new3[1],'hide_shield');await equip(new3[2],'hide_helmet');for(const m of new3.slice(0,2))for(const k of ['orange_crystal','gnosis','p_bolt'])await equip(m,k);
 await p.click('[data-tab="units"]');await p.selectOption('#nus',String(s2));await p.click('[data-act="newunit"]');uid2=await S(()=>__S().units[1].id);
 for(const m of new3.slice(0,4)){await p.click(`[data-act="selh"][data-id="${m}"]`);await p.click(`[data-act="putin"][data-u="${uid2}"] >> nth=0`)}await p.selectOption(`#urt${uid2}`,'defend');await next('squad2');fs.writeFileSync('tut15-new.json',await p.evaluate(()=>localStorage.getItem('realmforge-chal-1')));if(process.env.STOP15){await b.close();return}
 await fight(2,{live:async()=>{const ob=await p.$('[data-act="bfob"]:not([data-o="mv"]):not(.on)');if(ob){return await ob.click({timeout:2000}).then(()=>true).catch(()=>false)}return false}});await next('E2');
