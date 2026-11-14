@@ -12,6 +12,10 @@ function walkFrom(src){var N=COLS*ROWS,T=new Float64Array(N).fill(Infinity),done
     nbrs(c,r).forEach(function(p){var m=ix(p[0],p[1]);if(done[m])return;var s2=spd(m);if(!s2)return;var h2=hgtAt(m),gr=h1&&h2?((h2.b+(h2.r||0)/2)-(h1.b+(h1.r||0)/2))/(HEX_YD*.9144):0,G=gradeMul(gr),
       t=(HEX_YD/2)/(PACE.walk*s1)+(HEX_YD/2)/(PACE.walk*s2);t=G.cap!=null?Math.max(t,HEX_YD/G.cap):t/G.m;var nt=T[k]+t;if(nt<T[m]&&nt<=WALK_S){T[m]=nt;q.push(nt,m)}})}
   return T}
+/* an altar's animal has to live near it: a connected stretch of its land within a 30-minute walk of the settlement */
+var HABITAT={stag:{t:{woodland:1,forest:1},n:10,w:'woodland or oak forest'},boar:{t:{forest:1,swamp:1},n:8,w:'oak forest or swamp'},wolf:{t:{woodland:1,forest:1,pwood:1,pforest:1,swamp:1,field:1},n:15,w:'wooded or wild land (woodland, forest, pine, swamp, field)'},rabbit:{t:{field:1,pasture:1},n:5,w:'field or pasture'},hawk:{t:{field:1,pasture:1,water:1},n:6,w:'field, pasture or open water'}},ALTAR_WALK=1800;
+function habitatOf(s,k){var H=HABITAT[k];if(!H)return 0;var T=walkFrom(setHexes(s)),ok={},best=0,seen={};S.grid.forEach(function(g,i){if(H.t[g]&&T[i]<=ALTAR_WALK)ok[i]=1});
+  Object.keys(ok).forEach(function(i0){if(seen[i0])return;var n=0,q=[+i0];seen[i0]=1;while(q.length){var i=q.pop();n++;nbrs(i%COLS,Math.floor(i/COLS)).forEach(function(p){var m=ix(p[0],p[1]);if(ok[m]&&!seen[m]){seen[m]=1;q.push(m)}})}best=Math.max(best,n)});return best}
 function setHexes(s){return [ix(s.c,s.r)].concat(s.c2!=null?[ix(s.c2,s.r2)]:[])}
 /* who gets which tile: settlements in the order they were founded take the nearest free tiles they need, then pastures take prairie */
 var SUPC=null;
