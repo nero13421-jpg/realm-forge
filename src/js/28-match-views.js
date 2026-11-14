@@ -53,7 +53,7 @@ function vMatch(){
   var PU0=unitById(UI.mu),PR0=PR||(PU0?routeById(planRoot(PU0)?planRoot(PU0).route:PU0.route):null),PLY=isPlay(PR0)||(PR&&UI.medit)?{R:PR0,home:planHome(PR0,planUnit(PR0))}:null;
   var sv=UI.mview==='mine'?mapSvg({crop:true,vis:function(c,r){return M.mine[ix(c,r)]},sel:UI.leg?null:UI.tile,route:ppf.route,pz:'m',play:PLY}):mapSvg({world:true,mineRing:true,sel:UI.leg?null:UI.tile,route:ppf.route,pz:'m',play:PLY});
   var allShut=MFOLDS.every(function(k){return (UI.mfold||{})[k]});
-  return '<section class="panel" id="mappanel"><div class="row" style="justify-content:space-between"><h2>Match</h2>'+speedBar()+'</div>'+
+  return '<section class="panel" id="mappanel"><div class="row" style="justify-content:space-between"><h2>Match</h2>'+speedBar()+'</div>'+tiredHtml()+
     '<div class="row"><button class="btn sm'+(UI.mview==='mine'?' on':'')+'" data-act="mview" data-v="mine">My terrain</button><button class="btn sm'+(UI.mview==='all'?' on':'')+'" data-act="mview" data-v="all">Whole map</button></div>'+
     mapView(sv,'m',(UI.medit&&PR?planOver(PR):'')+(UI.leg||UI.tsel!=null&&UI.medit?'':matchPop())+bdockHtml()+pipHtml(),UI.medit&&PR?planBar(PR):'')+
     '<p class="note">Drag to move around, scroll or pinch to zoom, or tap a tile and press Zoom in here. Zoomed in, each tile opens up as the ground a fight would happen on, and a fight plays out right there on the map. '+(UI.mview==='all'?'Gold outlines mark your tiles.':'')+'</p>'+legend()+'</section>'+

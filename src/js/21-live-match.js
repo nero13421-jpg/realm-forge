@@ -9,6 +9,10 @@ function liveTick(){
   liveDraw();
   if(now-LIVE_SAVE>4000){LIVE_SAVE=now;save()}
 }
+/* a squad that runs out of endurance slows to a crawl: say so, pause, and ask what to do */
+function spent(U){var M=S.match;if(!M)return;M.tired=M.tired||[];if(M.tired.indexOf(U.id)<0)M.tired.push(U.id);var L=U.live,q=L&&L.pos?' at '+lab(L.pos[0],L.pos[1]):'';mlog(U.name+' is spent'+q+': the men slow to a crawl. Give them a rest, or press on at a crawl.','bad');autoPause()}
+function tiredHtml(){var M=S.match;if(!M||!M.tired||!M.tired.length)return '';M.tired=M.tired.filter(function(id){var U=unitById(id);return U&&U.hids.length&&U.live&&U.live.endur<=0&&!U.live.resting});if(!M.tired.length)return '';
+  return M.tired.map(function(id){var U=unitById(id),L=U.live,q=L.pos?lab(L.pos[0],L.pos[1]):'';return '<div class="tired" role="alert"><b>'+esc(U.name)+' is spent'+(q?' at '+q:'')+'.</b> Endurance 0: the men crawl at a third of walking pace and cannot jog or sprint.<div class="row"><button class="btn go sm" data-act="tired" data-u="'+U.id+'" data-v="short">Short rest · 10 s, back to 50%</button><button class="btn sm" data-act="tired" data-u="'+U.id+'" data-v="long">Long rest · 1 min, back to 100%</button><button class="btn sm" data-act="tired" data-u="'+U.id+'" data-v="go">Press on</button></div></div>'}).join('')}
 function autoPause(){var M=S.match;if(M&&M.autoPause&&M.speed>0){M.speed=0;M.halt=true}UI.needRender=true}
 function unitWF(U){var w=1;U.hids.map(byId).filter(Boolean).forEach(function(h){var t=0;S.cards.forEach(function(c){if(c.eq===h.id)t+=wtOf(c.key)});if(t>25)w=Math.min(w,25/t)});return w}
 function unitPace(U){var hs=U.hids.map(byId).filter(Boolean),o={sp:{},dr:{},rec:1};['walk','jog','sprint','creep'].forEach(function(k){o.sp[k]=hs.length?Math.min.apply(null,hs.map(function(h){return stats(h).sp[k]})):PACE[k];o.dr[k]=hs.length?Math.max.apply(null,hs.map(function(h){return stats(h).dr[k]})):DRAIN[k]});o.rec=hs.length?Math.min.apply(null,hs.map(function(h){return stats(h).rec})):1;return o}
@@ -102,7 +106,7 @@ function unitStep(U){
     return;
   }
   L.xy=null;var nx=L.path[0],pace=(L.mode==='chase'||L.mode==='reinforce'||L.mode==='raze')?'jog':(L.fleeing?'sprint':L.pace),pp=(L.endur<=0&&pace!=='creep')?'creep':pace;
-  var UB=(L.ub&&L.ub.sp)?L.ub:(L.ub=unitPace(U)),wp0=walkPos(L),nc0=center(nx[0],nx[1]),gd2=gradeAt(wp0[0],wp0[1],nc0[0]-wp0[0],nc0[1]-wp0[1]),GM2=gradeMul(gd2);L.rem-=gradeSpeed(UB.sp[pp]*L.wf*hexSpeed(ix(nx[0],nx[1]),uRoads(U)),gd2);L.endur=Math.max(0,L.endur-(GM2.mode==='hard'||GM2.mode==='climb'?UB.dr.sprint:GM2.mode==='scramble'?UB.dr.jog:UB.dr[pp]));
+  var UB=(L.ub&&L.ub.sp)?L.ub:(L.ub=unitPace(U)),wp0=walkPos(L),nc0=center(nx[0],nx[1]),gd2=gradeAt(wp0[0],wp0[1],nc0[0]-wp0[0],nc0[1]-wp0[1]),GM2=gradeMul(gd2);L.rem-=gradeSpeed(UB.sp[pp]*L.wf*hexSpeed(ix(nx[0],nx[1]),uRoads(U)),gd2);var e0=L.endur;L.endur=Math.max(0,L.endur-(GM2.mode==='hard'||GM2.mode==='climb'?UB.dr.sprint:GM2.mode==='scramble'?UB.dr.jog:UB.dr[pp]));if(e0>0&&L.endur<=0)spent(U);
   if(L.rem<=0){L.pos=L.path.shift();L.rem=HEX_YD;var bb=battleAt(L.pos);if(bb)return joinBattle(bb,U,false);if(L.path.length)crossWait(U,ix(L.pos[0],L.pos[1]),ix(L.path[0][0],L.path[0][1]))}
 }
 function contactCheck(){

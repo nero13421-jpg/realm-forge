@@ -16,6 +16,7 @@ document.addEventListener('click',function(e){
   if(a==='tutquit'){if(S.match)return;if(S.tut&&S.tut.part===2){try{var pq=localStorage.getItem(PKEY);if(pq){S=JSON.parse(pq);localStorage.removeItem(PKEY);COLS=9;ROWS=7;migrate();syncDims();initUI();UI.tab='packs';say('Part 2 set aside. Your realm is back as it was.');save();return render()}}catch(x){}}
     S.tut=null;S.p1=1;save();say('Tutorial closed. This realm is yours to keep.');return render()}
   if(a==='tutend1'){if(!S.tut)return render();S.tut=null;S.p1=1;try{localStorage.removeItem(TKEY)}catch(x){}save();if(d.v==='p2')return tutStart2();UI.tab='realm';say('This is your realm. Part 2 is in Packs whenever you want it.');return render()}
+  if(a==='tired'){var TU=unitById(+d.u),M0=S.match;if(TU&&TU.live&&M0){var TL=TU.live;if(d.v==='short'){TL.wait=10;TL.resting='short';TL.status='Short rest';mlog(TU.name+' takes a short rest.','dim')}else if(d.v==='long'){TL.wait=60;TL.resting='long';TL.status='Long rest';mlog(TU.name+' takes a long rest.','dim')}M0.tired=(M0.tired||[]).filter(function(x){return x!==TU.id});if(!M0.tired.length&&M0.speed===0){M0.halt=false;M0.speed=10}}save();return render()}
   if(a==='mergego'){if(S.match)return;return mergeStart()}
   if(a==='mhex'){if(UI.merge){UI.merge.at=[+d.c,+d.r]}return render()}
   if(a==='mnudge'){if(UI.merge){UI.merge.at=nb6(UI.merge.at[0],UI.merge.at[1])[+d.v]}return render()}

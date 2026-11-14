@@ -310,3 +310,4 @@ body.tutmode .wrap{outline:2px solid var(--ochre);outline-offset:10px;border-rad
 .mgnd{fill:transparent;stroke:rgba(232,222,198,.06);cursor:pointer}.mgnd:hover{fill:rgba(210,154,58,.12)}
 .mperm{stroke:#17140f;stroke-width:1;pointer-events:none}.mset{fill:#e8dec6}
 .mnew{stroke:var(--ochre);stroke-width:1.6;opacity:.78;pointer-events:none}.mnew.mset{fill:#f4d99a}.mnew.bad{stroke:var(--oxide);opacity:.55}
+.tired{border:1px solid var(--oxide);background:color-mix(in srgb,var(--oxide) 14%,transparent);padding:10px 12px;margin:8px 0;display:flex;flex-direction:column;gap:8px}

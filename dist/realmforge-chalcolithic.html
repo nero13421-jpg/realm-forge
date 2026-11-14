@@ -314,6 +314,7 @@ body.tutmode .wrap{outline:2px solid var(--ochre);outline-offset:10px;border-rad
 .mgnd{fill:transparent;stroke:rgba(232,222,198,.06);cursor:pointer}.mgnd:hover{fill:rgba(210,154,58,.12)}
 .mperm{stroke:#17140f;stroke-width:1;pointer-events:none}.mset{fill:#e8dec6}
 .mnew{stroke:var(--ochre);stroke-width:1.6;opacity:.78;pointer-events:none}.mnew.mset{fill:#f4d99a}.mnew.bad{stroke:var(--oxide);opacity:.55}
+.tired{border:1px solid var(--oxide);background:color-mix(in srgb,var(--oxide) 14%,transparent);padding:10px 12px;margin:8px 0;display:flex;flex-direction:column;gap:8px}
 </style>
 
 <div class="wrap">
@@ -2112,6 +2113,10 @@ function liveTick(){
   liveDraw();
   if(now-LIVE_SAVE>4000){LIVE_SAVE=now;save()}
 }
+/* a squad that runs out of endurance slows to a crawl: say so, pause, and ask what to do */
+function spent(U){var M=S.match;if(!M)return;M.tired=M.tired||[];if(M.tired.indexOf(U.id)<0)M.tired.push(U.id);var L=U.live,q=L&&L.pos?' at '+lab(L.pos[0],L.pos[1]):'';mlog(U.name+' is spent'+q+': the men slow to a crawl. Give them a rest, or press on at a crawl.','bad');autoPause()}
+function tiredHtml(){var M=S.match;if(!M||!M.tired||!M.tired.length)return '';M.tired=M.tired.filter(function(id){var U=unitById(id);return U&&U.hids.length&&U.live&&U.live.endur<=0&&!U.live.resting});if(!M.tired.length)return '';
+  return M.tired.map(function(id){var U=unitById(id),L=U.live,q=L.pos?lab(L.pos[0],L.pos[1]):'';return '<div class="tired" role="alert"><b>'+esc(U.name)+' is spent'+(q?' at '+q:'')+'.</b> Endurance 0: the men crawl at a third of walking pace and cannot jog or sprint.<div class="row"><button class="btn go sm" data-act="tired" data-u="'+U.id+'" data-v="short">Short rest · 10 s, back to 50%</button><button class="btn sm" data-act="tired" data-u="'+U.id+'" data-v="long">Long rest · 1 min, back to 100%</button><button class="btn sm" data-act="tired" data-u="'+U.id+'" data-v="go">Press on</button></div></div>'}).join('')}
 function autoPause(){var M=S.match;if(M&&M.autoPause&&M.speed>0){M.speed=0;M.halt=true}UI.needRender=true}
 function unitWF(U){var w=1;U.hids.map(byId).filter(Boolean).forEach(function(h){var t=0;S.cards.forEach(function(c){if(c.eq===h.id)t+=wtOf(c.key)});if(t>25)w=Math.min(w,25/t)});return w}
 function unitPace(U){var hs=U.hids.map(byId).filter(Boolean),o={sp:{},dr:{},rec:1};['walk','jog','sprint','creep'].forEach(function(k){o.sp[k]=hs.length?Math.min.apply(null,hs.map(function(h){return stats(h).sp[k]})):PACE[k];o.dr[k]=hs.length?Math.max.apply(null,hs.map(function(h){return stats(h).dr[k]})):DRAIN[k]});o.rec=hs.length?Math.min.apply(null,hs.map(function(h){return stats(h).rec})):1;return o}
@@ -2205,7 +2210,7 @@ function unitStep(U){
     return;
   }
   L.xy=null;var nx=L.path[0],pace=(L.mode==='chase'||L.mode==='reinforce'||L.mode==='raze')?'jog':(L.fleeing?'sprint':L.pace),pp=(L.endur<=0&&pace!=='creep')?'creep':pace;
-  var UB=(L.ub&&L.ub.sp)?L.ub:(L.ub=unitPace(U)),wp0=walkPos(L),nc0=center(nx[0],nx[1]),gd2=gradeAt(wp0[0],wp0[1],nc0[0]-wp0[0],nc0[1]-wp0[1]),GM2=gradeMul(gd2);L.rem-=gradeSpeed(UB.sp[pp]*L.wf*hexSpeed(ix(nx[0],nx[1]),uRoads(U)),gd2);L.endur=Math.max(0,L.endur-(GM2.mode==='hard'||GM2.mode==='climb'?UB.dr.sprint:GM2.mode==='scramble'?UB.dr.jog:UB.dr[pp]));
+  var UB=(L.ub&&L.ub.sp)?L.ub:(L.ub=unitPace(U)),wp0=walkPos(L),nc0=center(nx[0],nx[1]),gd2=gradeAt(wp0[0],wp0[1],nc0[0]-wp0[0],nc0[1]-wp0[1]),GM2=gradeMul(gd2);L.rem-=gradeSpeed(UB.sp[pp]*L.wf*hexSpeed(ix(nx[0],nx[1]),uRoads(U)),gd2);var e0=L.endur;L.endur=Math.max(0,L.endur-(GM2.mode==='hard'||GM2.mode==='climb'?UB.dr.sprint:GM2.mode==='scramble'?UB.dr.jog:UB.dr[pp]));if(e0>0&&L.endur<=0)spent(U);
   if(L.rem<=0){L.pos=L.path.shift();L.rem=HEX_YD;var bb=battleAt(L.pos);if(bb)return joinBattle(bb,U,false);if(L.path.length)crossWait(U,ix(L.pos[0],L.pos[1]),ix(L.path[0][0],L.path[0][1]))}
 }
 function contactCheck(){
@@ -3273,7 +3278,7 @@ function vMatch(){
   var PU0=unitById(UI.mu),PR0=PR||(PU0?routeById(planRoot(PU0)?planRoot(PU0).route:PU0.route):null),PLY=isPlay(PR0)||(PR&&UI.medit)?{R:PR0,home:planHome(PR0,planUnit(PR0))}:null;
   var sv=UI.mview==='mine'?mapSvg({crop:true,vis:function(c,r){return M.mine[ix(c,r)]},sel:UI.leg?null:UI.tile,route:ppf.route,pz:'m',play:PLY}):mapSvg({world:true,mineRing:true,sel:UI.leg?null:UI.tile,route:ppf.route,pz:'m',play:PLY});
   var allShut=MFOLDS.every(function(k){return (UI.mfold||{})[k]});
-  return '<section class="panel" id="mappanel"><div class="row" style="justify-content:space-between"><h2>Match</h2>'+speedBar()+'</div>'+
+  return '<section class="panel" id="mappanel"><div class="row" style="justify-content:space-between"><h2>Match</h2>'+speedBar()+'</div>'+tiredHtml()+
     '<div class="row"><button class="btn sm'+(UI.mview==='mine'?' on':'')+'" data-act="mview" data-v="mine">My terrain</button><button class="btn sm'+(UI.mview==='all'?' on':'')+'" data-act="mview" data-v="all">Whole map</button></div>'+
     mapView(sv,'m',(UI.medit&&PR?planOver(PR):'')+(UI.leg||UI.tsel!=null&&UI.medit?'':matchPop())+bdockHtml()+pipHtml(),UI.medit&&PR?planBar(PR):'')+
     '<p class="note">Drag to move around, scroll or pinch to zoom, or tap a tile and press Zoom in here. Zoomed in, each tile opens up as the ground a fight would happen on, and a fight plays out right there on the map. '+(UI.mview==='all'?'Gold outlines mark your tiles.':'')+'</p>'+legend()+'</section>'+
@@ -3856,6 +3861,7 @@ document.addEventListener('click',function(e){
   if(a==='tutquit'){if(S.match)return;if(S.tut&&S.tut.part===2){try{var pq=localStorage.getItem(PKEY);if(pq){S=JSON.parse(pq);localStorage.removeItem(PKEY);COLS=9;ROWS=7;migrate();syncDims();initUI();UI.tab='packs';say('Part 2 set aside. Your realm is back as it was.');save();return render()}}catch(x){}}
     S.tut=null;S.p1=1;save();say('Tutorial closed. This realm is yours to keep.');return render()}
   if(a==='tutend1'){if(!S.tut)return render();S.tut=null;S.p1=1;try{localStorage.removeItem(TKEY)}catch(x){}save();if(d.v==='p2')return tutStart2();UI.tab='realm';say('This is your realm. Part 2 is in Packs whenever you want it.');return render()}
+  if(a==='tired'){var TU=unitById(+d.u),M0=S.match;if(TU&&TU.live&&M0){var TL=TU.live;if(d.v==='short'){TL.wait=10;TL.resting='short';TL.status='Short rest';mlog(TU.name+' takes a short rest.','dim')}else if(d.v==='long'){TL.wait=60;TL.resting='long';TL.status='Long rest';mlog(TU.name+' takes a long rest.','dim')}M0.tired=(M0.tired||[]).filter(function(x){return x!==TU.id});if(!M0.tired.length&&M0.speed===0){M0.halt=false;M0.speed=10}}save();return render()}
   if(a==='mergego'){if(S.match)return;return mergeStart()}
   if(a==='mhex'){if(UI.merge){UI.merge.at=[+d.c,+d.r]}return render()}
   if(a==='mnudge'){if(UI.merge){UI.merge.at=nb6(UI.merge.at[0],UI.merge.at[1])[+d.v]}return render()}
