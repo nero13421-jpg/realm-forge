@@ -65,6 +65,7 @@ function toggleEquip(id){
   var it=byId(id),h=UI.hum?byId(UI.hum):null;if(!it||!h)return;
   if(it.eq===h.id){say(CD[it.key].n+' is his for good. Equipment cannot be taken off once it is on.',true);return render()}
   var k=kindOf(it),mine=gearOf(h);
+  if(k==='trophy'){say('No one knows yet what a '+CD[it.key].n.toLowerCase()+' is good for. Keep it.',true);return render()}
   if(h.sex==='f'&&SOLDIER_GEAR[k]){say(womanMsg(),true);return render()}
   var nw=mine.filter(function(c){return kindOf(c)==='weapon'}).length;
   if(k==='weapon'&&nw>=2){say('Two weapons at most.',true);return render()}

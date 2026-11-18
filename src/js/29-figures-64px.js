@@ -10,15 +10,15 @@ var A64PAL={skin:'#eeb48e',skinB:'#c98f6c',hair:'#6b4426',beard:'#6b4426',brow:'
   leg:'#d49a74',legB:'#a8765a',wrap:'#7a4a30',boot:'#7a4e34',bootB:'#5e3a26',armB:'#9a6448',wood:'#a06a3c',stone:'#b8bcc2',cord:'#d8c8a8',string:'#f0e6cc',quiver:'#6a4026',fletch:'#f0e6cc',
   vest:'#5e3a22',lace:'#e8d4a8',helm:'#7a5634',shield:'#a8804a',shieldR:'#5e3a22',hood:'#4e4a3c',mask:'#3a362e',cloak:'#3e4232',gskin:'#93bf52',gskinB:'#6f9a3a',giris:'#f0c030',mouth:'#5a1a10',tooth:'#fff8e0',rag:'#7a6a44',antler:'#c89a64',
   pskin:'#d8968a',pskinB:'#b07464',snout:'#eab0a2',nostril:'#5a2a22',tusk:'#f4ecd8',bristle:'#6a4234',fskin:'#7a9a46',fskinB:'#5a7a34',fbelly:'#d8d090',fspot:'#4a6428',web:'#9ab85a',
-  tat:'#2c5a6e',glow:'#bfeaff',glow2:'#6fc8ff',blood:'#7a1a14',arrow:'#c8b088',dfur:'#6e6258',dfurB:'#4e443c',dmane:'#3a322c',dbelly:'#867a6c',claw:'#ece4cc',deye:'#f2c030',dnose:'#1a1410',dmouth:'#7a2020'};
-var A64DET={deye:1,dnose:1,dmouth:1,claw:1,eyew:1,pupil:1,brow:1,lace:1,tooth:1,mouth:1,giris:1,tat:1,glow:1,glow2:1,nostril:1,tusk:1,fspot:1};
-var LK_FROG=[['#7a9a46','#5a7a34','#4a6428'],['#6a8a3e','#4e6a2c','#3a5220'],['#8a9a4e','#6a7a36','#5a6a28'],['#5e8a52','#44683a','#34542c'],['#9aa058','#78803e','#5e6630']],LK_PIG=[['#d8968a','#b07464'],['#c48678','#9c6454'],['#b8806a','#8e5e4a'],['#e0a898','#b8806e'],['#a87a62','#80583e']];
+  tat:'#2c5a6e',glow:'#bfeaff',glow2:'#6fc8ff',blood:'#7a1a14',arrow:'#c8b088',dfur:'#6e6258',dfurB:'#4e443c',dmane:'#3a322c',dbelly:'#867a6c',claw:'#ece4cc',deye:'#f2c030',dnose:'#1a1410',dmouth:'#7a2020',mskin:'#c8b8e2',mskinB:'#9a88c0',meye:'#140c24',mglint:'#f4f0ff',mmoon:'#b8a6f0',mrag:'#6a6474'};
+var A64DET={deye:1,dnose:1,dmouth:1,claw:1,eyew:1,pupil:1,brow:1,lace:1,tooth:1,mouth:1,giris:1,tat:1,glow:1,glow2:1,nostril:1,tusk:1,fspot:1,meye:1,mglint:1,mmoon:1};
+var LK_FROG=[['#7a9a46','#5a7a34','#4a6428'],['#6a8a3e','#4e6a2c','#3a5220'],['#8a9a4e','#6a7a36','#5a6a28'],['#5e8a52','#44683a','#34542c'],['#9aa058','#78803e','#5e6630']],LK_MOON=[['#c8b8e2','#9a88c0'],['#b8c8e6','#8a9ec4'],['#c0c0e6','#9294c2'],['#d2c2e6','#a492c4'],['#b0c4e0','#8098bc']],LK_PIG=[['#d8968a','#b07464'],['#c48678','#9c6454'],['#b8806a','#8e5e4a'],['#e0a898','#b8806e'],['#a87a62','#80583e']];
 var LK_SKIN=['#f4c8a4','#eeb48e','#e0a47e','#c98a62','#a8704c','#82543a'],LK_HAIR=['#2a1a10','#3e2616','#5a3820','#7a4c2a','#a06a36','#c9a26c','#8e3a1e','#8a8680'],
     LK_DYE=['#8a5a3c','#7a6a44','#6e4a3a','#9a7448','#5e5a48','#8a4a34','#6a5a50','#7e5a2e'],LK_BEAD=[['#c8382c','#3aa0c8'],['#e0782c','#2e8a6a'],['#d8b040','#a03a5a'],['#3aa0c8','#e0782c'],['#e8e0d0','#c8382c'],['#7a3a8a','#d8b040']],
     LK_HOOD=['#4e4a3c','#3e3a30','#5a4a3a','#3a4238','#4a3a34'],LK_GOB=[['#93bf52','#6f9a3a'],['#7fae48','#5e8a30'],['#a6b85a','#7e9040'],['#6fa060','#4e7a44'],['#9aa84e','#73803a']];
 function lookOf(who,seed,tt){var r=seeded((seed|0)*2654435761+(who==='gob'?7:who==='brig'?13:3)),pk=function(a){return a[Math.floor(r()*a.length)]};
   var L={sk:pk(LK_SKIN),hr:pk(LK_HAIR),dye:pk(LK_DYE),bead:pk(LK_BEAD),hs:pk(['short','short','long','shaved','topknot','braid']),bd:pk(['full','full','short','none','mustache','long']),tt:tt||0,hood:pk(LK_HOOD),mask:r()<.65,gob:pk(LK_GOB),gs:.9+r()*.2,ear:.8+r()*.5,robe:pk(['#e8dcc4','#d8c8a4','#c8a87a','#e0d0b8']),head:pk(['antler','antler','feather','band']),hg:r()<.25};
-  L.frog=pk(LK_FROG);L.pig=pk(LK_PIG);L.tusk=r()<.7;
+  L.frog=pk(LK_FROG);L.moon=pk(LK_MOON);L.pig=pk(LK_PIG);L.tusk=r()<.7;
   if(L.hr==='#8a8680'&&r()<.6)L.hr=pk(LK_HAIR.slice(0,6));return L}
 function a64parts(who,eq,pose,L){var P=[],add=function(id,fn){P.push([id,fn])};add.P=P;var kd=function(k){return CD[k]?CD[k].k:''},has=function(k){if(k==='hide_armor')return eq.some(function(x){return kd(x)==='armor'});if(k==='hide_helmet')return eq.some(function(x){return kd(x)==='helmet'});if(k==='hide_shield')return eq.some(function(x){return kd(x)==='shield'});return eq.map(wkey).indexOf(k)>=0};
   var poly=function(pts){return function(g){g.beginPath();pts.forEach(function(p,i){i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1])});g.closePath();g.fill()}},
@@ -28,6 +28,7 @@ function a64parts(who,eq,pose,L){var P=[],add=function(id,fn){P.push([id,fn])};a
       arc=function(x,y,r,a0,a1,w){return function(g){g.lineWidth=w;g.beginPath();g.arc(x,y,r,a0,a1);g.stroke()}},
       qd=function(pts,w){return function(g){g.lineWidth=w;g.lineCap='round';g.beginPath();g.moveTo(pts[0][0],pts[0][1]);g.quadraticCurveTo(pts[1][0],pts[1][1],pts[2][0],pts[2][1]);g.stroke()}};
   if(who==='frog')return frogParts(eq,pose,L,add,poly,el,rc,ln,arc);
+  if(who==='moon')return moonParts(pose,add,poly,el,rc,ln);
   if(who==='dog')return dogParts(pose==='guard'||pose==='cast'?'a1':pose,add,poly,el,rc,ln);
   var pig=who==='pig',PMB=[1.16,.58,-4.8,25.6],PMH=[1.62,1.6,-18.6,11.3],PM=PMB;/* the pigger is drawn chibi: a squat body under a huge head */
   if(pig){var add0=add;add=function(id,fn){var m=PM;add0(id,function(g){g.save();g.transform(m[0],0,0,m[1],m[2],m[3]);fn(g);g.restore()})}}
@@ -132,8 +133,34 @@ function frogParts(eq,pose,L,add,poly,el,rc,ln,arc){/* a tiggle: knee-high frog-
     add('wood',rc(h[0]-.5,h[1]-.7,1.6,1.4));if(pose==='a1')stone([[h[0]-.6,h[1]-1],[h[0]+.4,h[1]-5.6],[h[0]+1.2,h[1]-1]]);else stone([[h[0]+1.1,h[1]-1.1],[h[0]+5,h[1]],[h[0]+1.1,h[1]+.7]])}
   return P_FROG(add)}
 function P_FROG(add){return add.P}
+/* a moon eye: a little smaller than a goblin, pale lilac or pale blue, a huge bobbling head with two great black eyes, thin limbs and a flint dagger.
+   They do not hold a line: they scurry, and their cast pose throws a ball of moonlight up over the head */
+function moonParts(pose,add,poly,el,rc,ln){
+  var atk=pose==='a1'||pose==='a2',fr=pose==='w1',cast=pose==='cast',bob=fr?.6:0,hy=36+bob;
+  /* legs: spindly, knees bent, small bare feet */
+  var B=fr?[[29.4,52],[28.6,56],[28.4,59.6]]:[[29.4,52],[27.6,56],[26.6,59.6]],F=fr?[[31.2,52],[32,56],[31.8,59.6]]:[[31.2,52],[33.4,56],[34,59.6]];if(pose==='a2')F=[[31.2,52],[35,55.4],[36.6,59.6]];
+  add('mskinB',ln(B,1.8));add('mskinB',el(B[2][0]+.8,60.6,1.8,1.1));add('mskin',ln(F,1.9));add('mskin',el(F[2][0]+.8,60.6,1.9,1.2));
+  /* far arm */
+  var FA=cast?[[30,45],[36,44],[41.6,36]]:atk?[[30,45],[28,48],[27.6,51]]:[[30,45],[28.4,48.6],[28.6,52]];add('mskinB',ln(FA,1.5));add('mskinB',el(FA[2][0],FA[2][1],1,1));
+  /* body: a narrow chest, a pot belly, a ragged wrap and a cord with a moon pebble */
+  add('mskin',el(30.4,48.2,3.4,4.8));add('mskinB',el(28.4,48.4,1.4,3.6));add('mrag',poly([[26.8,50.4],[34,50],[34.6,53.6],[32,52.8],[30.4,54.2],[28.4,52.8],[26.6,53.6]]));
+  add('mskin',rc(29.8,43.4+bob,1.6,2.4));/* neck */
+  add('cord',ln([[28.4,44.8],[31,46.6],[33,44.8]],.6));add('mmoon',el(31,47,.9,.9));
+  /* head: far too big for the body, bobbing a little as he runs */
+  add('mskinB',el(29.6,hy+.6,8,8.2));add('mskin',el(30.6,hy,8,8.2));add('mskin',el(36.4,hy+3.6,3.4,3));/* cranium, cheek */
+  add('mskinB',rc(26,hy-2,1,4));add('mskinB',rc(27.6,hy-5.6,.8,2.6));/* veins under thin skin */
+  /* eyes: one great almond eye on the near side, the far one peeking past the brow; a pin of moonlight in each */
+  add('meye',function(g){g.beginPath();g.ellipse(35.2,hy+.4,3.2,2.2,-.45,0,7);g.fill()});add('meye',function(g){g.beginPath();g.ellipse(38.6,hy-.4,1.1,1.9,-.3,0,7);g.fill()});
+  add('mmoon',el(35.8,hy,1.1,.9));add('mglint',rc(34.4,hy-.8,1,.8));add('mglint',rc(38.4,hy-1.4,.6,.6));
+  add('mouth',rc(37,hy+5.4,atk?2:1.4,atk?1:.5));
+  /* near arm: the dagger, or both hands up for the cast */
+  var S0=[31.4,45],hand=function(pts){add('mskin',ln(pts,1.6));var h=pts[pts.length-1];add('mskin',el(h[0],h[1],1.1,1.1));return h};
+  if(cast){hand([S0,[38,45],[43.4,38]]);add('glow2',el(44.6,33,3.6,3.4));add('glow',el(44,32.4,2,1.9));add('mglint',rc(43.4,31.8,1,1))}
+  else{var h=pose==='a2'?hand([S0,[35.6,46.4],[40,47]]):pose==='a1'?hand([S0,[31.4,41],[29.4,37.6]]):hand([S0,[33.6,49],[35,51.4]]);
+    add('wood',rc(h[0]-.5,h[1]-.6,1.4,1.2));if(pose==='a1')add('stone',poly([[h[0]-.5,h[1]-.9],[h[0]+.3,h[1]-5],[h[0]+1,h[1]-.9]]));else add('stone',poly([[h[0]+.9,h[1]-.9],[h[0]+5,h[1]],[h[0]+.9,h[1]+.6]]))}
+  return add.P}
 function a64draw(who,eq,pose,L){var N=who==='dog'?DOG_N:A64N,c=document.createElement('canvas');c.width=c.height=N;var g=c.getContext('2d');if(!g)return null;var map=new Array(N*N).fill(null),pal={};for(var k in A64PAL)pal[k]=A64PAL[k];
-  pal.skin=L.sk;pal.hair=pal.beard=L.hr;pal.tunic=L.dye;pal.accent=L.bead[0];pal.accent2=L.bead[1];pal.hood=L.hood;pal.robe=L.robe;if(who==='gob'){pal.gskin=L.gob[0];pal.gskinB=L.gob[1]}if(who==='frog'){pal.fskin=L.frog[0];pal.fskinB=L.frog[1];pal.fspot=L.frog[2]}if(who==='pig'){pal.pskin=L.pig[0];pal.pskinB=L.pig[1]}
+  pal.skin=L.sk;pal.hair=pal.beard=L.hr;pal.tunic=L.dye;pal.accent=L.bead[0];pal.accent2=L.bead[1];pal.hood=L.hood;pal.robe=L.robe;if(who==='gob'){pal.gskin=L.gob[0];pal.gskinB=L.gob[1]}if(who==='frog'){pal.fskin=L.frog[0];pal.fskinB=L.frog[1];pal.fspot=L.frog[2]}if(who==='pig'){pal.pskin=L.pig[0];pal.pskinB=L.pig[1]}if(who==='moon'){pal.mskin=L.moon[0];pal.mskinB=L.moon[1]}
   var sh=function(h,m){var v=[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)].map(function(x){return Math.round(x*m)});return '#'+v.map(function(x){return ('0'+Math.max(0,Math.min(255,x)).toString(16)).slice(-2)}).join('')};
   var W0=weapPick(eq),pk0=eq.filter(function(x){return wkey(x)===W0.p})[0],m0=pk0?wmat(pk0):null;if((m0&&m0.hd==='cu')||W0.p==='rod_cu')pal.stone='#c27a40';if(m0&&m0.wd==='pine')pal.wood='#c89858';
   if(eq.indexOf('leather_armor')>=0)pal.vest='#8a5834';if(eq.indexOf('leather_helmet')>=0)pal.helm='#8a5834';if(eq.indexOf('oak_helmet')>=0)pal.helm='#9a6c3a';if(eq.indexOf('leather_shield')>=0){pal.shield='#8a5834';pal.shieldR='#4a2c18'}if(eq.indexOf('oak_shield')>=0){pal.shield='#b07a40';pal.shieldR='#5e3a1e'}pal.greave='#8a5834';pal.greaveB='#6e4428';
@@ -208,5 +235,6 @@ function dogParts(pose,add,poly,el,rc,ln){
   }
   return P0}
 function dogmanInner(b){return a64fig('dog',[],mobSeed(b),0)}
-function mobInner(kind,b){return kind==='dogman'?dogmanInner(b):kind==='goblin'?goblinInner(b):kind==='pigger'?piggerInner(b):kind==='tiggle'?tiggleInner(b):brigandInner(b)}
+function moonInner(b){return a64fig('moon',[],mobSeed(b),0)}
+function mobInner(kind,b){return kind==='moon'?moonInner(b):kind==='dogman'?dogmanInner(b):kind==='goblin'?goblinInner(b):kind==='pigger'?piggerInner(b):kind==='tiggle'?tiggleInner(b):brigandInner(b)}
 

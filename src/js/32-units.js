@@ -1,6 +1,6 @@
 /* ---------- units, filters ---------- */
 var SORTS=[['type','By type'],['az','A to Z'],['za','Z to A'],['wh','Heaviest first'],['wl','Lightest first'],['new','Newest first']];
-var KORD=['human','terrain','setcard','weapon','ammo','armor','helmet','shield','ring','tattoo','crystal','gnosis','parch','animal','altar','mat'];
+var KORD=['human','terrain','setcard','weapon','ammo','armor','helmet','shield','ring','tattoo','crystal','gnosis','parch','animal','altar','mat','trophy'];
 function sortOf(view){return (S.so&&S.so[view])||'type'}
 function sbar(view){var cur=sortOf(view);return '<div class="field sortf"><label class="label" for="so-'+view+'">Sort</label><select id="so-'+view+'" data-so="'+view+'">'+SORTS.map(function(o){return '<option value="'+o[0]+'"'+(cur===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></div>'}
 function srt(view,list){
@@ -12,7 +12,7 @@ function srt(view,list){
     var n=nm0(a)<nm0(b)?-1:nm0(a)>nm0(b)?1:0;if(m==='za')n=-n;return n||a.id-b.id;
   });
 }
-var FKINDS=[['all','All'],['weapon','Weapons'],['armor','Armor'],['helmet','Helmets'],['shield','Shields'],['ammo','Ammo'],['mat','Materials'],['ring','Rings'],['crystal','Crystals'],['gnosis','Gnosis'],['parch','Parchments'],['animal','Animals'],['altar','Altars'],['tattoo','Tattoos']];
+var FKINDS=[['all','All'],['weapon','Weapons'],['armor','Armor'],['helmet','Helmets'],['shield','Shields'],['ammo','Ammo'],['mat','Materials'],['ring','Rings'],['crystal','Crystals'],['gnosis','Gnosis'],['parch','Parchments'],['animal','Animals'],['altar','Altars'],['tattoo','Tattoos'],['trophy','Trophies']];
 var FHAND=[['human','Humans'],['terrain','Terrain'],['setcard','Settlements']];
 function fbar(view,extra,only){
   var cur=UI.f[view]||'all',list=only?[['all','All']].concat(extra):FKINDS.concat(extra||[]);
