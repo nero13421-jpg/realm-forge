@@ -20,7 +20,7 @@ var CD={
   red_crystal:{n:'Red crystal',k:'crystal'},orange_crystal:{n:'Orange crystal',k:'crystal'},gnosis:{n:'Gnosis',k:'gnosis'},
   rod_wood:{n:'Pine rod',k:'weapon'},rod_cu:{n:'Copper rod · pine core',k:'weapon'},
   ring_swift:{n:'Copper ring of swiftness',k:'ring'},ring_endur:{n:'Copper ring of endurance',k:'ring'},ring_str:{n:'Copper ring of strength',k:'ring'},
-  p_bark:{n:'Parchment: Arcane Bark',k:'parch'},p_jab:{n:'Parchment: Arcane Jab',k:'parch'},p_shield:{n:'Parchment: Mystic Shield',k:'parch'},p_slash:{n:'Parchment: Arcane Slash',k:'parch'},p_bolt:{n:'Parchment: Arcane Bolt',k:'parch'},p_push:{n:'Parchment: Gnostic Push',k:'parch'},p_arrow:{n:'Parchment: Arcane Arrow',k:'parch'},p_pull:{n:'Parchment: Gnostic Pull',k:'parch'},p_shower:{n:'Parchment: Arcane Shower',k:'parch'},p_grenade:{n:'Parchment: Arcane Grenade',k:'parch'},moon_eye:{n:'Moon eye',k:'trophy'},
+  p_bark:{n:'Parchment: Arcane Bark',k:'parch'},p_jab:{n:'Parchment: Arcane Jab',k:'parch'},p_shield:{n:'Parchment: Mystic Shield',k:'parch'},p_slash:{n:'Parchment: Arcane Slash',k:'parch'},p_bolt:{n:'Parchment: Arcane Bolt',k:'parch'},p_push:{n:'Parchment: Gnostic Push',k:'parch'},p_arrow:{n:'Parchment: Arcane Arrow',k:'parch'},p_pull:{n:'Parchment: Gnostic Pull',k:'parch'},p_shower:{n:'Parchment: Arcane Shower',k:'parch'},p_grenade:{n:'Parchment: Arcane Grenade',k:'parch'},moon_eye:{n:'Moon eye',k:'trophy'},watching_eyes:{n:'Watching eyes',k:'trophy'},cairn:{n:'Cairn',k:'monument'},obelisk:{n:'Obelisk',k:'monument'},
   setcard:{n:'Settlement card',k:'setcard'},
   altar:{n:'Flint altar',k:'altar'},tat_spiral:{n:'Spiral tattoo',k:'tattoo'},tat_antler:{n:'Antler tattoo',k:'tattoo'},tat_serpent:{n:'Serpent tattoo',k:'tattoo'},tat_eye:{n:'Eye tattoo',k:'tattoo'},tat_hand:{n:'Hand tattoo',k:'tattoo'},rabbit:{n:'Rabbit',k:'animal'},stag:{n:'Stag',k:'animal'},boar:{n:'Boar',k:'animal'},wolf:{n:'Wolf',k:'animal'},hawk:{n:'Hawk',k:'animal'}
 };
@@ -39,7 +39,7 @@ var SPELL={p_bark:{n:'Arcane Bark',t:'its rite is not yet understood: no one can
   /* the area spells that came with the moon eyes: drawn and named, not yet learnable */
   p_shower:{n:'Arcane Shower',t:'area · three arcane bolts fall from the sky on one spot · 5 gnosis to learn, 5 mana to cast · not yet understood: no one can learn it yet',later:1},
   p_grenade:{n:'Arcane Grenade',t:'area · a burst of moonlight like the moon eyes throw, −10 to −15 hp to everyone near where it lands · not yet understood: no one can learn it yet',later:1}};
-var KIND={ring:'Ring',greaves:'Greaves',tattoo:'Tattoo',animal:'Animal',altar:'Altar',human:'Human',weapon:'Weapon',ammo:'Ammo',armor:'Armor',helmet:'Helmet',shield:'Shield',mat:'Material',crystal:'Crystal',gnosis:'Gnosis',parch:'Parchment',trophy:'Trophy',terrain:'Terrain',setcard:'Settlement'};
+var KIND={ring:'Ring',greaves:'Greaves',tattoo:'Tattoo',animal:'Animal',altar:'Altar',human:'Human',weapon:'Weapon',ammo:'Ammo',armor:'Armor',helmet:'Helmet',shield:'Shield',mat:'Material',crystal:'Crystal',gnosis:'Gnosis',parch:'Parchment',trophy:'Trophy',monument:'Monument',terrain:'Terrain',setcard:'Settlement'};
 var WEAP={
   knife:{dmg:15,apm:60,reach:1,rng:false,wt:.5},
   rod_wood:{dmg:8,apm:45,reach:1,rng:false,wt:1.5,rod:.1},rod_cu:{dmg:10,apm:45,reach:1,rng:false,wt:2.5,rod:.2},

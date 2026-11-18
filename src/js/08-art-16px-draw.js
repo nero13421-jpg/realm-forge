@@ -40,7 +40,8 @@ function tagHtml(c,o){
   else if(k==='terrain')st=cardCost(c.key)+' prestige';
   else if(k==='crystal')st='+'+(CRYSTAL[c.key]||1)+' mana, for good';
   else if(k==='ring')st=RING[c.key].t+' · copper';
-  else if(k==='trophy')st='taken from the moon eyes, the only way to get one · its use is not yet known';
+  else if(k==='trophy')st=(c.key==='moon_eye'?'taken from the moon eyes, the only way to get one':'taken from a watcher')+' · its use is not yet known';
+  else if(k==='monument')st=c.key==='cairn'?'one Garavatra letter cut in it · boosts the stat that letter stands for within half a tile · raising it comes later':'two Garavatra letters cut in it · boosts both their stats within a whole tile · raising it comes later';
   else if(k==='tattoo')st=TATTOO[c.key].t+' of his stats when applied, then fixed';
   if(c.boon&&c.key!=='human')st+=(st?' · ':'')+'blessed: '+resText(c);
   var eq=c.eq?byId(c.eq):null,ne=g?g.filter(function(x){return x.eq}).length:0;

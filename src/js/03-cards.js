@@ -88,7 +88,7 @@ function sacPick(T,cnt){if(UI.sacA&&cnt[UI.sacA])return UI.sacA;if(T&&T.boon&&cn
 var BOON={rabbit:{n:'Rabbit',a:'Swiftness',lo:3,hi:6,t:'sprint speed and sprint endurance: charges, flanking runs and falling back. Not road marching.'},stag:{n:'Stag',a:'Stamina',lo:3,hi:6,t:'marching and middle-distance endurance'},boar:{n:'Boar',a:'Hardiness',lo:3,hi:6,t:'durability, more health'},wolf:{n:'Wolf',a:'Ferocity',lo:3,hi:6,t:'strength, more melee and bow damage'},hawk:{n:'Hawk',a:'Keen eye',lo:3,hi:6,t:'bow hit chance and sight range'}};
 function bo(c,k,eq){var v=c&&c.boon&&c.boon.k===k?c.boon.p/100:0;if(c&&c.key==='human')(eq||gearOf(c)).forEach(function(x){if(x.boon&&x.boon.k===k)v+=x.boon.p/100});return v}
 /* gear can be blessed only while it has never been worn */
-function blessable(c){return c&&isItem(c)&&!c.worn&&c.eq==null&&['animal','altar','mat','crystal','gnosis','parch','tattoo','trophy'].indexOf(kindOf(c))<0}
+function blessable(c){return c&&isItem(c)&&!c.worn&&c.eq==null&&['animal','altar','mat','crystal','gnosis','parch','tattoo','trophy','monument'].indexOf(kindOf(c))<0}
 function resText(c){return c.boon?BOON[c.boon.k].a+' +'+c.boon.p+'% · resonance '+(c.res||0):''}
 function boonText(c){return c.boon?BOON[c.boon.k].a+' +'+c.boon.p+'% ('+c.boon.n+' '+BOON[c.boon.k].n.toLowerCase()+(c.boon.n>1?'s':'')+')':'none'}
 function cardName(c){return c.key==='human'?hname(c):CD[c.key].n}
@@ -120,7 +120,7 @@ function rollKey(){
   if(g==='parch')return pick(Object.keys(SPELL).filter(function(k){return !SPELL[k].later}));
   return g;
 }
-var ITEMK={ring:1,greaves:1,weapon:1,ammo:1,armor:1,helmet:1,shield:1,mat:1,crystal:1,gnosis:1,parch:1,animal:1,altar:1,tattoo:1,trophy:1};
+var ITEMK={ring:1,greaves:1,weapon:1,ammo:1,armor:1,helmet:1,shield:1,mat:1,crystal:1,gnosis:1,parch:1,animal:1,altar:1,tattoo:1,trophy:1,monument:1};
 function isItem(c){return !!ITEMK[kindOf(c)]}
 function pool(){return S.cards.filter(isItem)}
 function inHand(){return S.cards.filter(function(c){return c.at===null})}
