@@ -178,10 +178,10 @@ function bfDrawEnts(P,list){
 var NOMOTION=false;try{NOMOTION=window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(x){}
 /* moves: a melee swing lunges at the target, a bow recoils, a spell glows; the man hit flashes and is knocked back, a dodge sidesteps */
 function bfAnim(P,i,frames,ms,delay){if(NOMOTION||i==null)return;var el=document.getElementById(P+'n'+i);if(!el)return;var bob=el.querySelector('.bob');if(!bob||!bob.animate)return;try{bob.animate(frames,{duration:ms,delay:delay||0,easing:'ease-out'})}catch(x){}}
-var POP=[{transform:'scale(.1)',opacity:1},{transform:'scale(1)',opacity:0}],SWING={club:1,axe:1,battle_axe:1},FLYSP={p_bolt:1,p_arrow:1};
+var POP=[{transform:'scale(.1)',opacity:1},{transform:'scale(1)',opacity:0}],SWING={club:1,axe:1,battle_axe:1},FLYSP={p_bolt:1,p_arrow:1,p_grenade:1};
 function bfPose(P,i,cls,ms){if(i==null)return;var el=document.getElementById(P+'n'+i);if(!el)return;el.style.setProperty('--pd',ms+'ms');el.classList.remove('atk','cst');void el.getBoundingClientRect();el.classList.add(cls);clearTimeout(el._pt);el._pt=setTimeout(function(){el.classList.remove(cls)},ms+140)}
 function bfMoves(P,ev,dur){
-  if(ev.k==='m')bfPose(P,ev.a,'atk',ev.x==='battle_axe'?480:380);else if(ev.k==='r')bfPose(P,ev.a,'atk',Math.max(380,dur));else if(ev.k==='b'||ev.k==='s'||ev.k==='j')bfPose(P,ev.a,'cst',520);
+  if(ev.k==='m')bfPose(P,ev.a,'atk',ev.x==='battle_axe'?480:380);else if(ev.k==='r')bfPose(P,ev.a,'atk',Math.max(380,dur));else if(ev.k==='b'||ev.k==='s'||ev.k==='j')bfPose(P,ev.a,'cst',520);else if(ev.k==='fz')bfPose(P,ev.a,'cst',900);
   var dir=ev.bx>=ev.ax?1:-1,as=ev.s==='e'?1:-1,ts=ev.s==='e'?-1:1,fly=ev.k==='r'||(ev.k==='b'&&FLYSP[ev.x]),hd=fly?dur:0,X=ev.x,f=dir*as;/* art of your men faces right, mobs are mirrored */
   if(ev.k==='m'){
     if(X==='spear')bfAnim(P,ev.a,[{transform:'none'},{transform:'translate('+(-f*2)+'px,0)',offset:.25},{transform:'translate('+(f*11)+'px,0)',offset:.5},{transform:'none'}],300);/* draw back, drive the point in */
@@ -211,9 +211,12 @@ function bfEffect(fx,ev,dur){
   }
   if(ev.k==='sh'){fxAdd(fx,'circle',{cx:ax.toFixed(1),cy:(ay+.2).toFixed(1),r:1.8,class:'fx-shield'},[{transform:'scale(.2)',opacity:1},{transform:'scale(1)',opacity:.9,offset:.6},{opacity:0}],520);return}
   if(ev.k==='r'){var el=fxAdd(fx,'line',{x1:0,y1:0,x2:((bx-ax)/(Math.hypot(bx-ax,by-ay)||1)*1.1).toFixed(2),y2:((by-ay)/(Math.hypot(bx-ax,by-ay)||1)*1.1).toFixed(2),class:'bfarrow'},[{transform:'translate('+ax+'px,'+ay+'px)'},{transform:'translate('+(ev.d>=0?bx:bx+dir*2)+'px,'+(ev.d>=0?by:by+1.2)+'px)'}],dur);return}
+  if(ev.k==='fz'){fxAdd(fx,'circle',{cx:ax.toFixed(1),cy:ay.toFixed(1),r:10,class:'fx-freeze'},[{transform:'scale(.1)',opacity:1},{transform:'scale(1)',opacity:.7,offset:.5},{opacity:0}],700);return}
   if(ev.k!=='b')return;
   if(X==='p_bolt'){fxAdd(fx,'circle',{cx:0,cy:0,r:.7,class:'fx-bolt'},[{transform:'translate('+ax+'px,'+ay+'px)'},{transform:'translate('+bx+'px,'+by+'px)'}],dur);fxAdd(fx,'circle',{cx:bx.toFixed(1),cy:by.toFixed(1),r:2,class:'fx-burst bolt'},POP,380,dur)}
   else if(X==='p_arrow'){var L=Math.hypot(bx-ax,by-ay)||1;fxAdd(fx,'line',{x1:0,y1:0,x2:((bx-ax)/L*2.4).toFixed(2),y2:((by-ay)/L*2.4).toFixed(2),class:'fx-arcarrow'},[{transform:'translate('+ax+'px,'+ay+'px)'},{transform:'translate('+bx+'px,'+by+'px)'}],dur)}
+  else if(X==='p_shower'){[-1.2,0,1.2].forEach(function(o,i){fxAdd(fx,'circle',{cx:0,cy:0,r:.7,class:'fx-bolt'},[{transform:'translate('+(bx+o)+'px,'+(by-16)+'px)'},{transform:'translate('+(bx+o*.6)+'px,'+by+'px)'}],320+i*90)});fxAdd(fx,'circle',{cx:bx.toFixed(1),cy:by.toFixed(1),r:4,class:'fx-burst bolt'},POP,420,420)}
+  else if(X==='p_grenade'||X==='moon'){if(X==='p_grenade')fxAdd(fx,'circle',{cx:0,cy:0,r:.6,class:'fx-moonball'},[{transform:'translate('+ax+'px,'+ay+'px)'},{transform:'translate('+bx+'px,'+by+'px)'}],dur);fxAdd(fx,'circle',{cx:bx.toFixed(1),cy:by.toFixed(1),r:2,class:'fx-moon'},POP,520,X==='p_grenade'?dur:0)}
   else if(X==='p_jab'){fxAdd(fx,'circle',{cx:bx.toFixed(1),cy:by.toFixed(1),r:1.3,class:'fx-burst'},POP,320)}
   else if(X==='p_slash'){fxAdd(fx,'path',{d:'M'+(bx-1.8).toFixed(1)+' '+(by-1.3).toFixed(1)+' Q'+bx.toFixed(1)+' '+(by+.9).toFixed(1)+' '+(bx+1.8).toFixed(1)+' '+(by-1.3).toFixed(1),class:'fx-slash'},[{opacity:0,strokeDashoffset:5},{opacity:1,strokeDashoffset:0,offset:.5},{opacity:0,strokeDashoffset:0}],380)}
   else if(X==='p_push'){fxAdd(fx,'circle',{cx:ax.toFixed(1),cy:ay.toFixed(1),r:5,class:'fx-wave'},POP,420)}

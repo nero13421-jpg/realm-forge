@@ -105,6 +105,7 @@ function mapSvg(opts){
       out+='<g class="setspr">'+sprite('set_'+s.type,p[0],p[1]-3)+'</g>';
       if(s.c===c&&s.r===r)out+='<text class="hl setlab" x="'+p[0].toFixed(1)+'" y="'+(p[1]+19).toFixed(1)+'">'+(s.name?esc(s.name.slice(0,10)):SETT[s.type].ab)+'</text>';
     }
+    var hk9=(S.hgt||[])[ix(c,r)];if(hk9&&hk9.sacred)out+='<g transform="translate('+(p[0]-12).toFixed(1)+' '+(p[1]-16).toFixed(1)+') scale(1.5)" shape-rendering="crispEdges" pointer-events="none"><title>Sacred mound</title>'+rects(ART.sacred_mound,0,0)+'</g>';
     if(!t&&!s)out+='<text class="hl" x="'+p[0].toFixed(1)+'" y="'+(p[1]+10).toFixed(1)+'" style="fill:#5a4f3d;font-size:9px">'+lab(c,r)+'</text>';
     var mk0=DS[ix(c,r)]?null:marks[ix(c,r)];
     if(mk0&&mk0.active){

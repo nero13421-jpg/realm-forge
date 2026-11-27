@@ -240,23 +240,23 @@ function moonInner(b){return a64fig('moon',[],mobSeed(b),0)}
 /* the watcher: half again a man's height, drawn on a 96px frame. Pale, faceless but for two hollow eyes, a long dark shroud,
    arms that hang past his knees. He reaches (a1) and then wraps a man up in those arms (a2) */
 function watcherParts(pose,add,poly,el,rc,ln){
-  var fr=pose==='w1',a1=pose==='a1',a2=pose==='a2',lean=a1||a2?3:1;
+  var fr=pose==='w1',a1=pose==='a1',a2=pose==='a2',up=pose==='cast',lean=a1||a2?3:up?0:1,sh=up?-2:0;/* cast: the freeze, arms and shoulders thrown up */
   /* legs: stilt-thin under the shroud */
   var B=fr?[[44,58],[43,76],[44,93.5]]:[[44,58],[40,76],[37,93.5]],F=fr?[[47,58],[48,76],[47,93.5]]:[[47,58],[51,76],[54,93.5]];
   add('wrobeB',ln(B,2.2));add('wrobeB',el(B[2][0]+1.4,94.4,2.6,1.2));add('wrobe',ln(F,2.4));add('wrobe',el(F[2][0]+1.4,94.4,2.8,1.3));
   /* far arm */
-  var FA=a1?[[46+lean,25],[56,30],[70,31]]:a2?[[46+lean,25],[60,32],[66,44],[58,52]]:[[46+lean,25],[44,44],[45,66]];add('wskinB',ln(FA,1.8));
-  var fe=FA[FA.length-1];for(var i=-1;i<=1;i++)add('wskinB',ln([fe,[fe[0]+(a1?5:a2?-4:i*1.4),fe[1]+(a1?i*1.6:a2?3+i:5)]],.8));
+  var FA=up?[[45,23+sh],[34,16],[29,6]]:a1?[[46+lean,25],[56,30],[70,31]]:a2?[[46+lean,25],[60,32],[66,44],[58,52]]:[[46+lean,25],[44,44],[45,66]];add('wskinB',ln(FA,1.8));
+  var fe=FA[FA.length-1];for(var i=-1;i<=1;i++)add('wskinB',ln([fe,[fe[0]+(up?i*1.6-1:a1?5:a2?-4:i*1.4),fe[1]+(up?-3:a1?i*1.6:a2?3+i:5)]],.8));
   /* the shroud: narrow at the shoulder, hanging in ragged strips to the shin */
-  add('wrobe',poly([[41+lean,21],[50+lean,21],[52,40],[54,70],[51,74],[49,69],[47,75],[45,69],[42,74],[40,70],[41,40]]));
-  add('wrobeB',poly([[41+lean,21],[44+lean,21],[43,70],[40,70],[41,40]]));
+  add('wrobe',poly([[41+lean,21+sh],[50+lean,21+sh],[52,40],[54,70],[51,74],[49,69],[47,75],[45,69],[42,74],[40,70],[41,40]]));
+  add('wrobeB',poly([[41+lean,21+sh],[44+lean,21+sh],[43,70],[40,70],[41,40]]));
   /* neck and head: a long pale oval, no mouth, two hollow eyes each with a pin of light */
   add('wskinB',rc(45.4+lean,15,2.2,7));
   add('wskin',el(47+lean,9,4.6,7.4));add('wskinB',el(44.8+lean,9.6,1.8,5.6));
   add('whole',el(49.6+lean,8.6,1.4,2));add('whole',el(51.4+lean,8.4,.6,1.7));add('wpin',rc(49.6+lean,8.2,.7,.7));
   /* near arm */
-  var NA=a1?[[48+lean,25],[60,28],[76,28]]:a2?[[48+lean,25],[64,28],[70,38],[64,48]]:[[48+lean,25],[54,44],[55.4,66]];add('wskin',ln(NA,2));
-  var ne=NA[NA.length-1];for(var j=-1;j<=1;j++)add('wskin',ln([ne,[ne[0]+(a1?6:a2?-5:j*1.6),ne[1]+(a1?j*1.8:a2?2+j*1.2:6)]],.9));
+  var NA=up?[[49,23+sh],[60,16],[66,6]]:a1?[[48+lean,25],[60,28],[76,28]]:a2?[[48+lean,25],[64,28],[70,38],[64,48]]:[[48+lean,25],[54,44],[55.4,66]];add('wskin',ln(NA,2));
+  var ne=NA[NA.length-1];for(var j=-1;j<=1;j++)add('wskin',ln([ne,[ne[0]+(up?j*1.8+1:a1?6:a2?-5:j*1.6),ne[1]+(up?-3:a1?j*1.8:a2?2+j*1.2:6)]],.9));
   return add.P}
 function watcherInner(b){return a64fig('watch',[],mobSeed(b),0)}
 function mobInner(kind,b){return kind==='watcher'?watcherInner(b):kind==='moon'?moonInner(b):kind==='dogman'?dogmanInner(b):kind==='goblin'?goblinInner(b):kind==='pigger'?piggerInner(b):kind==='tiggle'?tiggleInner(b):brigandInner(b)}

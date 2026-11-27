@@ -66,7 +66,12 @@ function toggleEquip(id){
   var it=byId(id),h=UI.hum?byId(UI.hum):null;if(!it||!h)return;
   if(it.eq===h.id){say(CD[it.key].n+' is his for good. Equipment cannot be taken off once it is on.',true);return render()}
   var k=kindOf(it),mine=gearOf(h);
-  if(k==='trophy'){say('No one knows yet what '+CD[it.key].n.toLowerCase()+' are good for. Keep them.',true);return render()}
+  if(k==='trophy'){
+    /* a moon eye set into a rod: moon eyes ring with plain magic, so the rod reaches further and hits harder (+0.1 each, up to five) */
+    if(it.key==='moon_eye'){var rod=gearOf(h).filter(function(x){var W2=WEAP[wkey(x.key)];return W2&&W2.rod})[0];if(!rod){say('A moon eye is set into a rod. Give '+hname(h)+' a rod first, then use the moon eye on him.',true);return render()}
+      if((rod.eyes||0)>=5){say('That rod already holds five moon eyes.',true);return render()}rod.eyes=(rod.eyes||0)+1;rod.res=(rod.res||0)+1;S.cards.splice(S.cards.indexOf(it),1);say('A moon eye is set into '+hname(h)+'\'s '+CD[rod.key].n.toLowerCase()+'. It now holds '+rod.eyes+': every spell reaches and hits ×'+(1+WEAP[wkey(rod.key)].rod+rod.eyes*.1).toFixed(1)+'. Resonance '+rod.res+'.');save();return render()}
+    if(it.key==='watching_eyes'){if(h.watch){say(hname(h)+' already sees with the watcher\'s eyes.',true);return render()}h.watch=1;S.cards.splice(S.cards.indexOf(it),1);say(hname(h)+' takes the watching eyes. He sees through woods, brush and rock, slopes slow him less, and once a fight he can rear up and freeze the enemy near him.');save();return render()}
+    say('No one knows yet what '+CD[it.key].n.toLowerCase()+' are good for. Keep them.',true);return render()}
   if(k==='monument'){say('A '+CD[it.key].n.toLowerCase()+' is raised on the land, not given to a man. Raising them comes later. Keep it.',true);return render()}
   if(h.sex==='f'&&SOLDIER_GEAR[k]){say(womanMsg(),true);return render()}
   var nw=mine.filter(function(c){return kindOf(c)==='weapon'}).length;
@@ -86,10 +91,10 @@ function toggleEquip(id){
     h.spells=h.spells||[];
     if(SPELL[it.key].later){say('No one can read the '+SPELL[it.key].n+' parchment yet. Keep it: its rite will be understood in time.',true);return render()}
     if(h.spells.indexOf(it.key)>=0){say(hname(h)+' already knows '+SPELL[it.key].n+'.',true);return render()}
-    if(!(h.gnosis>0)){say(hname(h)+' has no gnosis. Learning a spell costs 1 gnosis. Use a gnosis card on him first.',true);return render()}
+    var gn=SPELL[it.key].gn||1;if(!((h.gnosis||0)>=gn)){say(hname(h)+' has '+(h.gnosis||0)+' gnosis. Learning '+SPELL[it.key].n+' costs '+gn+' gnosis. Use gnosis cards on him first.',true);return render()}
     if(S.prestige<1){say('Using a parchment costs 1 prestige.',true);return render()}
-    S.prestige-=1;h.gnosis--;h.spells.push(it.key);S.cards.splice(S.cards.indexOf(it),1);
-    say('The parchment is consumed. '+hname(h)+' spends 1 gnosis and learns '+SPELL[it.key].n+'. 1 prestige sunk.');save();return render();
+    S.prestige-=1;h.gnosis-=gn;h.spells.push(it.key);S.cards.splice(S.cards.indexOf(it),1);
+    say('The parchment is consumed. '+hname(h)+' spends '+gn+' gnosis and learns '+SPELL[it.key].n+'. 1 prestige sunk.');save();return render();
   }
   if(k==='tattoo'){
     h.tat=h.tat||[];

@@ -8,8 +8,8 @@ PALS.s.yd=PALS.s.m/.9144;PALS.l.yd=PALS.l.m/.9144;
 var PAL_M=560,PAL_TIM=300,PANEL_M=PAL_M/PAL_TIM,PAL_LAB_M=100,COVER=.25,GATE_SEE=40;
 var GATE={n:'Gate',cost:150,tim:4,mats:{gravel:1},lab:1},TOWER={n:'Watchtower',cost:150,tim:20,mats:{gravel:1},lab:1,cap:4,m:4.57},MBR={n:'Medium footbridge',cost:250,mats:{lumber:3,gravel:2},lab:2};
 /* smart enemies go for a gate they can see, or scout along the wall for one; dumb ones hit the nearest panel */
-var INTEL={goblin:'smart',brigand:'smart',dogman:'smart'};
-var WALLX={goblin:.1,brigand:.15,pigger:.3,dogman:.3};/* share of a blow that bites into a palisade: claws and spears do little to logs */
+var INTEL={goblin:'smart',brigand:'smart',dogman:'smart',moon:'dim',watcher:'avg'};
+var WALLX={goblin:.1,brigand:.15,pigger:.3,dogman:.3,moon:.05,watcher:.2};/* share of a blow that bites into a palisade: claws and spears do little to logs */
 var CORE={hamlet:{ha:2.5,lh:8},village:{ha:7.5,lh:24}},LH_M=[22,7];
 var CD={
   human:{n:'Human',k:'human'},
@@ -38,9 +38,9 @@ function madeOf(k){var t=wkey(k);if((WEAP[t]||HEADED[t])&&!MADE[t]){var m=wmat(k
 var MAGIC_SCHOOL='Generic magic';
 var SPELL_CD={p_jab:1,p_slash:2,p_push:2,p_arrow:2,p_shield:3,p_bolt:3,p_pull:3,p_shower:5,p_grenade:3};
 var SPELL={p_bark:{n:'Arcane Bark',t:'its rite is not yet understood: no one can learn it yet',later:1},p_push:{n:'Gnostic Push',t:'1 mana · −15 hp · shoves the target 10 yd back · 30 yd range'},p_arrow:{n:'Arcane Arrow',t:'1 mana · −25 hp · 150 yd range'},p_pull:{n:'Gnostic Pull',t:'2 mana · drags one enemy out of his formation to the caster · 40 yd range'},p_jab:{n:'Arcane Jab',t:'1 mana · −20 hp'},p_shield:{n:'Mystic Shield',t:'1 mana · blocks 25 damage once'},p_slash:{n:'Arcane Slash',t:'1 mana · −10 hp · far range'},p_bolt:{n:'Arcane Bolt',t:'2 mana · −75 hp'},
-  /* the area spells that came with the moon eyes: drawn and named, not yet learnable */
-  p_shower:{n:'Arcane Shower',t:'area · three arcane bolts fall from the sky on one spot · 5 gnosis to learn, 5 mana to cast · not yet understood: no one can learn it yet',later:1},
-  p_grenade:{n:'Arcane Grenade',t:'area · a burst of moonlight like the moon eyes throw, −10 to −15 hp to everyone near where it lands · not yet understood: no one can learn it yet',later:1}};
+  /* the area spells that came with the moon eyes */
+  p_shower:{n:'Arcane Shower',t:'area · three arcane bolts fall from the sky on one spot, −75 hp each to whoever stands there · 5 gnosis to learn · 5 mana',gn:5,mc:5},
+  p_grenade:{n:'Arcane Grenade',t:'area · a burst of moonlight like the moon eyes throw, −10 to −15 hp to everyone within 2 yd of where it lands · 5 gnosis to learn · 4 mana',gn:5,mc:4}};
 var KIND={ring:'Ring',greaves:'Greaves',tattoo:'Tattoo',animal:'Animal',altar:'Altar',human:'Human',weapon:'Weapon',ammo:'Ammo',armor:'Armor',helmet:'Helmet',shield:'Shield',mat:'Material',crystal:'Crystal',gnosis:'Gnosis',parch:'Parchment',trophy:'Trophy',monument:'Monument',terrain:'Terrain',setcard:'Settlement'};
 var WEAP={
   knife:{dmg:15,apm:60,reach:1,rng:false,wt:.5},

@@ -40,10 +40,11 @@ function tagHtml(c,o){
   else if(k==='terrain')st=cardCost(c.key)+' prestige';
   else if(k==='crystal')st='+'+(CRYSTAL[c.key]||1)+' mana, for good';
   else if(k==='ring')st=RING[c.key].t+' · copper';
-  else if(k==='trophy')st=(c.key==='moon_eye'?'taken from the moon eyes, the only way to get one':'taken from a watcher')+' · its use is not yet known';
+  else if(k==='trophy')st=c.key==='moon_eye'?'taken from the moon eyes, the only way to get one · set it into a rod: every spell reaches and hits +0.1 (up to five eyes)':'taken from a watcher · whoever takes them sees through cover, climbs better and can freeze the enemy near him';
   else if(k==='monument')st=c.key==='cairn'?'one Garavatra letter cut in it · boosts the stat that letter stands for within half a tile · raising it comes later':'two Garavatra letters cut in it · boosts both their stats within a whole tile · raising it comes later';
   else if(k==='tattoo')st=TATTOO[c.key].t+' of his stats when applied, then fixed';
   if(c.boon&&c.key!=='human')st+=(st?' · ':'')+'blessed: '+resText(c);
+  if(c.eyes)st+=(st?' · ':'')+c.eyes+' moon eye'+(c.eyes>1?'s':'')+' set in: spells ×'+(1+(WEAP[wkey(c.key)].rod||0)+c.eyes*.1).toFixed(1)+' · resonance '+(c.res||0);
   var eq=c.eq?byId(c.eq):null,ne=g?g.filter(function(x){return x.eq}).length:0;
   if(g&&ne===g.length&&g.every(function(x){return x.eq===c.eq}))st+=(st?' · ':'')+'on '+esc(hname(eq));else if(g){if(ne)st+=(st?' · ':'')+ne+' equipped'}else if(eq)st+=(st?' · ':'')+'on '+esc(hname(eq));
   var cls='tag'+(o.sel?' sel':'')+(o.fresh?' fresh':'');

@@ -140,6 +140,7 @@ button.tag:hover{background:#f3ead3}
 .fx-arcarrow{stroke:#9fe3ff;stroke-width:.28;stroke-linecap:round}
 .fx-burst{fill:none;stroke:#9fe3ff;stroke-width:.28;transform-box:fill-box;transform-origin:center}.fx-burst.bolt{stroke:#c9b6ff;stroke-width:.4}
 .fx-slash{fill:none;stroke:#9fe3ff;stroke-width:.3;stroke-linecap:round;stroke-dasharray:5}
+.fx-moon{fill:#d8ccff;fill-opacity:.35;stroke:#b8a6f0;stroke-width:.3}.fx-moonball{fill:#e8e0ff;stroke:#a890e8;stroke-width:.25}.fx-freeze{fill:none;stroke:#e4ded2;stroke-width:.4;stroke-dasharray:1.2 .8}
 .fx-wave{fill:none;stroke:#bfe9ff;stroke-width:.35;transform-box:fill-box;transform-origin:center}
 .fx-tether{stroke:#b9a2ff;stroke-width:.22;stroke-dasharray:.6 .35}
 .fx-shield{fill:#7fd6ff22;stroke:#9fe3ff;stroke-width:.2;transform-box:fill-box;transform-origin:center}
@@ -369,8 +370,8 @@ PALS.s.yd=PALS.s.m/.9144;PALS.l.yd=PALS.l.m/.9144;
 var PAL_M=560,PAL_TIM=300,PANEL_M=PAL_M/PAL_TIM,PAL_LAB_M=100,COVER=.25,GATE_SEE=40;
 var GATE={n:'Gate',cost:150,tim:4,mats:{gravel:1},lab:1},TOWER={n:'Watchtower',cost:150,tim:20,mats:{gravel:1},lab:1,cap:4,m:4.57},MBR={n:'Medium footbridge',cost:250,mats:{lumber:3,gravel:2},lab:2};
 /* smart enemies go for a gate they can see, or scout along the wall for one; dumb ones hit the nearest panel */
-var INTEL={goblin:'smart',brigand:'smart',dogman:'smart'};
-var WALLX={goblin:.1,brigand:.15,pigger:.3,dogman:.3};/* share of a blow that bites into a palisade: claws and spears do little to logs */
+var INTEL={goblin:'smart',brigand:'smart',dogman:'smart',moon:'dim',watcher:'avg'};
+var WALLX={goblin:.1,brigand:.15,pigger:.3,dogman:.3,moon:.05,watcher:.2};/* share of a blow that bites into a palisade: claws and spears do little to logs */
 var CORE={hamlet:{ha:2.5,lh:8},village:{ha:7.5,lh:24}},LH_M=[22,7];
 var CD={
   human:{n:'Human',k:'human'},
@@ -399,9 +400,9 @@ function madeOf(k){var t=wkey(k);if((WEAP[t]||HEADED[t])&&!MADE[t]){var m=wmat(k
 var MAGIC_SCHOOL='Generic magic';
 var SPELL_CD={p_jab:1,p_slash:2,p_push:2,p_arrow:2,p_shield:3,p_bolt:3,p_pull:3,p_shower:5,p_grenade:3};
 var SPELL={p_bark:{n:'Arcane Bark',t:'its rite is not yet understood: no one can learn it yet',later:1},p_push:{n:'Gnostic Push',t:'1 mana · −15 hp · shoves the target 10 yd back · 30 yd range'},p_arrow:{n:'Arcane Arrow',t:'1 mana · −25 hp · 150 yd range'},p_pull:{n:'Gnostic Pull',t:'2 mana · drags one enemy out of his formation to the caster · 40 yd range'},p_jab:{n:'Arcane Jab',t:'1 mana · −20 hp'},p_shield:{n:'Mystic Shield',t:'1 mana · blocks 25 damage once'},p_slash:{n:'Arcane Slash',t:'1 mana · −10 hp · far range'},p_bolt:{n:'Arcane Bolt',t:'2 mana · −75 hp'},
-  /* the area spells that came with the moon eyes: drawn and named, not yet learnable */
-  p_shower:{n:'Arcane Shower',t:'area · three arcane bolts fall from the sky on one spot · 5 gnosis to learn, 5 mana to cast · not yet understood: no one can learn it yet',later:1},
-  p_grenade:{n:'Arcane Grenade',t:'area · a burst of moonlight like the moon eyes throw, −10 to −15 hp to everyone near where it lands · not yet understood: no one can learn it yet',later:1}};
+  /* the area spells that came with the moon eyes */
+  p_shower:{n:'Arcane Shower',t:'area · three arcane bolts fall from the sky on one spot, −75 hp each to whoever stands there · 5 gnosis to learn · 5 mana',gn:5,mc:5},
+  p_grenade:{n:'Arcane Grenade',t:'area · a burst of moonlight like the moon eyes throw, −10 to −15 hp to everyone within 2 yd of where it lands · 5 gnosis to learn · 4 mana',gn:5,mc:4}};
 var KIND={ring:'Ring',greaves:'Greaves',tattoo:'Tattoo',animal:'Animal',altar:'Altar',human:'Human',weapon:'Weapon',ammo:'Ammo',armor:'Armor',helmet:'Helmet',shield:'Shield',mat:'Material',crystal:'Crystal',gnosis:'Gnosis',parch:'Parchment',trophy:'Trophy',monument:'Monument',terrain:'Terrain',setcard:'Settlement'};
 var WEAP={
   knife:{dmg:15,apm:60,reach:1,rng:false,wt:.5},
@@ -715,10 +716,11 @@ function tagHtml(c,o){
   else if(k==='terrain')st=cardCost(c.key)+' prestige';
   else if(k==='crystal')st='+'+(CRYSTAL[c.key]||1)+' mana, for good';
   else if(k==='ring')st=RING[c.key].t+' · copper';
-  else if(k==='trophy')st=(c.key==='moon_eye'?'taken from the moon eyes, the only way to get one':'taken from a watcher')+' · its use is not yet known';
+  else if(k==='trophy')st=c.key==='moon_eye'?'taken from the moon eyes, the only way to get one · set it into a rod: every spell reaches and hits +0.1 (up to five eyes)':'taken from a watcher · whoever takes them sees through cover, climbs better and can freeze the enemy near him';
   else if(k==='monument')st=c.key==='cairn'?'one Garavatra letter cut in it · boosts the stat that letter stands for within half a tile · raising it comes later':'two Garavatra letters cut in it · boosts both their stats within a whole tile · raising it comes later';
   else if(k==='tattoo')st=TATTOO[c.key].t+' of his stats when applied, then fixed';
   if(c.boon&&c.key!=='human')st+=(st?' · ':'')+'blessed: '+resText(c);
+  if(c.eyes)st+=(st?' · ':'')+c.eyes+' moon eye'+(c.eyes>1?'s':'')+' set in: spells ×'+(1+(WEAP[wkey(c.key)].rod||0)+c.eyes*.1).toFixed(1)+' · resonance '+(c.res||0);
   var eq=c.eq?byId(c.eq):null,ne=g?g.filter(function(x){return x.eq}).length:0;
   if(g&&ne===g.length&&g.every(function(x){return x.eq===c.eq}))st+=(st?' · ':'')+'on '+esc(hname(eq));else if(g){if(ne)st+=(st?' · ':'')+ne+' equipped'}else if(eq)st+=(st?' · ':'')+'on '+esc(hname(eq));
   var cls='tag'+(o.sel?' sel':'')+(o.fresh?' fresh':'');
@@ -874,6 +876,7 @@ function mapSvg(opts){
       out+='<g class="setspr">'+sprite('set_'+s.type,p[0],p[1]-3)+'</g>';
       if(s.c===c&&s.r===r)out+='<text class="hl setlab" x="'+p[0].toFixed(1)+'" y="'+(p[1]+19).toFixed(1)+'">'+(s.name?esc(s.name.slice(0,10)):SETT[s.type].ab)+'</text>';
     }
+    var hk9=(S.hgt||[])[ix(c,r)];if(hk9&&hk9.sacred)out+='<g transform="translate('+(p[0]-12).toFixed(1)+' '+(p[1]-16).toFixed(1)+') scale(1.5)" shape-rendering="crispEdges" pointer-events="none"><title>Sacred mound</title>'+rects(ART.sacred_mound,0,0)+'</g>';
     if(!t&&!s)out+='<text class="hl" x="'+p[0].toFixed(1)+'" y="'+(p[1]+10).toFixed(1)+'" style="fill:#5a4f3d;font-size:9px">'+lab(c,r)+'</text>';
     var mk0=DS[ix(c,r)]?null:marks[ix(c,r)];
     if(mk0&&mk0.active){
@@ -1215,7 +1218,12 @@ function toggleEquip(id){
   var it=byId(id),h=UI.hum?byId(UI.hum):null;if(!it||!h)return;
   if(it.eq===h.id){say(CD[it.key].n+' is his for good. Equipment cannot be taken off once it is on.',true);return render()}
   var k=kindOf(it),mine=gearOf(h);
-  if(k==='trophy'){say('No one knows yet what '+CD[it.key].n.toLowerCase()+' are good for. Keep them.',true);return render()}
+  if(k==='trophy'){
+    /* a moon eye set into a rod: moon eyes ring with plain magic, so the rod reaches further and hits harder (+0.1 each, up to five) */
+    if(it.key==='moon_eye'){var rod=gearOf(h).filter(function(x){var W2=WEAP[wkey(x.key)];return W2&&W2.rod})[0];if(!rod){say('A moon eye is set into a rod. Give '+hname(h)+' a rod first, then use the moon eye on him.',true);return render()}
+      if((rod.eyes||0)>=5){say('That rod already holds five moon eyes.',true);return render()}rod.eyes=(rod.eyes||0)+1;rod.res=(rod.res||0)+1;S.cards.splice(S.cards.indexOf(it),1);say('A moon eye is set into '+hname(h)+'\'s '+CD[rod.key].n.toLowerCase()+'. It now holds '+rod.eyes+': every spell reaches and hits ×'+(1+WEAP[wkey(rod.key)].rod+rod.eyes*.1).toFixed(1)+'. Resonance '+rod.res+'.');save();return render()}
+    if(it.key==='watching_eyes'){if(h.watch){say(hname(h)+' already sees with the watcher\'s eyes.',true);return render()}h.watch=1;S.cards.splice(S.cards.indexOf(it),1);say(hname(h)+' takes the watching eyes. He sees through woods, brush and rock, slopes slow him less, and once a fight he can rear up and freeze the enemy near him.');save();return render()}
+    say('No one knows yet what '+CD[it.key].n.toLowerCase()+' are good for. Keep them.',true);return render()}
   if(k==='monument'){say('A '+CD[it.key].n.toLowerCase()+' is raised on the land, not given to a man. Raising them comes later. Keep it.',true);return render()}
   if(h.sex==='f'&&SOLDIER_GEAR[k]){say(womanMsg(),true);return render()}
   var nw=mine.filter(function(c){return kindOf(c)==='weapon'}).length;
@@ -1235,10 +1243,10 @@ function toggleEquip(id){
     h.spells=h.spells||[];
     if(SPELL[it.key].later){say('No one can read the '+SPELL[it.key].n+' parchment yet. Keep it: its rite will be understood in time.',true);return render()}
     if(h.spells.indexOf(it.key)>=0){say(hname(h)+' already knows '+SPELL[it.key].n+'.',true);return render()}
-    if(!(h.gnosis>0)){say(hname(h)+' has no gnosis. Learning a spell costs 1 gnosis. Use a gnosis card on him first.',true);return render()}
+    var gn=SPELL[it.key].gn||1;if(!((h.gnosis||0)>=gn)){say(hname(h)+' has '+(h.gnosis||0)+' gnosis. Learning '+SPELL[it.key].n+' costs '+gn+' gnosis. Use gnosis cards on him first.',true);return render()}
     if(S.prestige<1){say('Using a parchment costs 1 prestige.',true);return render()}
-    S.prestige-=1;h.gnosis--;h.spells.push(it.key);S.cards.splice(S.cards.indexOf(it),1);
-    say('The parchment is consumed. '+hname(h)+' spends 1 gnosis and learns '+SPELL[it.key].n+'. 1 prestige sunk.');save();return render();
+    S.prestige-=1;h.gnosis-=gn;h.spells.push(it.key);S.cards.splice(S.cards.indexOf(it),1);
+    say('The parchment is consumed. '+hname(h)+' spends '+gn+' gnosis and learns '+SPELL[it.key].n+'. 1 prestige sunk.');save();return render();
   }
   if(k==='tattoo'){
     h.tat=h.tat||[];
@@ -1274,7 +1282,7 @@ function makeUnit(c){
   if(!rng&&bows.length)rng=bows[0];
   var mhp=Math.round(X.hp*G.hp);
   return {c:c,gm:G,foot:Math.min(.8,(X.foot||0)+G.foot),short:(X.short||1)*G.short,mhp:mhp,hp:Math.max(1,mhp-Math.round(c.dmg||0)),sp:X.sp,dr:X.dr,strike:X.strike,str:X.str,range:X.range,keen:X.keen,dfn:X.def+G.def,dodge:X.dodge+G.dodge,grit:X.grit,react:X.react,rt:X.react,press:X.press,cast:X.cast,sight:X.sight,jd:X.jd,jh:X.jh,ce:100,ceDrain:100/X.cEnd*G.ceDrain,ceRec:100/60*X.rec,
-    rod:ws.reduce(function(m,k){return Math.max(m,WEAP[k].rod||0)},0),eqk:eq.map(function(x){return x.key}),ac:ac,arrows:ac.reduce(function(t,a){return t+a.cap},0),name:hname(c),endur:100,wf:X.wf,melee:melee,rng:rng,mana:X.mana,spells:c.spells||[],sh:0,cds:0,
+    rod:eq.reduce(function(m,x){var W2=WEAP[wkey(x.key)];return W2&&W2.rod?Math.max(m,W2.rod+Math.min(.5,(x.eyes||0)*.1)):m},0),watch:!!c.watch,eqk:eq.map(function(x){return x.key}),ac:ac,arrows:ac.reduce(function(t,a){return t+a.cap},0),name:hname(c),endur:100,wf:X.wf,melee:melee,rng:rng,mana:X.mana,spells:c.spells||[],sh:0,cds:0,
     mcard:melee?eq.filter(function(x){return wkey(x.key)===melee})[0]:null,md:0,rd:0,
     armor:eq.some(function(x){return kindOf(x)==='armor'}),shield:eq.some(function(x){return kindOf(x)==='shield'}),shDef:eq.reduce(function(t,x){return t+(kindOf(x)==='shield'&&ARM[x.key]?ARM[x.key].def:0)},0),helmet:eq.some(function(x){return kindOf(x)==='helmet'}),x:0,cdm:0,cdr:0,att:{},alive:true,gone:false};
 }
@@ -1491,7 +1499,7 @@ function raidAt(){return S.match&&S.match.raidAt!=null?S.match.raidAt:RAID_AT}
 function syncDims(){COLS=S.match?S.match.W:(S.bw||9);ROWS=S.match?S.match.H:(S.bh||7)}
 /* a lone pigger is one animal: fix the grammar the group messages were written for */
 var PIGV={are:'is',have:'has',reach:'reaches','break':'breaks',walk:'walks',leave:'leaves',go:'goes',remain:'remains',find:'finds',swarm:'swarms',batter:'batters',hack:'hacks',start:'starts',cannot:'cannot',move:'moves'};
-function pigFix(m){m=m.replace(/dogman/g,'dog man');m=m.replace(/\b(1 |The |the )dog m[ae]n((?: at [A-Z]+\d+| of [A-Z]+\d+)?) (are|have|reach|break|walk|leave|go|remain|find|batter|hack|start|move)\b/g,function(a,p,at,v){return p+'dog man'+at+' '+PIGV[v]}).replace(/dog man((?: at [A-Z]+\d+)?) has found the (\w+) at ([A-Z]+\d+) and go for it/g,'dog man$1 has found the $2 at $3 and goes for it').replace(/The dog man is destroyed/g,'The dog man is dead').replace(/dog mans/g,'dog men').replace(/(dog man|pigger) walks the wall and find /g,'$1 walks the wall and finds ');return m.replace(/\b(1 |The |the )pigger((?: at [A-Z]+\d+| of [A-Z]+\d+)?) (are|have|reach|break|walk|leave|go|remain|find|batter|hack|start|move)\b/g,function(a,p,at,v){return p+'pigger'+at+' '+PIGV[v]}).replace(/pigger((?: at [A-Z]+\d+)?) has found the (\w+) at ([A-Z]+\d+) and go for it/g,'pigger$1 has found the $2 at $3 and goes for it').replace(/The pigger is destroyed/g,'The pigger is dead')}
+function pigFix(m){m=m.replace(/dogman/g,'dog man');m=m.replace(/\b(1 |The |the )dog m[ae]n((?: at [A-Z]+\d+| of [A-Z]+\d+)?) (are|have|reach|break|walk|leave|go|remain|find|batter|hack|start|move)\b/g,function(a,p,at,v){return p+'dog man'+at+' '+PIGV[v]}).replace(/dog man((?: at [A-Z]+\d+)?) has found the (\w+) at ([A-Z]+\d+) and go for it/g,'dog man$1 has found the $2 at $3 and goes for it').replace(/The dog man is destroyed/g,'The dog man is dead').replace(/dog mans/g,'dog men').replace(/(dog man|pigger) walks the wall and find /g,'$1 walks the wall and finds ');m=m.replace(/\b(1 |The |the )watcher((?: at [A-Z]+\d+| of [A-Z]+\d+)?) (are|have|reach|break|walk|leave|go|remain|find|batter|hack|start|move)\b/g,function(a,p,at,v){return p+'watcher'+at+' '+PIGV[v]}).replace(/The watcher is destroyed/g,'The watcher is dead').replace(/1 watcher remains/g,'the watcher still stands');return m.replace(/\b(1 |The |the )pigger((?: at [A-Z]+\d+| of [A-Z]+\d+)?) (are|have|reach|break|walk|leave|go|remain|find|batter|hack|start|move)\b/g,function(a,p,at,v){return p+'pigger'+at+' '+PIGV[v]}).replace(/pigger((?: at [A-Z]+\d+)?) has found the (\w+) at ([A-Z]+\d+) and go for it/g,'pigger$1 has found the $2 at $3 and goes for it').replace(/The pigger is destroyed/g,'The pigger is dead')}
 function mlog(m,c){var M=S.match;m=pigFix(String(m));M.log.push({t:mmss(M.clock),m:m,c:c||''});if(M.log.length>80)M.log.shift()}
 function matchCamps(){
   return S.match.camps.filter(function(m){return !((m.type==='pigger'||m.type==='dogman')&&!m.roam)}).map(function(m){
@@ -1579,6 +1587,16 @@ function genWorld(){
   for(r=0;r<BH;r++)for(c=0;c<BW;c++){var hk=(S.hgt||[])[r*BW+c];if(hk&&(S.grid[r*BW+c]||setAt(c,r)))wh[ix(c+dc,r+dr)]=JSON.parse(JSON.stringify(hk))}
   for(i=0;i<N;i++){if(wh[i])continue;var cc0=i%W,rr0=Math.floor(i/W),nb0=Math.round(vn(cc0/3+sd,rr0/3+sd)*6)*5;if(wg[i]==='pond'||wg[i]==='swamp'||wg[i]==='water')nb0=Math.max(0,nb0-10);
     wh[i]=(wg[i]!=='pond'&&wg[i]!=='water'&&Math.random()<.12)?{s:'mound',b:nb0,r:Math.random()<.5?15:30,d:0}:{s:'flat',b:nb0}}
+  var nbK=function(k){return nbrs(k%W,Math.floor(k/W)).map(function(p){return ix(p[0],p[1])})},comps=function(ok){var seen={},out=[];for(var k=0;k<N;k++){if(!ok[k]||seen[k])continue;var cp=[],q=[k];seen[k]=1;while(q.length){var x=q.pop();cp.push(x);nbK(x).forEach(function(y){if(ok[y]&&!seen[y]){seen[y]=1;q.push(y)}})}out.push(cp)}return out.sort(function(a,b){return b.length-a.length})};
+  var hv=function(k){var h=wh[k];return h?h.b+(h.s==='mound'?h.r:h.s==='slope'?(h.r||0)/2:0):0};
+  /* moon eyes: a crowd of 20-30 on any 15 joined tiles of plains, raised ground or kharst. No camp: they stay on their ground */
+  var mok={};for(var mk2=0;mk2<N;mk2++)if(!mine[mk2]&&(wg[mk2]==='field'||wg[mk2]==='kharst'||(wh[mk2]&&(wh[mk2].s!=='flat'||wh[mk2].b>=20))&&wg[mk2]!=='pond'&&wg[mk2]!=='water'))mok[mk2]=1;
+  var mc=comps(mok)[0];if(mc&&mc.length>=15&&Math.random()<.5){var mn=20+rnd(11),mm=[];for(var mi=0;mi<mn;mi++)mm.push({k:'moon',hp:20});var mp=pick(mc);camps.push({key:'me0',type:'moon',hexes:[],lair:mp,terr:mc,reward:100,mobs:mm,roam:true,pos:[mp%W,Math.floor(mp/W)],path:[],rem:0,wait:0,razed:true})}
+  /* the watcher: a sacred mound on the highest ground, and he never leaves the high ground around it. A one-tile dip joins two rises; a run of low tiles does not */
+  var top=-1,topK=-1;for(var tk=0;tk<N;tk++)if(!mine[tk]&&wg[tk]!=='pond'&&wg[tk]!=='water'&&hv(tk)>top){top=hv(tk);topK=tk}
+  if(topK>=0&&top>=20){var hi={};for(var hk2=0;hk2<N;hk2++)if(!mine[hk2]&&wg[hk2]!=='pond'&&wg[hk2]!=='water'&&hv(hk2)>=top-12)hi[hk2]=1;
+    var reach={},q2=[topK];reach[topK]=1;while(q2.length){var x2=q2.pop();nbK(x2).forEach(function(y){if(reach[y]||mine[y])return;if(hi[y]){reach[y]=1;q2.push(y)}else if(wg[y]!=='pond'&&wg[y]!=='water'&&nbK(y).some(function(z){return hi[z]&&!reach[z]&&z!==x2})){reach[y]=1;nbK(y).forEach(function(z){if(hi[z]&&!reach[z]){reach[z]=1;q2.push(z)}})}})}
+    var wt2=Object.keys(reach).map(Number);if(wt2.length>=3){wh[topK]={s:'mound',b:wh[topK].b,r:22,d:0,sacred:1};camps.push({key:'wa0',type:'watcher',hexes:[],lair:topK,terr:wt2,reward:200,mobs:[{k:'watcher',hp:200}],roam:true,pos:[topK%W,Math.floor(topK/W)],path:[],rem:0,wait:0,razed:true})}}
   return{W:W,H:H,grid:wg,hgt:wh,mine:mine,camps:camps,dc:dc,dr:dr,n:fp.n};
 }
 
@@ -1757,7 +1775,7 @@ function endMatch(out){
   var b=M.base;COLS=9;ROWS=7;Object.keys(b).forEach(function(k){S[k]=b[k]});S.prestige+=M.earned;loot.forEach(function(k){mk(k)});var LP=out==='won'?{p:M.earned,lc:(function(){var c={};loot.forEach(function(k){c[k]=(c[k]||0)+1});return c})(),camps:cleared,mobs:M.mobs0-left,t:mmss(M.clock)}:null;delete S.match;syncDims();initUI();UI.lootPop=LP;UI.manim=null;UI.tab='match';UI.confirm=false;UI.tile=null;UI.fresh=[];UI.place=null;UI.res=null;UI.mview='mine';say('');save();render();
 }
 var MOBL={goblin:'G',brigand:'B',pigger:'P',tiggle:'T',dogman:'D',moon:'M',watcher:'W'};
-var LOOT={watcher:[['watching_eyes',1,4],['cairn',1,3],['obelisk',1,1],['axe@cu.oak',1,1],['knife@cu.oak',1,1]],moon:[['moon_eye',1,2],['knife',1,2],['axe',1,1]],dogman:[['p_bark',1,1]],pigger:[['lumber',3,3],['gravel',3,3],['stimber',1,1],['ltimber',1,1]],tiggle:[['knife',1,2],['short_arrows',1,2],['shortbow',1,1],['red_crystal',1,1],['gnosis',1,1],['p_jab',1,1],['p_slash',1,1],['hide_armor',1,1],['leather_shield',1,1],['tat_serpent',1,1],['lumber',2,1],['gravel',2,1]],goblin:[['gravel',3,3],['lumber',3,3],['knife',1,2],['club',1,1],['short_arrows',1,1]],brigand:[['lumber',3,2],['gravel',3,2],['spear',1,2],['club',1,1],['short_arrows',1,2],['hide_armor',1,1],['hide_shield',1,1]]};
+var LOOT={moon:[['moon_eye',1,5],['knife',1,2],['axe',1,1],['p_shower',1,1],['p_grenade',1,1]],watcher:[['watching_eyes',1,4],['cairn',1,3],['obelisk',1,1],['axe@cu.oak',1,1],['knife@cu.oak',1,1]],dogman:[['p_bark',1,1]],pigger:[['lumber',3,3],['gravel',3,3],['stimber',1,1],['ltimber',1,1]],tiggle:[['knife',1,2],['short_arrows',1,2],['shortbow',1,1],['red_crystal',1,1],['gnosis',1,1],['p_jab',1,1],['p_slash',1,1],['hide_armor',1,1],['leather_shield',1,1],['tat_serpent',1,1],['lumber',2,1],['gravel',2,1]],goblin:[['gravel',3,3],['lumber',3,3],['knife',1,2],['club',1,1],['short_arrows',1,1]],brigand:[['lumber',3,2],['gravel',3,2],['spear',1,2],['club',1,1],['short_arrows',1,2],['hide_armor',1,1],['hide_shield',1,1]]};
 var RAZE_S=30,MOB_SIGHT=3;
 /* killing a camp's mobs: its reward and one bundle of loot. Burning the camp: its reward again and two bundles */
 function giveLoot(m,big){var M=S.match,L=LOOT[m.type],ks=[],i,j;for(i=0;i<(big?2:1);i++){var t=0;L.forEach(function(x){t+=x[2]});var r=Math.random()*t,e=L[0];for(j=0;j<L.length;j++){if(r<L[j][2]){e=L[j];break}r-=L[j][2]}for(j=0;j<e[1];j++)ks.push(e[0])}M.loot=(M.loot||[]).concat(ks);var c={};ks.forEach(function(k){c[k]=(c[k]||0)+1});return matsText(c)}
@@ -1778,6 +1796,8 @@ function newMobs(type){
   return o;
 }
 function mkFoe(b,i,x){
+  if(b.k==='moon')return{side:'e',kind:'moon',dodge:.1,hp:b.hp,x:x,spd:4.6,dmg:6,apm:50,reach:1,rng:false,skill:15,armor:false,shield:false,cd:0,bcd:4+Math.floor(Math.random()*10),mana:2,alive:true,id:i,ref:b};/* two bursts of moonlight a fight each */
+  if(b.k==='watcher')return{side:'e',kind:'watcher',dodge:.1,hp:b.hp,mhp:200,x:x,spd:6.5,dmg:0,apm:30,reach:1.6,rng:false,skill:40,armor:false,shield:false,cd:0,fcd:0,alive:true,id:i,ref:b};
   if(b.k==='dogman')return{side:'e',kind:'dogman',dodge:.15,hp:b.hp,x:x,spd:DOG_SP,dmg:32,apm:55,reach:2.2,rng:false,skill:35,armor:false,shield:false,cd:0,alive:true,id:i,ref:b};
   if(b.k==='pigger')return{side:'e',kind:'pigger',dodge:.05,hp:b.hp,x:x,spd:GOB_SP,dmg:25,apm:50,reach:2,rng:false,skill:25,armor:false,shield:false,cd:0,alive:true,id:i,ref:b};
   if(b.k==='tiggle')return b.w==='bow'?{side:'e',kind:'tiggle',dodge:.15,hp:b.hp,x:x,spd:3.6,dmg:8,apm:30,reach:12,rng:true,skill:15,armor:false,shield:false,cd:0,alive:true,id:i,ref:b}:{side:'e',kind:'tiggle',dodge:.15,hp:b.hp,x:x,spd:3.6,dmg:8,apm:60,reach:1,rng:false,skill:15,armor:false,shield:false,cd:0,alive:true,id:i,ref:b};
@@ -1804,6 +1824,13 @@ function castAI(u,fs,onKill,F){
   var t=nearX(u,fs,u.c.num);if(!t)return;
   var RM=1+(u.rod||0),d=dX(t,u)/RM,has=function(k){return u.spells.indexOf(k)>=0};/* a rod stretches every spell's reach and hits harder */
   if(has('p_shield')&&!(u.sh>0)&&d<=80){u.mana--;u.sh=25;u.cds=Math.max(1,Math.round(SPELL_CD.p_shield*(u.cast||1)));recEv(u,u,'sh',1);return}
+  /* area spells go where the enemy is thickest: Arcane Shower drops three bolts on a spot, Arcane Grenade bursts over a knot of them */
+  if((has('p_shower')&&u.mana>=5)||(has('p_grenade')&&u.mana>=4)){var bestA=null,bn=0;fs.forEach(function(f){if(!f.alive||dX(f,u)/RM>70)return;var n=fs.filter(function(g){return g.alive&&dX(g,f)<=4}).length;if(n>bn){bn=n;bestA=f}});
+    var ak=has('p_shower')&&u.mana>=5&&bn>=2?'p_shower':has('p_grenade')&&u.mana>=4&&bn>=3?'p_grenade':null;
+    if(ak){var hitA=fs.filter(function(g){return g.alive&&dX(g,bestA)<=(ak==='p_shower'?4:2)});u.mana-=SPELL[ak].mc;u.cds=Math.max(1,Math.round(SPELL_CD[ak]*(u.cast||1)));
+      if(ak==='p_shower')for(var bi=0;bi<3;bi++){var tb=hitA[Math.floor(Math.random()*hitA.length)];if(tb&&tb.alive){tb.hp-=Math.round(75*RM);if(tb.hp<=0){tb.alive=false;if(onKill)onKill(tb,ak)}}}
+      else hitA.forEach(function(g){g.hp-=Math.round((10+Math.random()*5)*RM);if(g.hp<=0){g.alive=false;if(onKill)onKill(g,ak)}});
+      recEv(u,bestA,'b',1);return {k:ak,t:bestA,area:hitA}}}
   var k=null,dm=0,mc=1;
   if(has('p_bolt')&&u.mana>=2&&d<=70){k='p_bolt';dm=75;mc=2}
   else if(has('p_pull')&&u.mana>=2&&u.melee&&d>6&&d<=40){k='p_pull';mc=2}
@@ -1911,17 +1938,19 @@ function step(m){
   if(m.rem<=0){m.thru=null;m.pos=m.path.shift();m.rem=HEX_YD;if(m.path.length)m.wait=streamWait(ix(m.pos[0],m.pos[1]),ix(m.path[0][0],m.path[0][1]))}
 }
 var TIG_SP=3.6,TIG_REACH=1;
-function stepTiggle(m){var M=S.match,T={},bd=1e9,tgt=null,U0=null;(m.terr||[]).forEach(function(k){T[k]=1});
+/* tiggles, moon eyes and the watcher keep to their own ground (swamp water, rocky rises, the high ground) and fall on whoever comes next to it */
+var TERR_MOB={tiggle:{sp:TIG_SP,say:function(m,U){return 'The tiggles of the swamp at '+lab(m.pos[0],m.pos[1])+' swarm to the edge at '+U.name+'.'}},moon:{sp:4.2,say:function(m,U){return 'A crowd of moon eyes comes screaming and blabbering down the rise at '+lab(m.pos[0],m.pos[1])+' at '+U.name+'.'}},watcher:{sp:6.5,say:function(m,U){return 'Something tall is standing on the high ground at '+lab(m.pos[0],m.pos[1])+', watching '+U.name+'. Then it moves.'}}};
+function stepTiggle(m){var M=S.match,T={},bd=1e9,tgt=null,U0=null,TM=TERR_MOB[m.type]||TERR_MOB.tiggle;(m.terr||[]).forEach(function(k){T[k]=1});
   S.units.forEach(function(U){var L=U.live;if(!L||L.battle||!U.hids.length)return;var uk=ix(L.pos[0],L.pos[1]);
     (m.terr||[]).forEach(function(k){var d=hexDist([k%COLS,Math.floor(k/COLS)],L.pos);if(d<=TIG_REACH&&(d<bd||(d===bd&&k===ix(m.pos[0],m.pos[1])))){bd=d;tgt=k;U0=U}})});
   var here=ix(m.pos[0],m.pos[1]);
-  if(U0&&here===tgt){if(!m.alert||m.alert!==U0.id){m.alert=U0.id;mlog('The tiggles of the swamp at '+lab(m.pos[0],m.pos[1])+' swarm to the edge at '+U0.name+'.','bad');autoPause()}return liveBattle(U0,m)}
+  if(U0&&here===tgt){if(!m.alert||m.alert!==U0.id){m.alert=U0.id;mlog(TM.say(m,U0),'bad');autoPause()}return liveBattle(U0,m)}
   if(m.wait>0){m.wait--;return}
   if(!m.path.length){var goal=tgt;if(goal==null){if(Math.random()>.03)return;goal=pick(m.terr||[here])}
     /* a path that never leaves their ground */
     var prev={},q=[here];prev[here]=-1;while(q.length){var k=q.shift();if(k===goal)break;nbrs(k%COLS,Math.floor(k/COLS)).forEach(function(n){var j=ix(n[0],n[1]);if(T[j]&&prev[j]===undefined){prev[j]=k;q.push(j)}})}
     if(prev[goal]===undefined)return;var path=[],c=goal;while(c!==here){path.unshift([c%COLS,Math.floor(c/COLS)]);c=prev[c]}m.path=path;m.rem=HEX_YD}
-  if(!m.path.length)return;m.rem-=TIG_SP*(tgt!=null?1.6:.6);if(m.rem<=0){m.pos=m.path.shift();m.rem=HEX_YD}}
+  if(!m.path.length)return;m.rem-=TM.sp*(tgt!=null?1.6:.6);if(m.rem<=0){m.pos=m.path.shift();m.rem=HEX_YD}}
 function advance(dt){
   var M=S.match,s;if(!M)return;
   for(s=0;s<dt&&!M.over&&!M.halt;s++){
@@ -1930,7 +1959,7 @@ function advance(dt){
     M.camps.forEach(function(m){
       if(M.over||!m.mobs.length)return;
       if((m.type==='pigger'||m.type==='dogman')&&!m.roam){if(M.clock>=m.spawnAt){m.roam=true;m.pos=lairPos(m);m.path=[];m.rem=HEX_YD;mlog(m.type==='dogman'?'Something big comes out of the deep woods at '+lab(m.pos[0],m.pos[1])+' on all fours: a dog man.':'A pigger crashes out of the woods at '+lab(m.pos[0],m.pos[1])+'.','bad');UI.needRender=true}return}
-      if(m.type==='tiggle'){if(!m.inBattle)stepTiggle(m);return}
+      if(m.type==='tiggle'||m.type==='moon'||m.type==='watcher'){if(!m.inBattle)stepTiggle(m);return}
       if(!m.roam){
         if(M.clock>=raidAt()){m.roam=true;m.pos=lairPos(m);m.path=[];m.rem=HEX_YD;mlog('The '+mobWord(m,1)+' of '+lab(m.pos[0],m.pos[1])+' leave their camp and start exploring.','bad');UI.needRender=true}
         return;
@@ -2180,7 +2209,7 @@ function awaySet(){var o={};S.units.forEach(function(U){if(!atHome(U)||(U.live&&
 function goHome(U,status,mode){var L=U.live,h=homeOf(U);if(!h)return;L.path=findPath(L.pos,h,uRoads(U))||[];L.rem=HEX_YD;L.status=status;L.mode=mode||'home';L.chase=null}
 function resume(U){var L=U.live;if(L.mode==='raze'){var zc=campByKey(L.target);if(zc&&!zc.razed){L.path=[];L.status='Back to the camp';return}}if(isDefend(U)){L.chase=null;goHome(U,'Returning home');return}L.chase=null;L.path=[];L.mode=U.route?'route':'idle';if(L.cur>=0)L.si=L.cur;L.status=U.route?'Back on patrol':'At rest'}
 function campByKey(k){var M=S.match;if(!M||k==null)return null;for(var i=0;i<M.camps.length;i++)if(String(M.camps[i].key)===String(k))return M.camps[i];return null}
-function mobWord(m,pl,cap){var w=m.type==='dogman'?'dog man':m.type;if((m.type==='pigger'||m.type==='dogman')&&pl&&m.mobs&&m.mobs.length<2)pl=0;if(pl)w=m.type==='dogman'?'dog men':w+'s';return cap?w.charAt(0).toUpperCase()+w.slice(1):w}
+function mobWord(m,pl,cap){var w=m.type==='dogman'?'dog man':m.type==='moon'?'moon eyes':m.type;if((m.type==='pigger'||m.type==='dogman'||m.type==='watcher')&&pl&&m.mobs&&m.mobs.length<2)pl=0;if(pl)w=m.type==='dogman'?'dog men':m.type==='moon'?w:w+'s';return cap?w.charAt(0).toUpperCase()+w.slice(1):w}
 function lairPos(m){return[m.lair%COLS,Math.floor(m.lair/COLS)]}
 function enemyNear(pos,U){
   var k=ix(pos[0],pos[1]),r=U?Math.max(1,Math.floor(Math.min.apply(null,U.hids.map(byId).filter(Boolean).map(function(h){return stats(h).sight}).concat([1e9]))/HEX_YD)):1,nb=nbrs(pos[0],pos[1]),best=null;
@@ -2343,7 +2372,7 @@ function bfNear(from,arr,jit){var best=null,bs=1e9;arr.forEach(function(t,k){if(
 function bfHt(F,x,y){/* smooth height inside the field, metres */if(!F.hg)return 0;var fx=Math.max(0,Math.min(BFX-1.001,x/BFC-.5)),fy=Math.max(0,Math.min(BFY-1.001,y/BFC-.5)),ix0=Math.floor(fx),iy0=Math.floor(fy),tx=fx-ix0,ty=fy-iy0,ix1=Math.min(BFX-1,ix0+1),iy1=Math.min(BFY-1,iy0+1),H=F.hg;
   return (H[iy0*BFX+ix0]*(1-tx)+H[iy0*BFX+ix1]*tx)*(1-ty)+(H[iy1*BFX+ix0]*(1-tx)+H[iy1*BFX+ix1]*tx)*ty}
 function bfMeleeMod(F,u,holding,t){var g=GROUND[bfCell(F,u.x,u.y)]||GROUND.o,m=g.ml||0;if(holding&&g.ln)m+=g.ln;if(t&&F.hg)m+=Math.max(-8,Math.min(8,(bfHt(F,u.x,u.y)-bfHt(F,t.x,t.y))*.5));return m}
-function bfSeen(F,u,f){var c=bfCell(F,f.x,f.y);return bfD(u,f)<=(u.sight||400)*(c==='w'?.25:c==='b'?.6:1)}
+function bfSeen(F,u,f){var c=bfCell(F,f.x,f.y);return bfD(u,f)<=(u.sight||400)*(u.watch?(c==='w'?.7:c==='b'||c==='k'?.95:1):(c==='w'?.25:c==='b'?.6:c==='k'?.75:1))}/* the watcher's eyes see through cover */
 function bfCover(F,a,t){/* your men behind a palisade take arrows ×0.25 */if(!F.wl||!F.wl.length||t.side==='e')return 1;var dx=a.x-t.x,dy=a.y-t.y,d=Math.hypot(dx,dy)||1,lim=Math.min(d-.5,6);for(var s=.5;s<=lim;s+=.75){if(isWallC(bfCell(F,t.x+dx/d*s,t.y+dy/d*s)))return COVER}return 1}
 function bfShotMul(F,a,t){var hm=a.tw?1.2:F.hg?1+Math.max(-.2,Math.min(.2,(bfHt(F,a.x,a.y)-bfHt(F,t.x,t.y))*.01)):1;return ((GROUND[bfCell(F,a.x,a.y)]||GROUND.o).sh||1)*((GROUND[bfCell(F,t.x,t.y)]||GROUND.o).cv||1)*hm*bfCover(F,a,t)}
 function bfEv(b,a,t,k,d,lab,x){b.evn++;b.ev.push({n:b.evn,k:k,x:x,a:a._ri,t:t._ri,ax:a.x,ay:a.y,bx:t.x,by:t.y,d:d,s:t.side==='e'?'e':'p',lab:lab});if(b.ev.length>150)b.ev.shift();b.rec.ev.push([b.bt,a._ri,t._ri,k,d,lab,x])}
@@ -2356,6 +2385,39 @@ function bfFrame(b){var cen=function(L){var n=0,cx=0,cy=0;L.forEach(function(q){
   b.units.concat(b.foes).forEach(function(x){if(!x.alive)return;if(!x.face){/* at contact men face the way their team faces, mobs face the men */var tm=x.side==='e'?null:b.teams.filter(function(t){return t.k===x.tk})[0],c0=cen(x.side==='e'?b.units:b.foes);x.face=tm&&tm.face?tm.face.slice():c0?[c0[0]-x.x,c0[1]-x.y]:[1,0]}if(x._px!=null){var dx=x.x-x._px,dy=x.y-x._py;if(dx*dx+dy*dy>.0025)x.face=[dx,dy]}x._px=x.x;x._py=x.y});var fr=[];b.units.concat(b.foes).forEach(function(x){fr[x._ri]=[Math.round(x.x*10)/10,Math.round(x.y*10)/10,Math.max(0,Math.round(x.hp)),x.alive?(x.gone?2:1):0]});b.rec.fr.push(fr)}
 /* bodies keep apart: at least GAP_E yards between enemies, GAP_S between men of the same side, so the lines stay readable */
 var GAP_E=1.5,GAP_S=1;
+/* ---------- moon eyes: they scurry, never hold a line, and throw bursts of moonlight into the thickest knot of men ---------- */
+var MOON_R=1.8,MOON_RNG=20;
+function moonAI(b,F,f,seen,live){if(!seen.length)return;var tg=bfNear(f,seen,f.id);if(!tg)return;var d=bfD(f,tg);f.woke=true;
+  f.cd=Math.max(-1,f.cd-1);f.bcd=(f.bcd||0)-1;
+  /* the burst: centred on the man with the most others within 2 yd, if he is in throwing range */
+  if(f.bcd<=0&&f.mana>0){var best=null,bn=0;seen.forEach(function(u){if(bfD(f,u)>MOON_RNG)return;var n=live.filter(function(v){return v.alive&&!v.gone&&bfD(u,v)<=MOON_R}).length;if(n>bn){bn=n;best=u}});
+    if(best){f.mana--;f.bcd=10+Math.floor(Math.random()*7);bfEv(b,f,best,'b',0,null,'moon');live.forEach(function(v){if(!v.alive||v.gone||bfD(best,v)>MOON_R)return;var dm=10+Math.floor(Math.random()*6);hurt(v,dm);bfEv(b,f,v,'b',dm,v===best?'moonlight!':null,'moon');if(v.hp<=0)v.alive=false;nerveHit(v,4)});return}}
+  /* close in to throwing range, then keep 8-14 yd off, darting about; a man on top of them gets the flint knife */
+  if(d<=f.reach+.6&&f.cd<=0){f.cd+=60/f.apm;bfHit(b,f,tg,f.dmg,f.skill+bfMeleeMod(F,f,false,tg),'m','knife');return}
+  /* with moonlight left they hang back at throwing range; spent, they rush in with the flint knives */
+  var j=(Math.random()-.5)*6,want=f.mana>0?(d>16?12:d<6?14:null):Math.max(.8,f.reach*.8);
+  if(f.mana<=0){bfMove(F,f,tg.x+(Math.random()-.5)*2,tg.y+(Math.random()-.5)*2,f.spd);return}
+  if(want!=null||Math.random()<.5){var w=want||d,ux=(f.x-tg.x)/(d||1),uy=(f.y-tg.y)/(d||1);bfMove(F,f,tg.x+ux*w-uy*j,tg.y+uy*w+ux*j,f.spd)}}
+/* ---------- the watcher: circles to the back of the line for an archer or caster, freezes everyone near, grabs one and drains him ---------- */
+var W_FREEZE=10,W_FRZ_S=3,W_FCD=20,W_DRAIN=15;
+function wFreeze(b,src,targets,label){var n=0;targets.forEach(function(v){if(!v.alive||v.gone||bfD(src,v)>W_FREEZE||v.kind==='watcher')return;v.frz=W_FRZ_S+(Math.random()<.5?1:0);hurt(v,5);if(v.hp<=0)v.alive=false;n++;nerveHit(v,6)});if(n)bfEv(b,src,src,'fz',0,label||'freeze!',null);return n}
+function watcherAI(b,F,f,seen,live){f.fcd=Math.max(0,(f.fcd||0)-1);f.woke=true;
+  if(f.grab){var g=f.grab;if(!g.alive||g.gone){f.grab=null;g.grabbed=false;
+      /* the man is dead: he is gone 50-100 m off in a blink, takes back 10-20% of his strength, and comes again */
+      var a=Math.random()*Math.PI*2,r=(55+Math.random()*55)/.9144*.9144,nx=Math.max(4,Math.min(BFW-4,f.x+Math.cos(a)*r)),ny=Math.max(4,Math.min(BFH-4,f.y+Math.sin(a)*r)),q=bfFree(F,nx,ny);f.x=q[0];f.y=q[1];f.px=f.x;f.py=f.y;
+      var hl=Math.round((f.mhp||200)*(.1+Math.random()*.1));f.hp=Math.min(f.mhp||200,f.hp+hl);bfEv(b,f,f,'note',-1,'vanishes · +'+hl+' HP',null);return}
+    f.x=g.x+.8;f.y=g.y;hurt(g,W_DRAIN);bfEv(b,f,g,'m',W_DRAIN,'drained',null);if(g.hp<=0)g.alive=false;nerveHit(g,10);return}
+  if(!seen.length)return;
+  /* his target: an archer or caster if there is one, else whoever stands furthest back from the fighting */
+  var foesC=null,pick=null,ps=-1e9;seen.forEach(function(u){var sc=(u.rng||(u.spells&&u.spells.length)?40:0)-bfD(u,f)*.2;if(sc>ps){ps=sc;pick=u}});if(!pick)return;
+  var d=bfD(f,pick),fc=pick.face||[1,0],fl=Math.hypot(fc[0],fc[1])||1,bx=pick.x-fc[0]/fl*2.5,by=pick.y-fc[1]/fl*2.5;
+  if(d>6){/* swing wide of the line: aim for a point behind him, offset to the side while far off */var side=d>20?((f.id%2)?1:-1)*10:0;bfMove(F,f,bx-fc[1]/fl*side,by+fc[0]/fl*side,f.spd);return}
+  if(f.fcd<=0){f.fcd=W_FCD;wFreeze(b,f,live,'the watcher rears up: everyone near is frozen!')}
+  if(d>f.reach+.6){bfMove(F,f,pick.x,pick.y,f.spd);return}
+  if(pick.frz>0||Math.random()<.35){f.grab=pick;pick.grabbed=true;bfEv(b,f,pick,'m',0,'grabbed!',null);mlog('The watcher has '+pick.name+'.','bad')}}
+/* a man who has taken the watcher's eyes can rear up the same way: once every 20 s, when two or more enemies are within 10 yd */
+function eyesFreeze(b,u,fs){u.wcd=Math.max(0,(u.wcd||0)-1);if(u.wcd>0)return;if(fs.filter(function(f){return bfD(u,f)<=W_FREEZE}).length<2)return;u.wcd=W_FCD;wFreeze(b,u,fs,u.name+' rears up: the enemy near him freezes')}
+function nerveHit(){}
 function sepOk(F,e,x,y){var o=BFM;BFM={foe:e.side==='e',jh:0};var r=bfPass(F,x,y);BFM=o;return r}
 function bfSep(F,all){
   for(var it=0;it<2;it++)for(var i=0;i<all.length;i++){var a=all[i];for(var j=i+1;j<all.length;j++){var c=all[j],mn=(a.side==='e')!==(c.side==='e')?GAP_E:GAP_S,dx=c.x-a.x,dy=c.y-a.y,d=Math.hypot(dx,dy);if(d>=mn)continue;
@@ -2388,6 +2450,8 @@ function stepBattle(b){
   });
   var seenL=live.filter(function(u){return !u.hid}),seenG=seenL.filter(function(u){return !u.tw}),hasW=F.wl&&F.wl.length;b._fl=null;
   fl.forEach(function(f){
+    if(f.frz>0){f.frz--;return}
+    if(f.kind==='moon'||f.kind==='watcher'){if(f.kind==='moon')moonAI(b,F,f,seenG,live);else watcherAI(b,F,f,seenG,live);return}
     var tg=bfNear(f,f.rng?seenL:seenG,f.id);if(!tg){if(hasW&&seenL.length)wallAI(b,f,null);return}if(f.unaware){f.unaware=false;mlog('The '+f.kind+'s spot the ambush.','bad')}
     var d=bfD(f,tg),aggro=f.kind==='goblin'||f.kind==='pigger'||d<=110||f.woke;if(aggro)f.woke=true;
     if(f.kind==='tiggle'&&F.wet&&F.wet.charAt(bfIdx(f.x,f.y))!=='1'){var hw=bfFreeWet(F,f.x,f.y);bfMove(F,f,hw[0],hw[1],f.spd);f.cd=Math.max(-1,f.cd-1);return}
@@ -2398,7 +2462,7 @@ function stepBattle(b){
     if(f.woke&&d<=f.reach+.6&&f.cd<=0){f.cd+=60/f.apm;bfHit(b,f,tg,f.dmg,f.rng?f.skill*bfShotMul(F,f,tg):f.skill+bfMeleeMod(F,f,false,tg),f.rng?'r':'m',f.kind==='goblin'?'claw':f.kind==='tiggle'?(f.rng?'shortbow':'knife'):f.ref&&f.ref.w)}
   });
   live.forEach(function(u){
-    if(!u.alive||u.gone)return;var t=T[u.tk],g=G[u.uid],fs=b.foes.filter(function(f){return f.alive});if(!fs.length)return;
+    if(!u.alive||u.gone)return;if(u.grabbed){if(!b.foes.some(function(f){return f.alive&&f.grab===u}))u.grabbed=false;else return}if(u.frz>0){u.frz--;return}if(u.watch)eyesFreeze(b,u,b.foes.filter(function(f){return f.alive}));var t=T[u.tk],g=G[u.uid],fs=b.foes.filter(function(f){return f.alive});if(!fs.length)return;
     var tf=t.tgt!=null&&b.foes[t.tgt]&&b.foes[t.tgt].alive?b.foes[t.tgt]:null;if(t.tgt!=null&&!tf)t.tgt=null;
     u.guard=false;var gr=u.hp<u.grit?.8:1,o=t.order,mv=0,used=0,near=tf&&o==='advance'?tf:bfNear(u,fs,u.c.num),dn=bfD(u,near),pace=(u.endur>0?u.sp.jog:u.sp.walk)*gr,run=(u.endur>0?u.sp.sprint:u.sp.walk)*gr,hold=false,ran=false;
     var fp=t.pace||(o==='form'&&g.mode==='leg'?g.pace:null);if(fp){pace=run=((fp==='sprint'&&u.endur<=0)?u.sp.walk:(u.sp[fp]||u.sp.walk))*gr}
@@ -2428,7 +2492,7 @@ function stepBattle(b){
     if(mv)u.endur=Math.max(0,u.endur-(ran?u.dr.sprint:used>u.sp.walk*gr+1e-6?u.dr.jog:u.dr.walk));
     if(u.guard&&g.mode==='dmarch'&&o==='form')u.endur=Math.max(0,u.endur-u.dr.jog);
     if(u.hid){u.cds=Math.max(0,(u.cds||0)-1);return}
-    var hp0=fs.map(function(f){return f.hp}),sh0=u.sh||0,cs=castAI(u,fs,null,F);if(cs||(!(sh0>0)&&u.sh>0)){u.casts=(u.casts||0)+1;u.hide=false;u.rev=8}if(!(sh0>0)&&u.sh>0)bfEv(b,u,u,'sh',-1,'shield up','p_shield');fs.forEach(function(f,i){if(f.hp<hp0[i]||(cs&&cs.t===f&&(cs.k==='p_push'||cs.k==='p_pull'))){bfEv(b,u,f,'b',hp0[i]-f.hp,cs&&cs.t===f?(cs.k==='p_pull'?'pulled!':cs.k==='p_push'?'pushed −'+Math.round(hp0[i]-f.hp)+' HP':null):null,cs&&cs.t===f?cs.k:'p_bolt');f.woke=true}});
+    var hp0=fs.map(function(f){return f.hp}),sh0=u.sh||0,cs=castAI(u,fs,null,F);if(cs||(!(sh0>0)&&u.sh>0)){u.casts=(u.casts||0)+1;u.hide=false;u.rev=8}if(!(sh0>0)&&u.sh>0)bfEv(b,u,u,'sh',-1,'shield up','p_shield');fs.forEach(function(f,i){if(f.hp<hp0[i]||(cs&&cs.t===f&&(cs.k==='p_push'||cs.k==='p_pull'))){bfEv(b,u,f,'b',hp0[i]-f.hp,cs&&cs.t===f?(cs.k==='p_pull'?'pulled!':cs.k==='p_push'?'pushed −'+Math.round(hp0[i]-f.hp)+' HP':cs.area?SPELL[cs.k].n+'!':null):null,cs&&(cs.t===f||(cs.area&&cs.area.indexOf(f)>=0))?cs.k:'p_bolt');f.woke=true}});
     fs=fs.filter(function(f){return f.alive});if(!fs.length)return;
     var GM=u.gm||{mstr:1,rstr:1,mspd:1,rspd:1,rhit:1,tired:0,pierce:0},sm=u.strike*(u.ce<=0?.7+GM.tired:1)*(u.guard?.8:1),mreach=u.melee?WEAP[u.melee].reach:1;
     if(u.melee&&u.cdm<=0){var mt=tf&&bfD(u,tf)<=reach+.6?tf:bfNear(u,fs,u.c.num);if(mt&&bfD(u,mt)<=reach+.6){u.hide=false;u.rev=8;u.cdm+=60/(WEAP[u.melee].apm*sm*GM.mspd);u.att[u.melee]=(u.att[u.melee]||0)+1;var mh0=mt.hp;bfHit(b,u,mt,WEAP[u.melee].dmg*u.str*GM.mstr*(mreach<=1.5?(u.short||1):1)*matMul(u.mcard,mt)+GM.pierce,(u.c.skill[u.melee]+bfMeleeMod(F,u,hold,mt))*gr,'m',u.melee);u.md+=Math.max(0,mh0-mt.hp);return}}
@@ -2798,10 +2862,10 @@ function bfDrawEnts(P,list){
 var NOMOTION=false;try{NOMOTION=window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(x){}
 /* moves: a melee swing lunges at the target, a bow recoils, a spell glows; the man hit flashes and is knocked back, a dodge sidesteps */
 function bfAnim(P,i,frames,ms,delay){if(NOMOTION||i==null)return;var el=document.getElementById(P+'n'+i);if(!el)return;var bob=el.querySelector('.bob');if(!bob||!bob.animate)return;try{bob.animate(frames,{duration:ms,delay:delay||0,easing:'ease-out'})}catch(x){}}
-var POP=[{transform:'scale(.1)',opacity:1},{transform:'scale(1)',opacity:0}],SWING={club:1,axe:1,battle_axe:1},FLYSP={p_bolt:1,p_arrow:1};
+var POP=[{transform:'scale(.1)',opacity:1},{transform:'scale(1)',opacity:0}],SWING={club:1,axe:1,battle_axe:1},FLYSP={p_bolt:1,p_arrow:1,p_grenade:1};
 function bfPose(P,i,cls,ms){if(i==null)return;var el=document.getElementById(P+'n'+i);if(!el)return;el.style.setProperty('--pd',ms+'ms');el.classList.remove('atk','cst');void el.getBoundingClientRect();el.classList.add(cls);clearTimeout(el._pt);el._pt=setTimeout(function(){el.classList.remove(cls)},ms+140)}
 function bfMoves(P,ev,dur){
-  if(ev.k==='m')bfPose(P,ev.a,'atk',ev.x==='battle_axe'?480:380);else if(ev.k==='r')bfPose(P,ev.a,'atk',Math.max(380,dur));else if(ev.k==='b'||ev.k==='s'||ev.k==='j')bfPose(P,ev.a,'cst',520);
+  if(ev.k==='m')bfPose(P,ev.a,'atk',ev.x==='battle_axe'?480:380);else if(ev.k==='r')bfPose(P,ev.a,'atk',Math.max(380,dur));else if(ev.k==='b'||ev.k==='s'||ev.k==='j')bfPose(P,ev.a,'cst',520);else if(ev.k==='fz')bfPose(P,ev.a,'cst',900);
   var dir=ev.bx>=ev.ax?1:-1,as=ev.s==='e'?1:-1,ts=ev.s==='e'?-1:1,fly=ev.k==='r'||(ev.k==='b'&&FLYSP[ev.x]),hd=fly?dur:0,X=ev.x,f=dir*as;/* art of your men faces right, mobs are mirrored */
   if(ev.k==='m'){
     if(X==='spear')bfAnim(P,ev.a,[{transform:'none'},{transform:'translate('+(-f*2)+'px,0)',offset:.25},{transform:'translate('+(f*11)+'px,0)',offset:.5},{transform:'none'}],300);/* draw back, drive the point in */
@@ -2831,9 +2895,12 @@ function bfEffect(fx,ev,dur){
   }
   if(ev.k==='sh'){fxAdd(fx,'circle',{cx:ax.toFixed(1),cy:(ay+.2).toFixed(1),r:1.8,class:'fx-shield'},[{transform:'scale(.2)',opacity:1},{transform:'scale(1)',opacity:.9,offset:.6},{opacity:0}],520);return}
   if(ev.k==='r'){var el=fxAdd(fx,'line',{x1:0,y1:0,x2:((bx-ax)/(Math.hypot(bx-ax,by-ay)||1)*1.1).toFixed(2),y2:((by-ay)/(Math.hypot(bx-ax,by-ay)||1)*1.1).toFixed(2),class:'bfarrow'},[{transform:'translate('+ax+'px,'+ay+'px)'},{transform:'translate('+(ev.d>=0?bx:bx+dir*2)+'px,'+(ev.d>=0?by:by+1.2)+'px)'}],dur);return}
+  if(ev.k==='fz'){fxAdd(fx,'circle',{cx:ax.toFixed(1),cy:ay.toFixed(1),r:10,class:'fx-freeze'},[{transform:'scale(.1)',opacity:1},{transform:'scale(1)',opacity:.7,offset:.5},{opacity:0}],700);return}
   if(ev.k!=='b')return;
   if(X==='p_bolt'){fxAdd(fx,'circle',{cx:0,cy:0,r:.7,class:'fx-bolt'},[{transform:'translate('+ax+'px,'+ay+'px)'},{transform:'translate('+bx+'px,'+by+'px)'}],dur);fxAdd(fx,'circle',{cx:bx.toFixed(1),cy:by.toFixed(1),r:2,class:'fx-burst bolt'},POP,380,dur)}
   else if(X==='p_arrow'){var L=Math.hypot(bx-ax,by-ay)||1;fxAdd(fx,'line',{x1:0,y1:0,x2:((bx-ax)/L*2.4).toFixed(2),y2:((by-ay)/L*2.4).toFixed(2),class:'fx-arcarrow'},[{transform:'translate('+ax+'px,'+ay+'px)'},{transform:'translate('+bx+'px,'+by+'px)'}],dur)}
+  else if(X==='p_shower'){[-1.2,0,1.2].forEach(function(o,i){fxAdd(fx,'circle',{cx:0,cy:0,r:.7,class:'fx-bolt'},[{transform:'translate('+(bx+o)+'px,'+(by-16)+'px)'},{transform:'translate('+(bx+o*.6)+'px,'+by+'px)'}],320+i*90)});fxAdd(fx,'circle',{cx:bx.toFixed(1),cy:by.toFixed(1),r:4,class:'fx-burst bolt'},POP,420,420)}
+  else if(X==='p_grenade'||X==='moon'){if(X==='p_grenade')fxAdd(fx,'circle',{cx:0,cy:0,r:.6,class:'fx-moonball'},[{transform:'translate('+ax+'px,'+ay+'px)'},{transform:'translate('+bx+'px,'+by+'px)'}],dur);fxAdd(fx,'circle',{cx:bx.toFixed(1),cy:by.toFixed(1),r:2,class:'fx-moon'},POP,520,X==='p_grenade'?dur:0)}
   else if(X==='p_jab'){fxAdd(fx,'circle',{cx:bx.toFixed(1),cy:by.toFixed(1),r:1.3,class:'fx-burst'},POP,320)}
   else if(X==='p_slash'){fxAdd(fx,'path',{d:'M'+(bx-1.8).toFixed(1)+' '+(by-1.3).toFixed(1)+' Q'+bx.toFixed(1)+' '+(by+.9).toFixed(1)+' '+(bx+1.8).toFixed(1)+' '+(by-1.3).toFixed(1),class:'fx-slash'},[{opacity:0,strokeDashoffset:5},{opacity:1,strokeDashoffset:0,offset:.5},{opacity:0,strokeDashoffset:0}],380)}
   else if(X==='p_push'){fxAdd(fx,'circle',{cx:ax.toFixed(1),cy:ay.toFixed(1),r:5,class:'fx-wave'},POP,420)}
@@ -3287,6 +3354,8 @@ function terrName(c,r){var s=setAt(c,r),t=terrAt(c,r);return s?SETT[s.type].n:t?
 function mobDesc(m){
   if(m.type==='goblin')return m.mobs.length+' goblins, 50 hp each';
   if(m.type==='dogman')return 'a dog man, '+(m.mobs[0]?Math.round(m.mobs[0].hp):600)+' hp';
+  if(m.type==='moon')return m.mobs.length+' moon eyes, 20 hp each, flint daggers and bursts of moonlight';
+  if(m.type==='watcher')return 'a watcher, '+(m.mobs[0]?Math.round(m.mobs[0].hp):200)+' hp';
   if(m.type==='pigger')return 'a pigger, '+(m.mobs[0]?Math.round(m.mobs[0].hp):300)+' hp';
   if(m.type==='tiggle'){var nb=m.mobs.filter(function(b){return b.w==='bow'}).length;return m.mobs.length+' tiggles ('+nb+' little bows, '+(m.mobs.length-nb)+' daggers)'}
   var w={};m.mobs.forEach(function(b){w[b.w]=(w[b.w]||0)+1});
@@ -3593,23 +3662,23 @@ function moonInner(b){return a64fig('moon',[],mobSeed(b),0)}
 /* the watcher: half again a man's height, drawn on a 96px frame. Pale, faceless but for two hollow eyes, a long dark shroud,
    arms that hang past his knees. He reaches (a1) and then wraps a man up in those arms (a2) */
 function watcherParts(pose,add,poly,el,rc,ln){
-  var fr=pose==='w1',a1=pose==='a1',a2=pose==='a2',lean=a1||a2?3:1;
+  var fr=pose==='w1',a1=pose==='a1',a2=pose==='a2',up=pose==='cast',lean=a1||a2?3:up?0:1,sh=up?-2:0;/* cast: the freeze, arms and shoulders thrown up */
   /* legs: stilt-thin under the shroud */
   var B=fr?[[44,58],[43,76],[44,93.5]]:[[44,58],[40,76],[37,93.5]],F=fr?[[47,58],[48,76],[47,93.5]]:[[47,58],[51,76],[54,93.5]];
   add('wrobeB',ln(B,2.2));add('wrobeB',el(B[2][0]+1.4,94.4,2.6,1.2));add('wrobe',ln(F,2.4));add('wrobe',el(F[2][0]+1.4,94.4,2.8,1.3));
   /* far arm */
-  var FA=a1?[[46+lean,25],[56,30],[70,31]]:a2?[[46+lean,25],[60,32],[66,44],[58,52]]:[[46+lean,25],[44,44],[45,66]];add('wskinB',ln(FA,1.8));
-  var fe=FA[FA.length-1];for(var i=-1;i<=1;i++)add('wskinB',ln([fe,[fe[0]+(a1?5:a2?-4:i*1.4),fe[1]+(a1?i*1.6:a2?3+i:5)]],.8));
+  var FA=up?[[45,23+sh],[34,16],[29,6]]:a1?[[46+lean,25],[56,30],[70,31]]:a2?[[46+lean,25],[60,32],[66,44],[58,52]]:[[46+lean,25],[44,44],[45,66]];add('wskinB',ln(FA,1.8));
+  var fe=FA[FA.length-1];for(var i=-1;i<=1;i++)add('wskinB',ln([fe,[fe[0]+(up?i*1.6-1:a1?5:a2?-4:i*1.4),fe[1]+(up?-3:a1?i*1.6:a2?3+i:5)]],.8));
   /* the shroud: narrow at the shoulder, hanging in ragged strips to the shin */
-  add('wrobe',poly([[41+lean,21],[50+lean,21],[52,40],[54,70],[51,74],[49,69],[47,75],[45,69],[42,74],[40,70],[41,40]]));
-  add('wrobeB',poly([[41+lean,21],[44+lean,21],[43,70],[40,70],[41,40]]));
+  add('wrobe',poly([[41+lean,21+sh],[50+lean,21+sh],[52,40],[54,70],[51,74],[49,69],[47,75],[45,69],[42,74],[40,70],[41,40]]));
+  add('wrobeB',poly([[41+lean,21+sh],[44+lean,21+sh],[43,70],[40,70],[41,40]]));
   /* neck and head: a long pale oval, no mouth, two hollow eyes each with a pin of light */
   add('wskinB',rc(45.4+lean,15,2.2,7));
   add('wskin',el(47+lean,9,4.6,7.4));add('wskinB',el(44.8+lean,9.6,1.8,5.6));
   add('whole',el(49.6+lean,8.6,1.4,2));add('whole',el(51.4+lean,8.4,.6,1.7));add('wpin',rc(49.6+lean,8.2,.7,.7));
   /* near arm */
-  var NA=a1?[[48+lean,25],[60,28],[76,28]]:a2?[[48+lean,25],[64,28],[70,38],[64,48]]:[[48+lean,25],[54,44],[55.4,66]];add('wskin',ln(NA,2));
-  var ne=NA[NA.length-1];for(var j=-1;j<=1;j++)add('wskin',ln([ne,[ne[0]+(a1?6:a2?-5:j*1.6),ne[1]+(a1?j*1.8:a2?2+j*1.2:6)]],.9));
+  var NA=up?[[49,23+sh],[60,16],[66,6]]:a1?[[48+lean,25],[60,28],[76,28]]:a2?[[48+lean,25],[64,28],[70,38],[64,48]]:[[48+lean,25],[54,44],[55.4,66]];add('wskin',ln(NA,2));
+  var ne=NA[NA.length-1];for(var j=-1;j<=1;j++)add('wskin',ln([ne,[ne[0]+(up?j*1.8+1:a1?6:a2?-5:j*1.6),ne[1]+(up?-3:a1?j*1.8:a2?2+j*1.2:6)]],.9));
   return add.P}
 function watcherInner(b){return a64fig('watch',[],mobSeed(b),0)}
 function mobInner(kind,b){return kind==='watcher'?watcherInner(b):kind==='moon'?moonInner(b):kind==='dogman'?dogmanInner(b):kind==='goblin'?goblinInner(b):kind==='pigger'?piggerInner(b):kind==='tiggle'?tiggleInner(b):brigandInner(b)}
@@ -3803,7 +3872,7 @@ function vInfo(){
     [nm(icoMob('pigger'),'Pigger (no camp)'),'oak woods','1, roams alone','300','twice a human sprint','flint spear, 25 damage','100 prestige + raw materials'],
     [nm(icoMob('tiggle',{w:'bow'}),'Tiggle swamp'),'swamp','2 per swamp tile, up to 40','30','3.6 yd/s, free in wet ground','little bow (12 yd) or dagger','100 prestige + anything'],
     [nm(icoMob('dogman'),'Dog man (no camp)'),DOG_WOODS+' or more connected wooded tiles','1, always alone; smart, goes for gates','600',DOG_SP+' yd/s, a third faster than a man; runs on all fours, fights upright','claw swipes, 32 damage','200 prestige + the Arcane Bark parchment'],
-    [nm(icoMob('moon'),'Moon eyes (not in the world yet)'),'rocky ground: high ground and plains','large groups; they scurry and never hold a formation','30, frail','quick, scurrying','flint daggers, and area magic: −10 to −15 hp to everyone in a small patch','100 prestige + moon eyes (only from them) and flint tools'],
+    [nm(icoMob('moon'),'Moon eyes (not in the world yet)'),'rocky ground: high ground and plains','large groups; they scurry and never hold a formation','20, frail','quick, scurrying','flint daggers, and area magic: −10 to −15 hp to everyone in a small patch','100 prestige + moon eyes (only from them) and flint tools'],
     [nm(icoWatch(),'Watcher (not in the world yet)'),'a sacred mound, on high ground','1, always alone; average sense','200, twice a man; as hard to hurt as a man','long strides; never leaves high ground (a small dip is fine, a cluster of mounds is his, a run of low tiles is not)','circles round to the back for archers and casters, then grabs: heavy damage, very fast, while he holds on','watching eyes, and maybe a cairn, an obelisk or copper tools']])+
     '<p class="note">Mob skill is 20 (placeholder). Goblins have no gnosis. Moon eyes punish men standing close together: fight them spread out, with heroes and at range.</p>');
   o+=sec('match','Matches',

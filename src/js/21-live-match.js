@@ -23,7 +23,7 @@ function awaySet(){var o={};S.units.forEach(function(U){if(!atHome(U)||(U.live&&
 function goHome(U,status,mode){var L=U.live,h=homeOf(U);if(!h)return;L.path=findPath(L.pos,h,uRoads(U))||[];L.rem=HEX_YD;L.status=status;L.mode=mode||'home';L.chase=null}
 function resume(U){var L=U.live;if(L.mode==='raze'){var zc=campByKey(L.target);if(zc&&!zc.razed){L.path=[];L.status='Back to the camp';return}}if(isDefend(U)){L.chase=null;goHome(U,'Returning home');return}L.chase=null;L.path=[];L.mode=U.route?'route':'idle';if(L.cur>=0)L.si=L.cur;L.status=U.route?'Back on patrol':'At rest'}
 function campByKey(k){var M=S.match;if(!M||k==null)return null;for(var i=0;i<M.camps.length;i++)if(String(M.camps[i].key)===String(k))return M.camps[i];return null}
-function mobWord(m,pl,cap){var w=m.type==='dogman'?'dog man':m.type;if((m.type==='pigger'||m.type==='dogman')&&pl&&m.mobs&&m.mobs.length<2)pl=0;if(pl)w=m.type==='dogman'?'dog men':w+'s';return cap?w.charAt(0).toUpperCase()+w.slice(1):w}
+function mobWord(m,pl,cap){var w=m.type==='dogman'?'dog man':m.type==='moon'?'moon eyes':m.type;if((m.type==='pigger'||m.type==='dogman'||m.type==='watcher')&&pl&&m.mobs&&m.mobs.length<2)pl=0;if(pl)w=m.type==='dogman'?'dog men':m.type==='moon'?w:w+'s';return cap?w.charAt(0).toUpperCase()+w.slice(1):w}
 function lairPos(m){return[m.lair%COLS,Math.floor(m.lair/COLS)]}
 function enemyNear(pos,U){
   var k=ix(pos[0],pos[1]),r=U?Math.max(1,Math.floor(Math.min.apply(null,U.hids.map(byId).filter(Boolean).map(function(h){return stats(h).sight}).concat([1e9]))/HEX_YD)):1,nb=nbrs(pos[0],pos[1]),best=null;
@@ -186,7 +186,7 @@ function bfNear(from,arr,jit){var best=null,bs=1e9;arr.forEach(function(t,k){if(
 function bfHt(F,x,y){/* smooth height inside the field, metres */if(!F.hg)return 0;var fx=Math.max(0,Math.min(BFX-1.001,x/BFC-.5)),fy=Math.max(0,Math.min(BFY-1.001,y/BFC-.5)),ix0=Math.floor(fx),iy0=Math.floor(fy),tx=fx-ix0,ty=fy-iy0,ix1=Math.min(BFX-1,ix0+1),iy1=Math.min(BFY-1,iy0+1),H=F.hg;
   return (H[iy0*BFX+ix0]*(1-tx)+H[iy0*BFX+ix1]*tx)*(1-ty)+(H[iy1*BFX+ix0]*(1-tx)+H[iy1*BFX+ix1]*tx)*ty}
 function bfMeleeMod(F,u,holding,t){var g=GROUND[bfCell(F,u.x,u.y)]||GROUND.o,m=g.ml||0;if(holding&&g.ln)m+=g.ln;if(t&&F.hg)m+=Math.max(-8,Math.min(8,(bfHt(F,u.x,u.y)-bfHt(F,t.x,t.y))*.5));return m}
-function bfSeen(F,u,f){var c=bfCell(F,f.x,f.y);return bfD(u,f)<=(u.sight||400)*(c==='w'?.25:c==='b'?.6:1)}
+function bfSeen(F,u,f){var c=bfCell(F,f.x,f.y);return bfD(u,f)<=(u.sight||400)*(u.watch?(c==='w'?.7:c==='b'||c==='k'?.95:1):(c==='w'?.25:c==='b'?.6:c==='k'?.75:1))}/* the watcher's eyes see through cover */
 function bfCover(F,a,t){/* your men behind a palisade take arrows ×0.25 */if(!F.wl||!F.wl.length||t.side==='e')return 1;var dx=a.x-t.x,dy=a.y-t.y,d=Math.hypot(dx,dy)||1,lim=Math.min(d-.5,6);for(var s=.5;s<=lim;s+=.75){if(isWallC(bfCell(F,t.x+dx/d*s,t.y+dy/d*s)))return COVER}return 1}
 function bfShotMul(F,a,t){var hm=a.tw?1.2:F.hg?1+Math.max(-.2,Math.min(.2,(bfHt(F,a.x,a.y)-bfHt(F,t.x,t.y))*.01)):1;return ((GROUND[bfCell(F,a.x,a.y)]||GROUND.o).sh||1)*((GROUND[bfCell(F,t.x,t.y)]||GROUND.o).cv||1)*hm*bfCover(F,a,t)}
 function bfEv(b,a,t,k,d,lab,x){b.evn++;b.ev.push({n:b.evn,k:k,x:x,a:a._ri,t:t._ri,ax:a.x,ay:a.y,bx:t.x,by:t.y,d:d,s:t.side==='e'?'e':'p',lab:lab});if(b.ev.length>150)b.ev.shift();b.rec.ev.push([b.bt,a._ri,t._ri,k,d,lab,x])}
@@ -199,6 +199,39 @@ function bfFrame(b){var cen=function(L){var n=0,cx=0,cy=0;L.forEach(function(q){
   b.units.concat(b.foes).forEach(function(x){if(!x.alive)return;if(!x.face){/* at contact men face the way their team faces, mobs face the men */var tm=x.side==='e'?null:b.teams.filter(function(t){return t.k===x.tk})[0],c0=cen(x.side==='e'?b.units:b.foes);x.face=tm&&tm.face?tm.face.slice():c0?[c0[0]-x.x,c0[1]-x.y]:[1,0]}if(x._px!=null){var dx=x.x-x._px,dy=x.y-x._py;if(dx*dx+dy*dy>.0025)x.face=[dx,dy]}x._px=x.x;x._py=x.y});var fr=[];b.units.concat(b.foes).forEach(function(x){fr[x._ri]=[Math.round(x.x*10)/10,Math.round(x.y*10)/10,Math.max(0,Math.round(x.hp)),x.alive?(x.gone?2:1):0]});b.rec.fr.push(fr)}
 /* bodies keep apart: at least GAP_E yards between enemies, GAP_S between men of the same side, so the lines stay readable */
 var GAP_E=1.5,GAP_S=1;
+/* ---------- moon eyes: they scurry, never hold a line, and throw bursts of moonlight into the thickest knot of men ---------- */
+var MOON_R=1.8,MOON_RNG=20;
+function moonAI(b,F,f,seen,live){if(!seen.length)return;var tg=bfNear(f,seen,f.id);if(!tg)return;var d=bfD(f,tg);f.woke=true;
+  f.cd=Math.max(-1,f.cd-1);f.bcd=(f.bcd||0)-1;
+  /* the burst: centred on the man with the most others within 2 yd, if he is in throwing range */
+  if(f.bcd<=0&&f.mana>0){var best=null,bn=0;seen.forEach(function(u){if(bfD(f,u)>MOON_RNG)return;var n=live.filter(function(v){return v.alive&&!v.gone&&bfD(u,v)<=MOON_R}).length;if(n>bn){bn=n;best=u}});
+    if(best){f.mana--;f.bcd=10+Math.floor(Math.random()*7);bfEv(b,f,best,'b',0,null,'moon');live.forEach(function(v){if(!v.alive||v.gone||bfD(best,v)>MOON_R)return;var dm=10+Math.floor(Math.random()*6);hurt(v,dm);bfEv(b,f,v,'b',dm,v===best?'moonlight!':null,'moon');if(v.hp<=0)v.alive=false;nerveHit(v,4)});return}}
+  /* close in to throwing range, then keep 8-14 yd off, darting about; a man on top of them gets the flint knife */
+  if(d<=f.reach+.6&&f.cd<=0){f.cd+=60/f.apm;bfHit(b,f,tg,f.dmg,f.skill+bfMeleeMod(F,f,false,tg),'m','knife');return}
+  /* with moonlight left they hang back at throwing range; spent, they rush in with the flint knives */
+  var j=(Math.random()-.5)*6,want=f.mana>0?(d>16?12:d<6?14:null):Math.max(.8,f.reach*.8);
+  if(f.mana<=0){bfMove(F,f,tg.x+(Math.random()-.5)*2,tg.y+(Math.random()-.5)*2,f.spd);return}
+  if(want!=null||Math.random()<.5){var w=want||d,ux=(f.x-tg.x)/(d||1),uy=(f.y-tg.y)/(d||1);bfMove(F,f,tg.x+ux*w-uy*j,tg.y+uy*w+ux*j,f.spd)}}
+/* ---------- the watcher: circles to the back of the line for an archer or caster, freezes everyone near, grabs one and drains him ---------- */
+var W_FREEZE=10,W_FRZ_S=3,W_FCD=20,W_DRAIN=15;
+function wFreeze(b,src,targets,label){var n=0;targets.forEach(function(v){if(!v.alive||v.gone||bfD(src,v)>W_FREEZE||v.kind==='watcher')return;v.frz=W_FRZ_S+(Math.random()<.5?1:0);hurt(v,5);if(v.hp<=0)v.alive=false;n++;nerveHit(v,6)});if(n)bfEv(b,src,src,'fz',0,label||'freeze!',null);return n}
+function watcherAI(b,F,f,seen,live){f.fcd=Math.max(0,(f.fcd||0)-1);f.woke=true;
+  if(f.grab){var g=f.grab;if(!g.alive||g.gone){f.grab=null;g.grabbed=false;
+      /* the man is dead: he is gone 50-100 m off in a blink, takes back 10-20% of his strength, and comes again */
+      var a=Math.random()*Math.PI*2,r=(55+Math.random()*55)/.9144*.9144,nx=Math.max(4,Math.min(BFW-4,f.x+Math.cos(a)*r)),ny=Math.max(4,Math.min(BFH-4,f.y+Math.sin(a)*r)),q=bfFree(F,nx,ny);f.x=q[0];f.y=q[1];f.px=f.x;f.py=f.y;
+      var hl=Math.round((f.mhp||200)*(.1+Math.random()*.1));f.hp=Math.min(f.mhp||200,f.hp+hl);bfEv(b,f,f,'note',-1,'vanishes · +'+hl+' HP',null);return}
+    f.x=g.x+.8;f.y=g.y;hurt(g,W_DRAIN);bfEv(b,f,g,'m',W_DRAIN,'drained',null);if(g.hp<=0)g.alive=false;nerveHit(g,10);return}
+  if(!seen.length)return;
+  /* his target: an archer or caster if there is one, else whoever stands furthest back from the fighting */
+  var foesC=null,pick=null,ps=-1e9;seen.forEach(function(u){var sc=(u.rng||(u.spells&&u.spells.length)?40:0)-bfD(u,f)*.2;if(sc>ps){ps=sc;pick=u}});if(!pick)return;
+  var d=bfD(f,pick),fc=pick.face||[1,0],fl=Math.hypot(fc[0],fc[1])||1,bx=pick.x-fc[0]/fl*2.5,by=pick.y-fc[1]/fl*2.5;
+  if(d>6){/* swing wide of the line: aim for a point behind him, offset to the side while far off */var side=d>20?((f.id%2)?1:-1)*10:0;bfMove(F,f,bx-fc[1]/fl*side,by+fc[0]/fl*side,f.spd);return}
+  if(f.fcd<=0){f.fcd=W_FCD;wFreeze(b,f,live,'the watcher rears up: everyone near is frozen!')}
+  if(d>f.reach+.6){bfMove(F,f,pick.x,pick.y,f.spd);return}
+  if(pick.frz>0||Math.random()<.35){f.grab=pick;pick.grabbed=true;bfEv(b,f,pick,'m',0,'grabbed!',null);mlog('The watcher has '+pick.name+'.','bad')}}
+/* a man who has taken the watcher's eyes can rear up the same way: once every 20 s, when two or more enemies are within 10 yd */
+function eyesFreeze(b,u,fs){u.wcd=Math.max(0,(u.wcd||0)-1);if(u.wcd>0)return;if(fs.filter(function(f){return bfD(u,f)<=W_FREEZE}).length<2)return;u.wcd=W_FCD;wFreeze(b,u,fs,u.name+' rears up: the enemy near him freezes')}
+function nerveHit(){}
 function sepOk(F,e,x,y){var o=BFM;BFM={foe:e.side==='e',jh:0};var r=bfPass(F,x,y);BFM=o;return r}
 function bfSep(F,all){
   for(var it=0;it<2;it++)for(var i=0;i<all.length;i++){var a=all[i];for(var j=i+1;j<all.length;j++){var c=all[j],mn=(a.side==='e')!==(c.side==='e')?GAP_E:GAP_S,dx=c.x-a.x,dy=c.y-a.y,d=Math.hypot(dx,dy);if(d>=mn)continue;
@@ -231,6 +264,8 @@ function stepBattle(b){
   });
   var seenL=live.filter(function(u){return !u.hid}),seenG=seenL.filter(function(u){return !u.tw}),hasW=F.wl&&F.wl.length;b._fl=null;
   fl.forEach(function(f){
+    if(f.frz>0){f.frz--;return}
+    if(f.kind==='moon'||f.kind==='watcher'){if(f.kind==='moon')moonAI(b,F,f,seenG,live);else watcherAI(b,F,f,seenG,live);return}
     var tg=bfNear(f,f.rng?seenL:seenG,f.id);if(!tg){if(hasW&&seenL.length)wallAI(b,f,null);return}if(f.unaware){f.unaware=false;mlog('The '+f.kind+'s spot the ambush.','bad')}
     var d=bfD(f,tg),aggro=f.kind==='goblin'||f.kind==='pigger'||d<=110||f.woke;if(aggro)f.woke=true;
     if(f.kind==='tiggle'&&F.wet&&F.wet.charAt(bfIdx(f.x,f.y))!=='1'){var hw=bfFreeWet(F,f.x,f.y);bfMove(F,f,hw[0],hw[1],f.spd);f.cd=Math.max(-1,f.cd-1);return}
@@ -241,7 +276,7 @@ function stepBattle(b){
     if(f.woke&&d<=f.reach+.6&&f.cd<=0){f.cd+=60/f.apm;bfHit(b,f,tg,f.dmg,f.rng?f.skill*bfShotMul(F,f,tg):f.skill+bfMeleeMod(F,f,false,tg),f.rng?'r':'m',f.kind==='goblin'?'claw':f.kind==='tiggle'?(f.rng?'shortbow':'knife'):f.ref&&f.ref.w)}
   });
   live.forEach(function(u){
-    if(!u.alive||u.gone)return;var t=T[u.tk],g=G[u.uid],fs=b.foes.filter(function(f){return f.alive});if(!fs.length)return;
+    if(!u.alive||u.gone)return;if(u.grabbed){if(!b.foes.some(function(f){return f.alive&&f.grab===u}))u.grabbed=false;else return}if(u.frz>0){u.frz--;return}if(u.watch)eyesFreeze(b,u,b.foes.filter(function(f){return f.alive}));var t=T[u.tk],g=G[u.uid],fs=b.foes.filter(function(f){return f.alive});if(!fs.length)return;
     var tf=t.tgt!=null&&b.foes[t.tgt]&&b.foes[t.tgt].alive?b.foes[t.tgt]:null;if(t.tgt!=null&&!tf)t.tgt=null;
     u.guard=false;var gr=u.hp<u.grit?.8:1,o=t.order,mv=0,used=0,near=tf&&o==='advance'?tf:bfNear(u,fs,u.c.num),dn=bfD(u,near),pace=(u.endur>0?u.sp.jog:u.sp.walk)*gr,run=(u.endur>0?u.sp.sprint:u.sp.walk)*gr,hold=false,ran=false;
     var fp=t.pace||(o==='form'&&g.mode==='leg'?g.pace:null);if(fp){pace=run=((fp==='sprint'&&u.endur<=0)?u.sp.walk:(u.sp[fp]||u.sp.walk))*gr}
@@ -271,7 +306,7 @@ function stepBattle(b){
     if(mv)u.endur=Math.max(0,u.endur-(ran?u.dr.sprint:used>u.sp.walk*gr+1e-6?u.dr.jog:u.dr.walk));
     if(u.guard&&g.mode==='dmarch'&&o==='form')u.endur=Math.max(0,u.endur-u.dr.jog);
     if(u.hid){u.cds=Math.max(0,(u.cds||0)-1);return}
-    var hp0=fs.map(function(f){return f.hp}),sh0=u.sh||0,cs=castAI(u,fs,null,F);if(cs||(!(sh0>0)&&u.sh>0)){u.casts=(u.casts||0)+1;u.hide=false;u.rev=8}if(!(sh0>0)&&u.sh>0)bfEv(b,u,u,'sh',-1,'shield up','p_shield');fs.forEach(function(f,i){if(f.hp<hp0[i]||(cs&&cs.t===f&&(cs.k==='p_push'||cs.k==='p_pull'))){bfEv(b,u,f,'b',hp0[i]-f.hp,cs&&cs.t===f?(cs.k==='p_pull'?'pulled!':cs.k==='p_push'?'pushed −'+Math.round(hp0[i]-f.hp)+' HP':null):null,cs&&cs.t===f?cs.k:'p_bolt');f.woke=true}});
+    var hp0=fs.map(function(f){return f.hp}),sh0=u.sh||0,cs=castAI(u,fs,null,F);if(cs||(!(sh0>0)&&u.sh>0)){u.casts=(u.casts||0)+1;u.hide=false;u.rev=8}if(!(sh0>0)&&u.sh>0)bfEv(b,u,u,'sh',-1,'shield up','p_shield');fs.forEach(function(f,i){if(f.hp<hp0[i]||(cs&&cs.t===f&&(cs.k==='p_push'||cs.k==='p_pull'))){bfEv(b,u,f,'b',hp0[i]-f.hp,cs&&cs.t===f?(cs.k==='p_pull'?'pulled!':cs.k==='p_push'?'pushed −'+Math.round(hp0[i]-f.hp)+' HP':cs.area?SPELL[cs.k].n+'!':null):null,cs&&(cs.t===f||(cs.area&&cs.area.indexOf(f)>=0))?cs.k:'p_bolt');f.woke=true}});
     fs=fs.filter(function(f){return f.alive});if(!fs.length)return;
     var GM=u.gm||{mstr:1,rstr:1,mspd:1,rspd:1,rhit:1,tired:0,pierce:0},sm=u.strike*(u.ce<=0?.7+GM.tired:1)*(u.guard?.8:1),mreach=u.melee?WEAP[u.melee].reach:1;
     if(u.melee&&u.cdm<=0){var mt=tf&&bfD(u,tf)<=reach+.6?tf:bfNear(u,fs,u.c.num);if(mt&&bfD(u,mt)<=reach+.6){u.hide=false;u.rev=8;u.cdm+=60/(WEAP[u.melee].apm*sm*GM.mspd);u.att[u.melee]=(u.att[u.melee]||0)+1;var mh0=mt.hp;bfHit(b,u,mt,WEAP[u.melee].dmg*u.str*GM.mstr*(mreach<=1.5?(u.short||1):1)*matMul(u.mcard,mt)+GM.pierce,(u.c.skill[u.melee]+bfMeleeMod(F,u,hold,mt))*gr,'m',u.melee);u.md+=Math.max(0,mh0-mt.hp);return}}

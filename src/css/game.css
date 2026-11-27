@@ -136,6 +136,7 @@ button.tag:hover{background:#f3ead3}
 .fx-arcarrow{stroke:#9fe3ff;stroke-width:.28;stroke-linecap:round}
 .fx-burst{fill:none;stroke:#9fe3ff;stroke-width:.28;transform-box:fill-box;transform-origin:center}.fx-burst.bolt{stroke:#c9b6ff;stroke-width:.4}
 .fx-slash{fill:none;stroke:#9fe3ff;stroke-width:.3;stroke-linecap:round;stroke-dasharray:5}
+.fx-moon{fill:#d8ccff;fill-opacity:.35;stroke:#b8a6f0;stroke-width:.3}.fx-moonball{fill:#e8e0ff;stroke:#a890e8;stroke-width:.25}.fx-freeze{fill:none;stroke:#e4ded2;stroke-width:.4;stroke-dasharray:1.2 .8}
 .fx-wave{fill:none;stroke:#bfe9ff;stroke-width:.35;transform-box:fill-box;transform-origin:center}
 .fx-tether{stroke:#b9a2ff;stroke-width:.22;stroke-dasharray:.6 .35}
 .fx-shield{fill:#7fd6ff22;stroke:#9fe3ff;stroke-width:.2;transform-box:fill-box;transform-origin:center}

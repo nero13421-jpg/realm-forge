@@ -173,7 +173,7 @@ function endMatch(out){
   var b=M.base;COLS=9;ROWS=7;Object.keys(b).forEach(function(k){S[k]=b[k]});S.prestige+=M.earned;loot.forEach(function(k){mk(k)});var LP=out==='won'?{p:M.earned,lc:(function(){var c={};loot.forEach(function(k){c[k]=(c[k]||0)+1});return c})(),camps:cleared,mobs:M.mobs0-left,t:mmss(M.clock)}:null;delete S.match;syncDims();initUI();UI.lootPop=LP;UI.manim=null;UI.tab='match';UI.confirm=false;UI.tile=null;UI.fresh=[];UI.place=null;UI.res=null;UI.mview='mine';say('');save();render();
 }
 var MOBL={goblin:'G',brigand:'B',pigger:'P',tiggle:'T',dogman:'D',moon:'M',watcher:'W'};
-var LOOT={watcher:[['watching_eyes',1,4],['cairn',1,3],['obelisk',1,1],['axe@cu.oak',1,1],['knife@cu.oak',1,1]],moon:[['moon_eye',1,2],['knife',1,2],['axe',1,1]],dogman:[['p_bark',1,1]],pigger:[['lumber',3,3],['gravel',3,3],['stimber',1,1],['ltimber',1,1]],tiggle:[['knife',1,2],['short_arrows',1,2],['shortbow',1,1],['red_crystal',1,1],['gnosis',1,1],['p_jab',1,1],['p_slash',1,1],['hide_armor',1,1],['leather_shield',1,1],['tat_serpent',1,1],['lumber',2,1],['gravel',2,1]],goblin:[['gravel',3,3],['lumber',3,3],['knife',1,2],['club',1,1],['short_arrows',1,1]],brigand:[['lumber',3,2],['gravel',3,2],['spear',1,2],['club',1,1],['short_arrows',1,2],['hide_armor',1,1],['hide_shield',1,1]]};
+var LOOT={moon:[['moon_eye',1,5],['knife',1,2],['axe',1,1],['p_shower',1,1],['p_grenade',1,1]],watcher:[['watching_eyes',1,4],['cairn',1,3],['obelisk',1,1],['axe@cu.oak',1,1],['knife@cu.oak',1,1]],dogman:[['p_bark',1,1]],pigger:[['lumber',3,3],['gravel',3,3],['stimber',1,1],['ltimber',1,1]],tiggle:[['knife',1,2],['short_arrows',1,2],['shortbow',1,1],['red_crystal',1,1],['gnosis',1,1],['p_jab',1,1],['p_slash',1,1],['hide_armor',1,1],['leather_shield',1,1],['tat_serpent',1,1],['lumber',2,1],['gravel',2,1]],goblin:[['gravel',3,3],['lumber',3,3],['knife',1,2],['club',1,1],['short_arrows',1,1]],brigand:[['lumber',3,2],['gravel',3,2],['spear',1,2],['club',1,1],['short_arrows',1,2],['hide_armor',1,1],['hide_shield',1,1]]};
 var RAZE_S=30,MOB_SIGHT=3;
 /* killing a camp's mobs: its reward and one bundle of loot. Burning the camp: its reward again and two bundles */
 function giveLoot(m,big){var M=S.match,L=LOOT[m.type],ks=[],i,j;for(i=0;i<(big?2:1);i++){var t=0;L.forEach(function(x){t+=x[2]});var r=Math.random()*t,e=L[0];for(j=0;j<L.length;j++){if(r<L[j][2]){e=L[j];break}r-=L[j][2]}for(j=0;j<e[1];j++)ks.push(e[0])}M.loot=(M.loot||[]).concat(ks);var c={};ks.forEach(function(k){c[k]=(c[k]||0)+1});return matsText(c)}
@@ -194,6 +194,8 @@ function newMobs(type){
   return o;
 }
 function mkFoe(b,i,x){
+  if(b.k==='moon')return{side:'e',kind:'moon',dodge:.1,hp:b.hp,x:x,spd:4.6,dmg:6,apm:50,reach:1,rng:false,skill:15,armor:false,shield:false,cd:0,bcd:4+Math.floor(Math.random()*10),mana:2,alive:true,id:i,ref:b};/* two bursts of moonlight a fight each */
+  if(b.k==='watcher')return{side:'e',kind:'watcher',dodge:.1,hp:b.hp,mhp:200,x:x,spd:6.5,dmg:0,apm:30,reach:1.6,rng:false,skill:40,armor:false,shield:false,cd:0,fcd:0,alive:true,id:i,ref:b};
   if(b.k==='dogman')return{side:'e',kind:'dogman',dodge:.15,hp:b.hp,x:x,spd:DOG_SP,dmg:32,apm:55,reach:2.2,rng:false,skill:35,armor:false,shield:false,cd:0,alive:true,id:i,ref:b};
   if(b.k==='pigger')return{side:'e',kind:'pigger',dodge:.05,hp:b.hp,x:x,spd:GOB_SP,dmg:25,apm:50,reach:2,rng:false,skill:25,armor:false,shield:false,cd:0,alive:true,id:i,ref:b};
   if(b.k==='tiggle')return b.w==='bow'?{side:'e',kind:'tiggle',dodge:.15,hp:b.hp,x:x,spd:3.6,dmg:8,apm:30,reach:12,rng:true,skill:15,armor:false,shield:false,cd:0,alive:true,id:i,ref:b}:{side:'e',kind:'tiggle',dodge:.15,hp:b.hp,x:x,spd:3.6,dmg:8,apm:60,reach:1,rng:false,skill:15,armor:false,shield:false,cd:0,alive:true,id:i,ref:b};
@@ -220,6 +222,13 @@ function castAI(u,fs,onKill,F){
   var t=nearX(u,fs,u.c.num);if(!t)return;
   var RM=1+(u.rod||0),d=dX(t,u)/RM,has=function(k){return u.spells.indexOf(k)>=0};/* a rod stretches every spell's reach and hits harder */
   if(has('p_shield')&&!(u.sh>0)&&d<=80){u.mana--;u.sh=25;u.cds=Math.max(1,Math.round(SPELL_CD.p_shield*(u.cast||1)));recEv(u,u,'sh',1);return}
+  /* area spells go where the enemy is thickest: Arcane Shower drops three bolts on a spot, Arcane Grenade bursts over a knot of them */
+  if((has('p_shower')&&u.mana>=5)||(has('p_grenade')&&u.mana>=4)){var bestA=null,bn=0;fs.forEach(function(f){if(!f.alive||dX(f,u)/RM>70)return;var n=fs.filter(function(g){return g.alive&&dX(g,f)<=4}).length;if(n>bn){bn=n;bestA=f}});
+    var ak=has('p_shower')&&u.mana>=5&&bn>=2?'p_shower':has('p_grenade')&&u.mana>=4&&bn>=3?'p_grenade':null;
+    if(ak){var hitA=fs.filter(function(g){return g.alive&&dX(g,bestA)<=(ak==='p_shower'?4:2)});u.mana-=SPELL[ak].mc;u.cds=Math.max(1,Math.round(SPELL_CD[ak]*(u.cast||1)));
+      if(ak==='p_shower')for(var bi=0;bi<3;bi++){var tb=hitA[Math.floor(Math.random()*hitA.length)];if(tb&&tb.alive){tb.hp-=Math.round(75*RM);if(tb.hp<=0){tb.alive=false;if(onKill)onKill(tb,ak)}}}
+      else hitA.forEach(function(g){g.hp-=Math.round((10+Math.random()*5)*RM);if(g.hp<=0){g.alive=false;if(onKill)onKill(g,ak)}});
+      recEv(u,bestA,'b',1);return {k:ak,t:bestA,area:hitA}}}
   var k=null,dm=0,mc=1;
   if(has('p_bolt')&&u.mana>=2&&d<=70){k='p_bolt';dm=75;mc=2}
   else if(has('p_pull')&&u.mana>=2&&u.melee&&d>6&&d<=40){k='p_pull';mc=2}
@@ -327,17 +336,19 @@ function step(m){
   if(m.rem<=0){m.thru=null;m.pos=m.path.shift();m.rem=HEX_YD;if(m.path.length)m.wait=streamWait(ix(m.pos[0],m.pos[1]),ix(m.path[0][0],m.path[0][1]))}
 }
 var TIG_SP=3.6,TIG_REACH=1;
-function stepTiggle(m){var M=S.match,T={},bd=1e9,tgt=null,U0=null;(m.terr||[]).forEach(function(k){T[k]=1});
+/* tiggles, moon eyes and the watcher keep to their own ground (swamp water, rocky rises, the high ground) and fall on whoever comes next to it */
+var TERR_MOB={tiggle:{sp:TIG_SP,say:function(m,U){return 'The tiggles of the swamp at '+lab(m.pos[0],m.pos[1])+' swarm to the edge at '+U.name+'.'}},moon:{sp:4.2,say:function(m,U){return 'A crowd of moon eyes comes screaming and blabbering down the rise at '+lab(m.pos[0],m.pos[1])+' at '+U.name+'.'}},watcher:{sp:6.5,say:function(m,U){return 'Something tall is standing on the high ground at '+lab(m.pos[0],m.pos[1])+', watching '+U.name+'. Then it moves.'}}};
+function stepTiggle(m){var M=S.match,T={},bd=1e9,tgt=null,U0=null,TM=TERR_MOB[m.type]||TERR_MOB.tiggle;(m.terr||[]).forEach(function(k){T[k]=1});
   S.units.forEach(function(U){var L=U.live;if(!L||L.battle||!U.hids.length)return;var uk=ix(L.pos[0],L.pos[1]);
     (m.terr||[]).forEach(function(k){var d=hexDist([k%COLS,Math.floor(k/COLS)],L.pos);if(d<=TIG_REACH&&(d<bd||(d===bd&&k===ix(m.pos[0],m.pos[1])))){bd=d;tgt=k;U0=U}})});
   var here=ix(m.pos[0],m.pos[1]);
-  if(U0&&here===tgt){if(!m.alert||m.alert!==U0.id){m.alert=U0.id;mlog('The tiggles of the swamp at '+lab(m.pos[0],m.pos[1])+' swarm to the edge at '+U0.name+'.','bad');autoPause()}return liveBattle(U0,m)}
+  if(U0&&here===tgt){if(!m.alert||m.alert!==U0.id){m.alert=U0.id;mlog(TM.say(m,U0),'bad');autoPause()}return liveBattle(U0,m)}
   if(m.wait>0){m.wait--;return}
   if(!m.path.length){var goal=tgt;if(goal==null){if(Math.random()>.03)return;goal=pick(m.terr||[here])}
     /* a path that never leaves their ground */
     var prev={},q=[here];prev[here]=-1;while(q.length){var k=q.shift();if(k===goal)break;nbrs(k%COLS,Math.floor(k/COLS)).forEach(function(n){var j=ix(n[0],n[1]);if(T[j]&&prev[j]===undefined){prev[j]=k;q.push(j)}})}
     if(prev[goal]===undefined)return;var path=[],c=goal;while(c!==here){path.unshift([c%COLS,Math.floor(c/COLS)]);c=prev[c]}m.path=path;m.rem=HEX_YD}
-  if(!m.path.length)return;m.rem-=TIG_SP*(tgt!=null?1.6:.6);if(m.rem<=0){m.pos=m.path.shift();m.rem=HEX_YD}}
+  if(!m.path.length)return;m.rem-=TM.sp*(tgt!=null?1.6:.6);if(m.rem<=0){m.pos=m.path.shift();m.rem=HEX_YD}}
 function advance(dt){
   var M=S.match,s;if(!M)return;
   for(s=0;s<dt&&!M.over&&!M.halt;s++){
@@ -346,7 +357,7 @@ function advance(dt){
     M.camps.forEach(function(m){
       if(M.over||!m.mobs.length)return;
       if((m.type==='pigger'||m.type==='dogman')&&!m.roam){if(M.clock>=m.spawnAt){m.roam=true;m.pos=lairPos(m);m.path=[];m.rem=HEX_YD;mlog(m.type==='dogman'?'Something big comes out of the deep woods at '+lab(m.pos[0],m.pos[1])+' on all fours: a dog man.':'A pigger crashes out of the woods at '+lab(m.pos[0],m.pos[1])+'.','bad');UI.needRender=true}return}
-      if(m.type==='tiggle'){if(!m.inBattle)stepTiggle(m);return}
+      if(m.type==='tiggle'||m.type==='moon'||m.type==='watcher'){if(!m.inBattle)stepTiggle(m);return}
       if(!m.roam){
         if(M.clock>=raidAt()){m.roam=true;m.pos=lairPos(m);m.path=[];m.rem=HEX_YD;mlog('The '+mobWord(m,1)+' of '+lab(m.pos[0],m.pos[1])+' leave their camp and start exploring.','bad');UI.needRender=true}
         return;
