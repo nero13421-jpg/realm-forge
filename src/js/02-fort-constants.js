@@ -27,7 +27,9 @@ var CD={
 Object.keys(TERR).forEach(function(k){CD['t_'+k]={n:TERR[k].n,k:'terrain'}});
 /* elevation: slopes rise across the tile toward the way they are turned; mounds rise in the middle and keep level edges */
 var ELEV={gs:{n:'Gentle slope',sh:'slope',rise:25,cost:15},ms:{n:'Moderate slope',sh:'slope',rise:50,cost:30},sm:{n:'Small mound',sh:'mound',rise:15,cost:10},lm:{n:'Large mound',sh:'mound',rise:30,cost:20}},EKIND=['field','woodland','forest','pwood','pforest'];
-Object.keys(ELEV).forEach(function(e){EKIND.forEach(function(k){CD['e_'+e+'_'+k]={n:ELEV[e].n+' · '+TERR[k].n,k:'terrain'}})});
+/* every elevation card: each slope or mound on wild ground, plus farmland and grazing on hillsides (terraced fields on a gentle slope, hill pasture on gentle or moderate slopes) */
+var ECOMBO=[];Object.keys(ELEV).forEach(function(e){EKIND.forEach(function(k){ECOMBO.push([e,k])})});ECOMBO.push(['gs','cultivated'],['gs','pasture'],['ms','pasture']);
+ECOMBO.forEach(function(p){CD['e_'+p[0]+'_'+p[1]]={n:ELEV[p[0]].n+' · '+TERR[p[1]].n,k:'terrain'}});
 function cardTerr(key){return key.charAt(0)==='e'?key.split('_')[2]:key.slice(2)}
 function cardCost(key){var t=cardTerr(key);return TERR[t].cost+(key.charAt(0)==='e'?ELEV[key.split('_')[1]].cost:0)}
 /* what each item is made of; resonances in later eras key off these */

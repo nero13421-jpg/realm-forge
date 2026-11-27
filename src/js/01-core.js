@@ -7,20 +7,21 @@ var TERR={
   pond:{n:'Pond',cost:50,ppl:1.3,ab:'Po',sp:0},
   field:{n:'Field',cost:25,ppl:.25,ab:'Fi',sp:1},
   cultivated:{n:'Cultivated field',cost:100,ppl:20,ab:'Cu',sp:1},
-  pasture:{n:'Pasture',cost:100,ppl:5,ab:'Pa',sp:1},
+  pasture:{n:'Pasture',cost:50,ppl:5,ab:'Pa',sp:1},
+  kharst:{n:'Kharst',cost:50,ppl:2.5,ab:'Kh',sp:.5},/* rocky limestone outcrops: rough grazing (half a pasture), slow, broken ground */
   forest:{n:'Oak forest',cost:30,ppl:.03,ab:'Fo',sp:.5},
   pwood:{n:'Pine woodland',cost:25,ppl:.04,ab:'Pw',sp:.85},
   pforest:{n:'Pine forest',cost:30,ppl:.03,ab:'Pf',sp:.7},
   water:{n:'Small open water',cost:60,ppl:1.5,ab:'Ow',sp:0},
   orchard:{n:'Orchard',cost:100,ppl:12,ab:'Or',sp:.9}
 };
-var TERR_W={woodland:14,swamp:18,pond:7,field:16,cultivated:12,pasture:12,forest:8,water:5,pwood:12,pforest:8,orchard:6};
+var TERR_W={woodland:14,swamp:18,pond:7,field:16,cultivated:12,pasture:12,forest:8,water:5,pwood:12,pforest:8,orchard:6,kharst:6};
 var SETT={
   hamlet:{n:'Hamlet',cost:500,mats:{lumber:10,gravel:10},cards:1,need:150,ab:'Ha',maxPal:1,def:15},
   camp:{n:'Military camp',cost:500,cards:1,need:100,ab:'Ca',maxPal:1,def:50},
   village:{n:'Village',cost:1000,cards:3,need:450,ab:'Vi',maxPal:3,def:null,hexes:2}
 };
-var CAMP_WILD=50,WILD={woodland:1,swamp:1,field:1,forest:1,pwood:1,pforest:1};
+var CAMP_WILD=50,WILD={woodland:1,swamp:1,field:1,forest:1,pwood:1,pforest:1,kharst:1};
 /* the largest stretch of wilderness you can walk through without touching farmland, pasture or a settlement */
 function wildCount(){var best=0,seen={},W=S.bw,H=S.bh,r,c;
   for(r=0;r<H;r++)for(c=0;c<W;c++){var k0=r*W+c;if(seen[k0]||!WILD[S.grid[k0]]||setAt(c,r))continue;var q=[[c,r]],n=0;seen[k0]=1;

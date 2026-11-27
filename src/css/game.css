@@ -75,7 +75,7 @@ button.tag:hover{background:#f3ead3}
 .h-empty{fill:var(--t-empty)}
 .hx.h-clear{fill:transparent;stroke:transparent}.hx.h-clear:hover{stroke:rgba(244,234,210,.55);stroke-width:1.2}
 .h-woodland{fill:url(#pt-woodland)}.h-swamp{fill:url(#pt-swamp)}.h-pond{fill:url(#pt-pond)}
-.h-field{fill:url(#pt-field)}.h-cultivated{fill:url(#pt-cultivated)}.h-pasture{fill:url(#pt-pasture)}
+.h-field{fill:url(#pt-field)}.h-kharst{fill:url(#pt-kharst)}.h-cultivated{fill:url(#pt-cultivated)}.h-pasture{fill:url(#pt-pasture)}
 .h-set{fill:url(#pt-settle)}
 .hl.setlab{font-size:9px;fill:var(--bone);stroke:#14100a;stroke-width:2.5;paint-order:stroke}
 .hl{font-family:var(--f-mono);font-size:11px;fill:#14100a;pointer-events:none;text-anchor:middle;dominant-baseline:central}

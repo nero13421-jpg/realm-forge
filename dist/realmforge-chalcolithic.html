@@ -79,7 +79,7 @@ button.tag:hover{background:#f3ead3}
 .h-empty{fill:var(--t-empty)}
 .hx.h-clear{fill:transparent;stroke:transparent}.hx.h-clear:hover{stroke:rgba(244,234,210,.55);stroke-width:1.2}
 .h-woodland{fill:url(#pt-woodland)}.h-swamp{fill:url(#pt-swamp)}.h-pond{fill:url(#pt-pond)}
-.h-field{fill:url(#pt-field)}.h-cultivated{fill:url(#pt-cultivated)}.h-pasture{fill:url(#pt-pasture)}
+.h-field{fill:url(#pt-field)}.h-kharst{fill:url(#pt-kharst)}.h-cultivated{fill:url(#pt-cultivated)}.h-pasture{fill:url(#pt-pasture)}
 .h-set{fill:url(#pt-settle)}
 .hl.setlab{font-size:9px;fill:var(--bone);stroke:#14100a;stroke-width:2.5;paint-order:stroke}
 .hl{font-family:var(--f-mono);font-size:11px;fill:#14100a;pointer-events:none;text-anchor:middle;dominant-baseline:central}
@@ -337,20 +337,21 @@ var TERR={
   pond:{n:'Pond',cost:50,ppl:1.3,ab:'Po',sp:0},
   field:{n:'Field',cost:25,ppl:.25,ab:'Fi',sp:1},
   cultivated:{n:'Cultivated field',cost:100,ppl:20,ab:'Cu',sp:1},
-  pasture:{n:'Pasture',cost:100,ppl:5,ab:'Pa',sp:1},
+  pasture:{n:'Pasture',cost:50,ppl:5,ab:'Pa',sp:1},
+  kharst:{n:'Kharst',cost:50,ppl:2.5,ab:'Kh',sp:.5},/* rocky limestone outcrops: rough grazing (half a pasture), slow, broken ground */
   forest:{n:'Oak forest',cost:30,ppl:.03,ab:'Fo',sp:.5},
   pwood:{n:'Pine woodland',cost:25,ppl:.04,ab:'Pw',sp:.85},
   pforest:{n:'Pine forest',cost:30,ppl:.03,ab:'Pf',sp:.7},
   water:{n:'Small open water',cost:60,ppl:1.5,ab:'Ow',sp:0},
   orchard:{n:'Orchard',cost:100,ppl:12,ab:'Or',sp:.9}
 };
-var TERR_W={woodland:14,swamp:18,pond:7,field:16,cultivated:12,pasture:12,forest:8,water:5,pwood:12,pforest:8,orchard:6};
+var TERR_W={woodland:14,swamp:18,pond:7,field:16,cultivated:12,pasture:12,forest:8,water:5,pwood:12,pforest:8,orchard:6,kharst:6};
 var SETT={
   hamlet:{n:'Hamlet',cost:500,mats:{lumber:10,gravel:10},cards:1,need:150,ab:'Ha',maxPal:1,def:15},
   camp:{n:'Military camp',cost:500,cards:1,need:100,ab:'Ca',maxPal:1,def:50},
   village:{n:'Village',cost:1000,cards:3,need:450,ab:'Vi',maxPal:3,def:null,hexes:2}
 };
-var CAMP_WILD=50,WILD={woodland:1,swamp:1,field:1,forest:1,pwood:1,pforest:1};
+var CAMP_WILD=50,WILD={woodland:1,swamp:1,field:1,forest:1,pwood:1,pforest:1,kharst:1};
 /* the largest stretch of wilderness you can walk through without touching farmland, pasture or a settlement */
 function wildCount(){var best=0,seen={},W=S.bw,H=S.bh,r,c;
   for(r=0;r<H;r++)for(c=0;c<W;c++){var k0=r*W+c;if(seen[k0]||!WILD[S.grid[k0]]||setAt(c,r))continue;var q=[[c,r]],n=0;seen[k0]=1;
@@ -387,7 +388,9 @@ var CD={
 Object.keys(TERR).forEach(function(k){CD['t_'+k]={n:TERR[k].n,k:'terrain'}});
 /* elevation: slopes rise across the tile toward the way they are turned; mounds rise in the middle and keep level edges */
 var ELEV={gs:{n:'Gentle slope',sh:'slope',rise:25,cost:15},ms:{n:'Moderate slope',sh:'slope',rise:50,cost:30},sm:{n:'Small mound',sh:'mound',rise:15,cost:10},lm:{n:'Large mound',sh:'mound',rise:30,cost:20}},EKIND=['field','woodland','forest','pwood','pforest'];
-Object.keys(ELEV).forEach(function(e){EKIND.forEach(function(k){CD['e_'+e+'_'+k]={n:ELEV[e].n+' · '+TERR[k].n,k:'terrain'}})});
+/* every elevation card: each slope or mound on wild ground, plus farmland and grazing on hillsides (terraced fields on a gentle slope, hill pasture on gentle or moderate slopes) */
+var ECOMBO=[];Object.keys(ELEV).forEach(function(e){EKIND.forEach(function(k){ECOMBO.push([e,k])})});ECOMBO.push(['gs','cultivated'],['gs','pasture'],['ms','pasture']);
+ECOMBO.forEach(function(p){CD['e_'+p[0]+'_'+p[1]]={n:ELEV[p[0]].n+' · '+TERR[p[1]].n,k:'terrain'}});
 function cardTerr(key){return key.charAt(0)==='e'?key.split('_')[2]:key.slice(2)}
 function cardCost(key){var t=cardTerr(key);return TERR[t].cost+(key.charAt(0)==='e'?ELEV[key.split('_')[1]].cost:0)}
 /* what each item is made of; resonances in later eras key off these */
@@ -556,7 +559,7 @@ function openPackOf(k){
 }
 function rollKey(){
   var g=wpick(PACK);
-  if(g==='terrain'){if(Math.random()<.35){var ek=wpick([['gs',5],['ms',2],['sm',4],['lm',2]]);return 'e_'+ek+'_'+pick(EKIND)}return 't_'+wpick(TERR_PAIRS)}
+  if(g==='terrain'){if(Math.random()<.35){var ec=pick(ECOMBO);if(Math.random()<.5){var ek=wpick([['gs',5],['ms',2],['sm',4],['lm',2]]);ec=[ek,pick(EKIND)]}return 'e_'+ec[0]+'_'+ec[1]}return 't_'+wpick(TERR_PAIRS)}
   if(g==='weapon'&&Math.random()<.08)return Math.random()<.35?'rod_cu':'rod_wood';
   if(g==='weapon'||g==='ammo'){var t=pick(WEAPON_KEYS),hd=Math.random()<.35?'cu':'fl',wd=Math.random()<.4?'pine':'oak';return wvar(t,hd,wd)}
   if(g==='armor')return pick(['hide_armor','leather_armor']);
@@ -636,7 +639,7 @@ function findPath(from,to,rs){
 function fresh(){
   S={v:1,nid:1,hn:0,sid:1,prestige:3500,grid:[],hgt:[],setl:[],cards:[],packs:5,units:[],uid:1,lines:[],routes:[],rid:1,bw:9,bh:7};
   for(var i=0;i<COLS*ROWS;i++){S.grid.push(null);(S.hgt=S.hgt||[]).push(null)}
-  Object.keys(TERR).forEach(function(k){for(var n=0;n<10;n++)mk('t_'+k)});Object.keys(ELEV).forEach(function(e){EKIND.forEach(function(k){for(var n=0;n<3;n++)mk('e_'+e+'_'+k)})});
+  Object.keys(TERR).forEach(function(k){for(var n=0;n<10;n++)mk('t_'+k)});ECOMBO.forEach(function(p){for(var n=0;n<3;n++)mk('e_'+p[0]+'_'+p[1])});
   for(var q=0;q<3;q++)mk('setcard');for(var hq=0;hq<15;hq++)mk('human');S.startSet=1;
 }
 function initUI(){
@@ -725,9 +728,10 @@ ART.watching_eyes={"c":{"o":"#1c1a20","W":"#e6e2da","w":"#b0aaa0","P":"#0c0a10",
 ART.cairn={"c":{"o":"#22201c","S":"#b4ada0","s":"#8a8478","h":"#d8d2c4","G":"#7ad0c8","g":"#3a8a86"},"r":[["o",7.5,3.0,1.0,0.5],["o",7.0,3.5,0.5,0.5],["h",7.5,3.5,1.0,0.5],["o",8.5,3.5,1.0,0.5],["o",6.5,4.0,0.5,0.5],["h",7.0,4.0,2.0,0.5],["s",9.0,4.0,0.5,0.5],["o",9.5,4.0,0.5,0.5],["o",6.0,4.5,0.5,0.5],["s",6.5,4.5,0.5,0.5],["h",7.0,4.5,2.0,0.5],["s",9.0,4.5,1.0,0.5],["o",10.0,4.5,0.5,0.5],["o",6.5,5.0,0.5,0.5],["s",7.0,5.0,0.5,0.5],["h",7.5,5.0,1.0,0.5],["s",8.5,5.0,1.0,0.5],["o",9.5,5.0,0.5,0.5],["o",5.5,5.5,1.5,0.5],["S",7.0,5.5,0.5,0.5],["s",7.5,5.5,1.0,0.5],["o",8.5,5.5,1.5,0.5],["o",5.0,6.0,0.5,0.5],["S",5.5,6.0,4.0,0.5],["s",9.5,6.0,0.5,0.5],["o",10.0,6.0,0.5,0.5],["o",4.5,6.5,0.5,0.5],["s",5.0,6.5,0.5,0.5],["S",5.5,6.5,4.5,0.5],["s",10.0,6.5,0.5,0.5],["o",10.5,6.5,0.5,0.5],["o",4.5,7.0,0.5,0.5],["s",5.0,7.0,1.0,0.5],["S",6.0,7.0,3.5,0.5],["s",9.5,7.0,1.0,0.5],["o",10.5,7.0,0.5,0.5],["o",5.0,7.5,0.5,0.5],["s",5.5,7.5,4.5,0.5],["o",10.0,7.5,0.5,0.5],["o",5.5,8.0,1.5,0.5],["s",7.0,8.0,1.5,0.5],["S",8.5,8.0,0.5,0.5],["o",9.0,8.0,2.0,0.5],["o",5.0,8.5,0.5,0.5],["S",5.5,8.5,5.0,0.5],["s",10.5,8.5,0.5,0.5],["o",11.0,8.5,0.5,0.5],["o",4.5,9.0,0.5,0.5],["S",5.0,9.0,2.0,0.5],["G",7.0,9.0,0.5,0.5],["S",7.5,9.0,1.0,0.5],["G",8.5,9.0,0.5,0.5],["S",9.0,9.0,2.0,0.5],["s",11.0,9.0,0.5,0.5],["o",11.5,9.0,0.5,0.5],["o",4.5,9.5,0.5,0.5],["s",5.0,9.5,0.5,0.5],["S",5.5,9.5,2.0,0.5],["G",7.5,9.5,1.0,0.5],["S",8.5,9.5,2.5,0.5],["s",11.0,9.5,1.0,0.5],["o",12.0,9.5,0.5,0.5],["o",4.5,10.0,0.5,0.5],["s",5.0,10.0,1.0,0.5],["S",6.0,10.0,1.5,0.5],["G",7.5,10.0,1.0,0.5],["S",8.5,10.0,2.0,0.5],["s",10.5,10.0,1.0,0.5],["o",11.5,10.0,0.5,0.5],["o",5.0,10.5,1.0,0.5],["s",6.0,10.5,5.0,0.5],["o",11.0,10.5,0.5,0.5],["o",4.0,11.0,1.0,0.5],["S",5.0,11.0,2.5,0.5],["s",7.5,11.0,2.0,0.5],["S",9.5,11.0,1.0,0.5],["o",10.5,11.0,1.5,0.5],["o",3.5,11.5,0.5,0.5],["S",4.0,11.5,7.5,0.5],["s",11.5,11.5,0.5,0.5],["o",12.0,11.5,0.5,0.5],["o",3.0,12.0,0.5,0.5],["S",3.5,12.0,8.5,0.5],["s",12.0,12.0,0.5,0.5],["o",12.5,12.0,0.5,0.5],["o",3.0,12.5,0.5,0.5],["s",3.5,12.5,0.5,0.5],["S",4.0,12.5,7.5,0.5],["s",11.5,12.5,1.0,0.5],["o",12.5,12.5,0.5,0.5],["o",3.5,13.0,0.5,0.5],["s",4.0,13.0,1.5,0.5],["S",5.5,13.0,5.0,0.5],["s",10.5,13.0,1.5,0.5],["o",12.0,13.0,0.5,0.5],["o",4.0,13.5,1.0,0.5],["s",5.0,13.5,6.0,0.5],["o",11.0,13.5,1.0,0.5],["o",5.0,14.0,6.0,0.5]]};
 ART.obelisk={"c":{"o":"#22201c","S":"#b4ada0","s":"#8a8478","h":"#d8d2c4","G":"#7ad0c8","g":"#3a8a86"},"r":[["o",7.5,2.0,1.0,0.5],["o",7.0,2.5,0.5,0.5],["S",7.5,2.5,0.5,0.5],["s",8.0,2.5,0.5,0.5],["o",8.5,2.5,0.5,0.5],["o",6.5,3.0,0.5,0.5],["S",7.0,3.0,1.0,0.5],["s",8.0,3.0,1.0,0.5],["o",9.0,3.0,0.5,0.5],["o",6.5,3.5,0.5,0.5],["h",7.0,3.5,0.5,0.5],["S",7.5,3.5,0.5,0.5],["s",8.0,3.5,1.0,0.5],["o",9.0,3.5,0.5,0.5],["o",6.5,4.0,0.5,0.5],["h",7.0,4.0,0.5,0.5],["S",7.5,4.0,0.5,0.5],["s",8.0,4.0,1.0,0.5],["o",9.0,4.0,0.5,0.5],["o",6.5,4.5,0.5,0.5],["S",7.0,4.5,1.0,0.5],["s",8.0,4.5,1.0,0.5],["o",9.0,4.5,0.5,0.5],["o",6.5,5.0,0.5,0.5],["S",7.0,5.0,1.0,0.5],["s",8.0,5.0,1.0,0.5],["o",9.0,5.0,0.5,0.5],["o",6.5,5.5,0.5,0.5],["S",7.0,5.5,1.0,0.5],["s",8.0,5.5,1.0,0.5],["o",9.0,5.5,0.5,0.5],["o",6.5,6.0,0.5,0.5],["S",7.0,6.0,0.5,0.5],["G",7.5,6.0,0.5,0.5],["s",8.0,6.0,1.0,0.5],["o",9.0,6.0,0.5,0.5],["o",6.0,6.5,0.5,0.5],["S",6.5,6.5,1.0,0.5],["G",7.5,6.5,0.5,0.5],["s",8.0,6.5,1.5,0.5],["o",9.5,6.5,0.5,0.5],["o",6.0,7.0,0.5,0.5],["S",6.5,7.0,1.5,0.5],["G",8.0,7.0,0.5,0.5],["s",8.5,7.0,1.0,0.5],["o",9.5,7.0,0.5,0.5],["o",6.0,7.5,0.5,0.5],["S",6.5,7.5,1.0,0.5],["G",7.5,7.5,0.5,0.5],["S",8.0,7.5,0.5,0.5],["s",8.5,7.5,1.0,0.5],["o",9.5,7.5,0.5,0.5],["o",6.0,8.0,0.5,0.5],["S",6.5,8.0,0.5,0.5],["G",7.0,8.0,0.5,0.5],["S",7.5,8.0,1.0,0.5],["s",8.5,8.0,1.0,0.5],["o",9.5,8.0,0.5,0.5],["o",6.0,8.5,0.5,0.5],["S",6.5,8.5,2.0,0.5],["s",8.5,8.5,1.0,0.5],["o",9.5,8.5,0.5,0.5],["o",6.0,9.0,0.5,0.5],["S",6.5,9.0,2.0,0.5],["s",8.5,9.0,1.0,0.5],["o",9.5,9.0,0.5,0.5],["o",6.0,9.5,0.5,0.5],["S",6.5,9.5,1.0,0.5],["G",7.5,9.5,0.5,0.5],["S",8.0,9.5,0.5,0.5],["s",8.5,9.5,1.0,0.5],["o",9.5,9.5,0.5,0.5],["o",6.0,10.0,0.5,0.5],["S",6.5,10.0,0.5,0.5],["G",7.0,10.0,2.0,0.5],["s",9.0,10.0,0.5,0.5],["o",9.5,10.0,0.5,0.5],["o",6.0,10.5,0.5,0.5],["S",6.5,10.5,1.0,0.5],["G",7.5,10.5,0.5,0.5],["S",8.0,10.5,0.5,0.5],["s",8.5,10.5,1.0,0.5],["o",9.5,10.5,0.5,0.5],["o",6.0,11.0,0.5,0.5],["S",6.5,11.0,1.0,0.5],["G",7.5,11.0,0.5,0.5],["S",8.0,11.0,0.5,0.5],["s",8.5,11.0,1.0,0.5],["o",9.5,11.0,0.5,0.5],["o",6.0,11.5,0.5,0.5],["S",6.5,11.5,1.0,0.5],["G",7.5,11.5,0.5,0.5],["S",8.0,11.5,0.5,0.5],["s",8.5,11.5,1.0,0.5],["o",9.5,11.5,0.5,0.5],["o",6.0,12.0,0.5,0.5],["S",6.5,12.0,2.0,0.5],["s",8.5,12.0,1.0,0.5],["o",9.5,12.0,0.5,0.5],["o",6.0,12.5,0.5,0.5],["S",6.5,12.5,2.0,0.5],["s",8.5,12.5,1.0,0.5],["o",9.5,12.5,0.5,0.5],["o",4.5,13.0,1.5,0.5],["S",6.0,13.0,2.5,0.5],["s",8.5,13.0,1.5,0.5],["o",10.0,13.0,1.5,0.5],["o",4.0,13.5,0.5,0.5],["s",4.5,13.5,1.5,0.5],["S",6.0,13.5,2.5,0.5],["s",8.5,13.5,3.0,0.5],["o",11.5,13.5,0.5,0.5],["o",4.0,14.0,0.5,0.5],["s",4.5,14.0,7.0,0.5],["o",11.5,14.0,0.5,0.5],["o",4.5,14.5,7.0,0.5]]};
 ART.sacred_mound={"c":{"o":"#22201c","M":"#7a9a56","S":"#c8c2b4","P":"#6a52b0"},"r":[["o",7.5,5.5,1.0,0.5],["o",4.5,6.0,1.0,0.5],["o",7.0,6.0,0.5,0.5],["S",7.5,6.0,1.0,0.5],["o",8.5,6.0,0.5,0.5],["o",10.5,6.0,1.0,0.5],["o",4.0,6.5,0.5,0.5],["S",4.5,6.5,1.0,0.5],["o",5.5,6.5,0.5,0.5],["o",7.0,6.5,0.5,0.5],["S",7.5,6.5,1.0,0.5],["o",8.5,6.5,0.5,0.5],["o",10.0,6.5,0.5,0.5],["S",10.5,6.5,1.0,0.5],["o",11.5,6.5,0.5,0.5],["o",4.0,7.0,0.5,0.5],["S",4.5,7.0,1.0,0.5],["o",5.5,7.0,0.5,0.5],["o",7.0,7.0,0.5,0.5],["P",7.5,7.0,1.0,0.5],["o",8.5,7.0,0.5,0.5],["o",10.0,7.0,0.5,0.5],["S",10.5,7.0,1.0,0.5],["o",11.5,7.0,0.5,0.5],["o",4.0,7.5,0.5,0.5],["S",4.5,7.5,1.0,0.5],["o",5.5,7.5,0.5,0.5],["o",7.0,7.5,0.5,0.5],["S",7.5,7.5,1.0,0.5],["o",8.5,7.5,0.5,0.5],["o",10.0,7.5,0.5,0.5],["S",10.5,7.5,1.0,0.5],["o",11.5,7.5,0.5,0.5],["o",2.0,8.0,1.0,0.5],["o",4.0,8.0,0.5,0.5],["S",4.5,8.0,1.0,0.5],["o",5.5,8.0,2.0,0.5],["S",7.5,8.0,1.0,0.5],["o",8.5,8.0,2.0,0.5],["S",10.5,8.0,1.0,0.5],["o",11.5,8.0,0.5,0.5],["o",13.0,8.0,1.0,0.5],["o",1.5,8.5,0.5,0.5],["S",2.0,8.5,1.0,0.5],["o",3.0,8.5,0.5,0.5],["o",4.0,8.5,1.5,0.5],["M",5.5,8.5,2.0,0.5],["S",7.5,8.5,1.0,0.5],["M",8.5,8.5,2.0,0.5],["o",10.5,8.5,1.5,0.5],["o",12.5,8.5,0.5,0.5],["S",13.0,8.5,1.0,0.5],["o",14.0,8.5,0.5,0.5],["o",1.5,9.0,0.5,0.5],["S",2.0,9.0,1.0,0.5],["o",3.0,9.0,1.0,0.5],["M",4.0,9.0,8.0,0.5],["o",12.0,9.0,1.0,0.5],["S",13.0,9.0,1.0,0.5],["o",14.0,9.0,0.5,0.5],["o",2.0,9.5,1.0,0.5],["M",3.0,9.5,10.0,0.5],["o",13.0,9.5,1.0,0.5],["o",2.0,10.0,0.5,0.5],["M",2.5,10.0,11.0,0.5],["o",13.5,10.0,0.5,0.5],["o",1.5,10.5,0.5,0.5],["M",2.0,10.5,12.0,0.5],["o",14.0,10.5,0.5,0.5],["o",1.0,11.0,0.5,0.5],["M",1.5,11.0,13.0,0.5],["o",14.5,11.0,0.5,0.5],["o",0.5,11.5,0.5,0.5],["M",1.0,11.5,14.0,0.5],["o",15.0,11.5,0.5,0.5],["o",0.5,12.0,0.5,0.5],["M",1.0,12.0,14.0,0.5],["o",15.0,12.0,0.5,0.5],["o",0.5,12.5,0.5,0.5],["M",1.0,12.5,14.0,0.5],["o",15.0,12.5,0.5,0.5],["o",0.0,13.0,0.5,0.5],["M",0.5,13.0,15.0,0.5],["o",15.5,13.0,0.5,0.5],["o",0.0,13.5,0.5,0.5],["M",0.5,13.5,15.0,0.5],["o",15.5,13.5,0.5,0.5],["o",0.5,14.0,15.0,0.5]]};
+ART16.t_kharst={"c":{"o":"#2a2620","S":"#b8b2a2","s":"#8c8676","h":"#dcd6c6","k":"#4a4438","G":"#4f7a2e","g":"#86b84a"},"r":[["o",9.0,3.0,0.5,0.5],["o",8.0,3.5,1.0,0.5],["S",9.0,3.5,0.5,0.5],["o",9.5,3.5,0.5,0.5],["o",7.5,4.0,0.5,0.5],["S",8.0,4.0,1.0,0.5],["h",9.0,4.0,0.5,0.5],["s",9.5,4.0,0.5,0.5],["o",10.0,4.0,0.5,0.5],["o",7.5,4.5,0.5,0.5],["S",8.0,4.5,0.5,0.5],["h",8.5,4.5,0.5,0.5],["S",9.0,4.5,0.5,0.5],["s",9.5,4.5,0.5,0.5],["o",10.0,4.5,0.5,0.5],["o",7.5,5.0,0.5,0.5],["S",8.0,5.0,1.5,0.5],["s",9.5,5.0,1.0,0.5],["o",10.5,5.0,0.5,0.5],["o",7.0,5.5,0.5,0.5],["S",7.5,5.5,2.0,0.5],["s",9.5,5.5,1.0,0.5],["o",10.5,5.5,0.5,0.5],["o",4.0,6.0,1.0,0.5],["o",7.0,6.0,0.5,0.5],["S",7.5,6.0,1.0,0.5],["k",8.5,6.0,0.5,0.5],["S",9.0,6.0,0.5,0.5],["s",9.5,6.0,1.0,0.5],["o",10.5,6.0,0.5,0.5],["o",3.0,6.5,1.0,0.5],["S",4.0,6.5,0.5,0.5],["s",4.5,6.5,0.5,0.5],["o",5.0,6.5,0.5,0.5],["o",7.0,6.5,0.5,0.5],["S",7.5,6.5,0.5,0.5],["k",8.0,6.5,0.5,0.5],["S",8.5,6.5,1.0,0.5],["s",9.5,6.5,1.0,0.5],["o",10.5,6.5,0.5,0.5],["o",2.5,7.0,0.5,0.5],["S",3.0,7.0,0.5,0.5],["h",3.5,7.0,0.5,0.5],["S",4.0,7.0,0.5,0.5],["s",4.5,7.0,0.5,0.5],["o",5.0,7.0,0.5,0.5],["o",7.0,7.0,0.5,0.5],["S",7.5,7.0,0.5,0.5],["k",8.0,7.0,0.5,0.5],["S",8.5,7.0,1.0,0.5],["s",9.5,7.0,1.5,0.5],["o",11.0,7.0,0.5,0.5],["o",2.5,7.5,0.5,0.5],["h",3.0,7.5,0.5,0.5],["S",3.5,7.5,1.0,0.5],["s",4.5,7.5,0.5,0.5],["o",5.0,7.5,0.5,0.5],["o",6.5,7.5,0.5,0.5],["S",7.0,7.5,1.0,0.5],["k",8.0,7.5,0.5,0.5],["S",8.5,7.5,1.0,0.5],["s",9.5,7.5,1.5,0.5],["o",11.0,7.5,0.5,0.5],["o",2.5,8.0,0.5,0.5],["S",3.0,8.0,1.5,0.5],["s",4.5,8.0,1.0,0.5],["o",5.5,8.0,0.5,0.5],["o",6.5,8.0,0.5,0.5],["S",7.0,8.0,1.0,0.5],["k",8.0,8.0,0.5,0.5],["S",8.5,8.0,1.0,0.5],["s",9.5,8.0,1.5,0.5],["o",11.0,8.0,0.5,0.5],["o",2.0,8.5,0.5,0.5],["S",2.5,8.5,2.5,0.5],["s",5.0,8.5,0.5,0.5],["o",5.5,8.5,0.5,0.5],["o",6.5,8.5,0.5,0.5],["S",7.0,8.5,1.0,0.5],["k",8.0,8.5,0.5,0.5],["S",8.5,8.5,1.0,0.5],["s",9.5,8.5,1.5,0.5],["o",11.0,8.5,0.5,0.5],["o",2.0,9.0,0.5,0.5],["S",2.5,9.0,1.0,0.5],["k",3.5,9.0,0.5,0.5],["S",4.0,9.0,1.0,0.5],["s",5.0,9.0,1.0,0.5],["o",6.0,9.0,1.0,0.5],["S",7.0,9.0,1.0,0.5],["k",8.0,9.0,0.5,0.5],["S",8.5,9.0,1.0,0.5],["s",9.5,9.0,1.5,0.5],["o",11.0,9.0,0.5,0.5],["o",12.0,9.0,2.0,0.5],["o",2.0,9.5,0.5,0.5],["S",2.5,9.5,1.0,0.5],["k",3.5,9.5,0.5,0.5],["S",4.0,9.5,1.0,0.5],["s",5.0,9.5,1.0,0.5],["o",6.0,9.5,1.0,0.5],["S",7.0,9.5,1.5,0.5],["k",8.5,9.5,0.5,0.5],["S",9.0,9.5,0.5,0.5],["s",9.5,9.5,1.5,0.5],["o",11.0,9.5,1.0,0.5],["S",12.0,9.5,1.5,0.5],["s",13.5,9.5,0.5,0.5],["o",14.0,9.5,0.5,0.5],["o",2.0,10.0,0.5,0.5],["S",2.5,10.0,1.0,0.5],["k",3.5,10.0,0.5,0.5],["S",4.0,10.0,1.0,0.5],["s",5.0,10.0,1.0,0.5],["o",6.0,10.0,0.5,0.5],["S",6.5,10.0,2.0,0.5],["k",8.5,10.0,0.5,0.5],["S",9.0,10.0,0.5,0.5],["s",9.5,10.0,1.5,0.5],["o",11.0,10.0,1.0,0.5],["S",12.0,10.0,1.5,0.5],["s",13.5,10.0,0.5,0.5],["o",14.0,10.0,0.5,0.5],["o",1.5,10.5,0.5,0.5],["S",2.0,10.5,1.5,0.5],["k",3.5,10.5,0.5,0.5],["S",4.0,10.5,1.0,0.5],["s",5.0,10.5,1.0,0.5],["o",6.0,10.5,0.5,0.5],["S",6.5,10.5,3.0,0.5],["s",9.5,10.5,1.5,0.5],["o",11.0,10.5,0.5,0.5],["S",11.5,10.5,2.0,0.5],["s",13.5,10.5,0.5,0.5],["o",14.0,10.5,0.5,0.5],["o",1.5,11.0,0.5,0.5],["S",2.0,11.0,1.5,0.5],["k",3.5,11.0,0.5,0.5],["S",4.0,11.0,1.0,0.5],["s",5.0,11.0,1.5,0.5],["S",6.5,11.0,3.0,0.5],["s",9.5,11.0,1.5,0.5],["o",11.0,11.0,0.5,0.5],["S",11.5,11.0,2.0,0.5],["s",13.5,11.0,0.5,0.5],["o",14.0,11.0,0.5,0.5],["o",1.5,11.5,0.5,0.5],["S",2.0,11.5,3.0,0.5],["s",5.0,11.5,1.5,0.5],["S",6.5,11.5,3.0,0.5],["s",9.5,11.5,1.5,0.5],["S",11.0,11.5,2.5,0.5],["s",13.5,11.5,1.0,0.5],["o",14.5,11.5,0.5,0.5],["o",1.0,12.0,0.5,0.5],["S",1.5,12.0,1.0,0.5],["g",2.5,12.0,1.0,0.5],["S",3.5,12.0,1.5,0.5],["s",5.0,12.0,1.5,0.5],["S",6.5,12.0,1.0,0.5],["g",7.5,12.0,1.0,0.5],["S",8.5,12.0,1.0,0.5],["s",9.5,12.0,1.5,0.5],["S",11.0,12.0,1.0,0.5],["G",12.0,12.0,0.5,0.5],["g",12.5,12.0,0.5,0.5],["S",13.0,12.0,0.5,0.5],["s",13.5,12.0,1.0,0.5],["o",14.5,12.0,0.5,0.5],["o",1.5,12.5,0.5,0.5],["G",2.0,12.5,0.5,0.5],["g",2.5,12.5,1.0,0.5],["o",3.5,12.5,3.5,0.5],["G",7.0,12.5,0.5,0.5],["g",7.5,12.5,1.0,0.5],["o",8.5,12.5,3.5,0.5],["G",12.0,12.5,0.5,0.5],["g",12.5,12.5,0.5,0.5],["o",13.0,12.5,1.5,0.5],["o",1.5,13.0,0.5,0.5],["G",2.0,13.0,0.5,0.5],["g",2.5,13.0,1.0,0.5],["o",3.5,13.0,0.5,0.5],["o",6.5,13.0,0.5,0.5],["G",7.0,13.0,0.5,0.5],["g",7.5,13.0,1.0,0.5],["o",8.5,13.0,0.5,0.5],["o",11.5,13.0,0.5,0.5],["G",12.0,13.0,0.5,0.5],["g",12.5,13.0,0.5,0.5],["o",13.0,13.0,0.5,0.5],["o",2.0,13.5,1.5,0.5],["o",7.0,13.5,1.5,0.5],["o",12.0,13.5,1.0,0.5]]};
 /* ---------- 8-bit terrain art ---------- */
-var DITHER={pwood:['#3d5e4a','#456852'],pforest:['#2a4a3c','#315444'],forest:['#2c4a2e','#335536'],water:['#3a6e98','#4680aa'],woodland:['#3f6b3f','#467546'],swamp:['#456b66','#4d746f'],pond:['#3f78a0','#4a85ae'],field:['#9db25a','#a8bc66'],cultivated:['#b88f3d','#c09845'],pasture:['#7fa04a','#88a953'],orchard:['#8a9a4a','#96a654']};
-var SPR={};['woodland','swamp','pond','field','cultivated','pasture'].forEach(function(k){SPR[k]=ART16['t_'+k]});SPR.forest=SPR.woodland;SPR.water=SPR.pond;SPR.pwood=SPR.woodland;SPR.pforest=SPR.woodland;SPR.orchard=SPR.woodland;['hamlet','camp','village'].forEach(function(k){SPR['set_'+k]=ART16['set_'+k]});
+var DITHER={pwood:['#3d5e4a','#456852'],pforest:['#2a4a3c','#315444'],forest:['#2c4a2e','#335536'],water:['#3a6e98','#4680aa'],woodland:['#3f6b3f','#467546'],swamp:['#456b66','#4d746f'],pond:['#3f78a0','#4a85ae'],field:['#9db25a','#a8bc66'],cultivated:['#b88f3d','#c09845'],pasture:['#7fa04a','#88a953'],orchard:['#8a9a4a','#96a654'],kharst:['#8c887a','#9a9586']};
+var SPR={};['woodland','swamp','pond','field','cultivated','pasture'].forEach(function(k){SPR[k]=ART16['t_'+k]});SPR.forest=SPR.woodland;SPR.water=SPR.pond;SPR.pwood=SPR.woodland;SPR.pforest=SPR.woodland;SPR.orchard=SPR.woodland;SPR.kharst=ART16.t_kharst;['hamlet','camp','village'].forEach(function(k){SPR['set_'+k]=ART16['set_'+k]});
 DITHER.settle=['#6f5a3e','#7a6446'];
 function artDefs(){
   var o='<defs>';
@@ -746,7 +750,7 @@ function sprite(k,cx,cy){
    units; every terrain has a 4-tone muted palette with ordered dithering, a paper grain, broken ink lines where
    terrains meet, and ink-outlined pixel sprites (trees, reeds, sheep, lily pads). Shown with crisp pixel scaling. */
 var TPAL={pwood:['#465a44','#56684e','#687a5c','#7e8c6a'],pforest:['#36483a','#425444','#50604e','#62705c'],forest:['#34442a','#435432','#52643c','#66744a'],water:['#46687e','#577a90','#6e90a2','#a0b8b8'],woodland:['#4a5a34','#5e6e40','#72804c','#8a945e'],swamp:['#55604a','#677058','#7a8068','#5a6e6a'],pond:['#4e6e7e','#5f8090','#7896a0','#a8bcb8'],
-  field:['#a8a468','#b8b276','#c8c086','#d8cf9a'],cultivated:['#a0804a','#b49456','#c8a866','#9a9a5a'],pasture:['#7e8e52','#8e9e5e','#a0ae6c','#b4bf80'],orchard:['#7c8a4c','#8c9a56','#9eaa64','#b0b874'],
+  field:['#a8a468','#b8b276','#c8c086','#d8cf9a'],cultivated:['#a0804a','#b49456','#c8a866','#9a9a5a'],pasture:['#7e8e52','#8e9e5e','#a0ae6c','#b4bf80'],orchard:['#7c8a4c','#8c9a56','#9eaa64','#b0b874'],kharst:['#8a8676','#9a9686','#aeaa98','#c4c0ae'],
   settle:['#9a8462','#aa946e','#baa47e','#8a7454']};
 var TINK='#3a2814',TPX=1.5;
 function tRGB(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]}
@@ -795,7 +799,7 @@ function terrainImage(vis,x0,y0,W,H){
   var items=[];
   for(i=0;i<COLS*ROWS;i++){var t2=kind[i];if(!t2||t2==='settle')continue;var c2=i%COLS,r2=Math.floor(i/COLS),cx=w*(c2+.5+((r2&1)?.5:0)),cy=SH*1.5*r2+SH,rn=seeded(i*9973+7);
     if(t2==='orchard'){var oa2=ang[i],ca2=Math.cos(oa2),sa2=Math.sin(oa2);for(var gu=-6;gu<=6;gu++)for(var gv=-6;gv<=6;gv++){var ox3=cx+(gu*ca2-gv*sa2)*5,oy3=cy+(gu*sa2+gv*ca2)*5,lx2=Math.floor((ox3-x0)/TPX),ly2=Math.floor((oy3-y0)/TPX);if(lx2<0||ly2<0||lx2>=cw||ly2>=chh||T[ly2*cw+lx2]!=='orchard')continue;items.push({t:'orchard',x:lx2,y:ly2,s:rn(),v:rn()})}continue}
-    var n=({woodland:18,swamp:8,field:5,pasture:4,pond:3,forest:24,pwood:14,pforest:22})[t2]||0;
+    var n=({woodland:18,swamp:8,field:5,pasture:4,pond:3,forest:24,pwood:14,pforest:22,kharst:12})[t2]||0;
     for(var q=0;q<n;q++){var aa=rn()*Math.PI*2,rr=Math.sqrt(rn())*SH*1.05,ix2=cx+Math.cos(aa)*rr,iy2=cy+Math.sin(aa)*rr,lx=Math.floor((ix2-x0)/TPX),ly=Math.floor((iy2-y0)/TPX);
       if(lx<0||ly<0||lx>=cw||ly>=chh||T[ly*cw+lx]!==t2)continue;items.push({t:t2,x:lx,y:ly,s:rn(),v:rn()})}}
   items.sort(function(a,b){return a.y-b.y});
@@ -807,6 +811,7 @@ function terrainImage(vis,x0,y0,W,H){
     else if(it.t==='swamp'){dot(x,y-3,1,3,TINK);dot(x+2,y-2,1,2,TINK);dot(x-2,y-2,1,2,TINK);dot(x-3,y,7,1,TINK)}
     else if(it.t==='field'){dot(x,y,1,1,TINK);dot(x+2,y+1,1,1,TINK)}
     else if(it.t==='pasture'){dot(x-2,y-1,5,4,TINK);dot(x-1,y,3,2,'#f4efe0')}
+    else if(it.t==='kharst'){var hk=2+Math.round(it.s*2);dot(x-2,y-hk,5,hk+1,TINK);dot(x-1,y-hk+1,3,hk-1,it.v<.5?'#c4c0ae':'#aeaa98');dot(x+1,y-hk+1,1,hk-1,'#8a8676')}
     else if(it.t==='orchard'){var R2=2;g.fillStyle=TINK;for(yy=-R2-1;yy<=R2+1;yy++)for(xx=-R2-1;xx<=R2+1;xx++){var q2=xx*xx+yy*yy;if(q2<=(R2+1)*(R2+1)&&q2>R2*R2)g.fillRect(x+xx,y+yy-R2,1,1)}g.fillStyle=TPAL.woodland[it.v<.5?2:3];for(yy=-R2;yy<=R2;yy++)for(xx=-R2;xx<=R2;xx++)if(xx*xx+yy*yy<=R2*R2)g.fillRect(x+xx,y+yy-R2,1,1);dot(x-1,y-R2-1,1,1,it.s<.5?'#c8402c':'#e8b030');dot(x+1,y-R2+1,1,1,it.s<.5?'#c8402c':'#e8b030');dot(x,y+1,1,1,TINK)}
     else if(it.t==='pond'){if(it.v<.6){dot(x-1,y-1,4,3,TINK);dot(x,y,2,1,'#6e8a50')}else dot(x,y,3,1,TINK)}
   });
@@ -869,7 +874,7 @@ function mapSvg(opts){
   out+='</svg>';
   return out;
 }
-var LEG_COL={pwood:'#4e6e56',pforest:'#365240',woodland:'var(--t-wood)',swamp:'var(--t-swamp)',pond:'var(--t-pond)',field:'var(--t-field)',cultivated:'var(--t-cult)',pasture:'var(--t-past)',orchard:'#8a9a4a',forest:'#2f4a2c',water:'#4a7c9e'};
+var LEG_COL={pwood:'#4e6e56',pforest:'#365240',woodland:'var(--t-wood)',swamp:'var(--t-swamp)',pond:'var(--t-pond)',field:'var(--t-field)',cultivated:'var(--t-cult)',pasture:'var(--t-past)',orchard:'#8a9a4a',forest:'#2f4a2c',water:'#4a7c9e',kharst:'#9a9586'};
 function legend(){
   return '<div class="legend">'+Object.keys(TERR).map(function(k){return '<span><i style="background:'+LEG_COL[k]+'"></i>'+TERR[k].n+'</span>'}).join('')+'<span>Thin brown lines = height every 10 m · bold every 50 m</span>'+'<span><i style="background:#7a6446"></i>Settlement</span><span><i style="background:#c9bda0"></i>Gravel road</span><span><i style="background:#6fb4e8"></i>Stream</span><span>Goblin or brigand figure = camp · ✓ cleared'+(S.match?' · ! party on the move · number = mobs left':'')+'</span></div>';
 }
@@ -970,7 +975,7 @@ function vRealm(){
   var sb=Object.keys(SETT).map(function(k){var d=SETT[k];return '<button class="btn sm'+(UI.place&&UI.place.t==='s'&&UI.place.k===k?' on':'')+'" data-act="plc" data-t="s" data-k="'+k+'"'+(nset>=d.cards?'':' disabled')+'>'+d.n+' · '+d.cards+' card'+(d.cards>1?'s':'')+' · '+d.cost+(d.mats?' + '+matsText(d.mats):'')+(k==='camp'?' · needs '+CAMP_WILD+' connected wild tiles ('+wildCount()+')':'')+'</button>'}).join('');
   return '<div class="split"><section class="panel"><h2>Realm</h2>'+mapView(mapSvg({sel:UI.place&&UI.place.first,pz:'r'}),'r',realmPop())+legend()+'<p class="note">Drag to move around, scroll or pinch to zoom. Tap a settlement to see who lives there. Every placement is permanent and its prestige is sunk. Terrain is never destroyed.</p></section>'+
    '<section class="panel"><p class="note">Tap a placed tile, with nothing picked to place, to zoom in on its ground right there on the map.</p><h3>Place</h3><p class="label">Terrain in hand</p><div class="row">'+tb+'</div><p class="label">Settlements · '+nset+' settlement card'+(nset===1?'':'s')+' in hand</p><div class="row">'+sb+'</div>'+
-   '<p class="label">Elevation in hand</p><div class="row">'+Object.keys(ELEV).map(function(e){return EKIND.map(function(k){var key=e+'_'+k,n=countHand('e_'+key);return n?'<button class="btn sm'+(UI.place&&UI.place.t==='e'&&UI.place.k===key?' on':'')+'" data-act="plc" data-t="e" data-k="'+key+'">'+CD['e_'+key].n+' ×'+n+' · '+(TERR[k].cost+ELEV[e].cost)+'</button>':''}).join('')}).join('')+'</div>'+
+   '<p class="label">Elevation in hand</p><div class="row">'+ECOMBO.map(function(p){var e=p[0],k=p[1];return (function(){var key=e+'_'+k,n=countHand('e_'+key);return n?'<button class="btn sm'+(UI.place&&UI.place.t==='e'&&UI.place.k===key?' on':'')+'" data-act="plc" data-t="e" data-k="'+key+'">'+CD['e_'+key].n+' ×'+n+' · '+(TERR[k].cost+ELEV[e].cost)+'</button>':''})()}).join('')+'</div>'+
    (UI.place&&UI.place.t==='e'&&ELEV[UI.place.k.split('_')[0]].sh==='slope'?'<div class="row"><span class="label">Uphill toward the</span>'+HDIR.map(function(dn,di){return '<button class="btn sm'+((UI.rot||0)===di?' on':'')+'" data-act="rot" data-d="'+di+'">'+['→ E','↗ NE','↖ NW','← W','↙ SW','↘ SE'][di]+'</button>'}).join('')+'</div><p class="note">Turn the card before you place it. The slope rises '+ELEV[UI.place.k.split('_')[0]].rise+' m across the tile toward that side. Tiles placed past its high edge start up there; a level tile on the far side of a crest gets a bank down to it.</p>':'')+
    fortPanel()+
    '<p class="label">Roads, streams and creeks · road '+lineCostText('road')+' · stream '+lineCostText('stream')+'</p>'+waterPanel()+'<div class="row"><button class="btn sm'+(UI.draw&&UI.draw.type==='road'?' on':'')+'" data-act="draw" data-k="road">Gravel road</button><button class="btn sm'+(UI.draw&&UI.draw.type==='stream'?' on':'')+'" data-act="draw" data-k="stream">Stream</button><button class="btn sm'+(UI.draw&&UI.draw.type==='creek'?' on':'')+'" data-act="draw" data-k="creek">Creek · '+lineCostText('creek')+'</button><button class="btn sm'+(UI.place&&UI.place.k==='bridge'?' on':'')+'" data-act="plc" data-t="b" data-k="bridge">Footbridge (stream) · '+workText({cost:BRIDGE_COST,mats:BRIDGE_MATS,lab:1})+'</button><button class="btn sm'+(UI.place&&UI.place.k==='mbridge'?' on':'')+'" data-act="plc" data-t="b" data-k="mbridge">Medium footbridge (creek) · '+workText(MBR)+'</button></div>'+roadNames()+(UI.draw&&!UI.draw.fk?drawPanel():'')+msgHtml()+
@@ -1082,6 +1087,8 @@ function doPlace(c,r){
   if(pl.t==='e'){
     var ep=pl.k.split('_'),EE=ELEV[ep[0]],ek=ep[1],ecard=S.cards.filter(function(x){return x.at===null&&x.key==='e_'+pl.k})[0],ecost=TERR[ek].cost+EE.cost;
     if(!ecard){say('No '+CD['e_'+pl.k].n.toLowerCase()+' card in hand.',true);return render()}
+    if(ek==='cultivated'&&!waterNear(c,r)){say('A hillside field is still farmland: it needs water within two tiles, like any cultivated field.',true);return render()}
+    if(ek==='pasture'&&S.prestige>=ecost){var pm2=pastureNo(i,c,r,{s:EE.sh,b:baseFor(c,r,EE.sh,EE.rise,UI.rot||0),r:EE.rise,d:UI.rot||0});if(pm2){say(pm2,true);return render()}}
     if(S.prestige<ecost){say('Not enough prestige.',true);return render()}
     var dir=UI.rot||0,eb=baseFor(c,r,EE.sh,EE.rise,dir);
     S.cards.splice(S.cards.indexOf(ecard),1);S.grid[i]=ek;S.hgt[i]={s:EE.sh,b:eb,r:EE.rise,d:dir};S.prestige-=ecost;
@@ -1092,7 +1099,7 @@ function doPlace(c,r){
     var key=pl.k,card=S.cards.filter(function(x){return x.at===null&&x.key==='t_'+key})[0];
     if(key==='pond'&&nbrs(c,r).some(function(p){return terrAt(p[0],p[1])==='pond'})){say('Ponds cannot touch each other.',true);return render()}
     if(key==='orchard'&&!waterNear(c,r)){say('An orchard is farmland: it needs water within two tiles, like a cultivated field.',true);return render()}
-    if(key==='pasture'&&card&&S.prestige>=TERR[key].cost){var was=S.grid[i],wh=S.hgt[i];S.grid[i]=key;S.hgt[i]={s:'flat',b:baseFor(c,r,'flat',0,0)};var SU0=supply(),okp=SU0.past[i]&&SU0.past[i].ok,TW=okp?null:walkFrom([i]),nf=0;if(TW)for(var fk=0;fk<COLS*ROWS;fk++)if(S.grid[fk]==='field'&&TW[fk]<Infinity)nf++;S.grid[i]=was;S.hgt[i]=wh;if(!okp){say('Every pasture needs half a prairie: one field tile feeds two pastures, within an hour\'s walk. '+(nf?'The '+nf+' field'+(nf>1?'s':'')+' in reach already feed'+(nf>1?'':'s')+' two pastures each':'No field is in reach of '+lab(c,r))+'. Place a field (prairie) next to where the pasture will go first.',true);return render()}}
+    if(key==='pasture'&&card&&S.prestige>=TERR[key].cost){var pm=pastureNo(i,c,r,{s:'flat',b:baseFor(c,r,'flat',0,0)});if(pm){say(pm,true);return render()}}
     if(key==='cultivated'&&!waterNear(c,r)){say('Cultivated fields need water within two tiles: a pond, swamp, small open water, stream or creek, with its water rules met.',true);return render()}
     if(!card){say('No '+TERR[key].n.toLowerCase()+' card in hand.',true);return render()}
     if(S.prestige<TERR[key].cost){say('Not enough prestige.',true);return render()}
@@ -1114,10 +1121,14 @@ function doPlace(c,r){
   }
   found(pl.k,c,r);
 }
+
+/* a pasture (flat or on a hillside) needs half a prairie in reach: try it on the map and see whether a field can feed it */
+function pastureNo(i,c,r,h){var was=S.grid[i],wh=S.hgt[i];S.grid[i]='pasture';S.hgt[i]=h;var SU0=supply(),okp=SU0.past[i]&&SU0.past[i].ok,TW=okp?null:walkFrom([i]),nf=0;if(TW)for(var fk=0;fk<COLS*ROWS;fk++)if(S.grid[fk]==='field'&&TW[fk]<Infinity)nf++;S.grid[i]=was;S.hgt[i]=wh;
+  if(okp)return null;return 'Every pasture needs half a prairie: one field tile feeds two pastures, within an hour\'s walk. '+(nf?'The '+nf+' field'+(nf>1?'s':'')+' in reach already feed'+(nf>1?'':'s')+' two pastures each':'No field is in reach of '+lab(c,r))+'. Place a field (prairie) next to where the pasture will go first.'}
 /* ---------- land use ----------
    Villages and camps burn firewood; villages also need specialty food (orchards for now); every pasture needs half a
    prairie for fodder and hay. A supply tile counts if it is within an hour's walk, and each tile serves one claimant. */
-var WOOD={forest:1.5,woodland:1,pwood:.75,pforest:.75,swamp:.5},SPEC={orchard:1},NEED={hamlet:{woodT:1,past:2},village:{fire:8,spec:3},camp:{fire:2}},WOODT={forest:1,woodland:1,pwood:1,pforest:1,swamp:1}/* any tile that gives wood counts as a hamlet's wood tile, swamp included */,WALK_S=3600,PRAIRIE_CAP=2;
+var WOOD={forest:1.5,woodland:1,pwood:.75,pforest:.75,swamp:.5},SPEC={orchard:1},NEED={hamlet:{woodT:1,past:2},village:{fire:8,spec:3},camp:{fire:2}},WOODT={forest:1,woodland:1,pwood:1,pforest:1,swamp:1}/* any tile that gives wood counts as a hamlet's wood tile, swamp included */,WALK_S=3600,PRAIRIE_CAP=2,GRAZE={pasture:1,kharst:.5}/* kharst is rough grazing: half a pasture toward a hamlet's clothing, and it needs no prairie */;
 /* seconds to walk from a set of hexes to every hex within an hour, over placed ground (roads faster, slopes slower) */
 /* a small binary min-heap of [cost, key] pairs */
 function heap(){var a=[];return{n:function(){return a.length},push:function(t,k){a.push([t,k]);var i=a.length-1;while(i){var p=(i-1)>>1;if(a[p][0]<=a[i][0])break;var x=a[p];a[p]=a[i];a[i]=x;i=p}},
@@ -1139,25 +1150,25 @@ function supply(){var key=COLS+'|'+S.grid.join(',')+'|'+(S.hgt||[]).map(function
 function supply0(){var N=COLS*ROWS,used={},prc={},out={set:{},past:{},claim:{}},k;
   /* hamlets: one wood tile and two pastures (clothing); villages: 8 firewood and 3 orchards; camps: 2 firewood */
   S.setl.forEach(function(st){var nd=NEED[st.type];if(!nd)return;var T=walkFrom(setHexes(st)),R={fire:0,spec:0,woodT:0,past:0,need:nd,tiles:[]};
-    var near=[];for(k=0;k<N;k++)if(T[k]<Infinity&&!used[k]&&(WOOD[S.grid[k]]||SPEC[S.grid[k]]||S.grid[k]==='pasture')&&!setAt(k%COLS,Math.floor(k/COLS)))near.push(k);near.sort(function(a,b){return T[a]-T[b]});
+    var near=[];for(k=0;k<N;k++)if(T[k]<Infinity&&!used[k]&&(WOOD[S.grid[k]]||SPEC[S.grid[k]]||GRAZE[S.grid[k]])&&!setAt(k%COLS,Math.floor(k/COLS)))near.push(k);near.sort(function(a,b){return T[a]-T[b]});
     var take=function(k2,kind){used[k2]=1;R.tiles.push(k2);out.claim[k2]={by:st.id,kind:kind}};
     /* a hamlet's wood tile: the poorest wood in reach first (swamp, pine, woodland, then oak forest), leaving the richer firewood to villages and camps */
     if(nd.woodT)near.filter(function(k2){return WOODT[S.grid[k2]]}).sort(function(a,b){return WOOD[S.grid[a]]-WOOD[S.grid[b]]||T[a]-T[b]}).slice(0,nd.woodT).forEach(function(k2){R.woodT++;take(k2,'fire')});
     near.forEach(function(k2){var g=S.grid[k2];if(used[k2])return;
       if(nd.fire&&WOOD[g]&&R.fire<nd.fire){R.fire+=WOOD[g];take(k2,'fire')}
       else if(nd.spec&&SPEC[g]&&R.spec<nd.spec){R.spec+=SPEC[g];take(k2,'spec')}
-      else if(nd.past&&g==='pasture'&&R.past<nd.past){R.past++;take(k2,'cloth')}});
+      else if(nd.past&&GRAZE[g]&&R.past<nd.past-1e-9){R.past+=GRAZE[g];take(k2,'cloth')}});
     R.ok=R.fire>=(nd.fire||0)-1e-9&&R.spec>=(nd.spec||0)&&R.woodT>=(nd.woodT||0)&&R.past>=(nd.past||0);out.set[st.id]=R});
   for(k=0;k<N;k++){if(S.grid[k]!=='pasture')continue;var T2=walkFrom([k]),best=-1;for(var m=0;m<N;m++)if(S.grid[m]==='field'&&!used[m]&&T2[m]<Infinity&&(prc[m]||0)<PRAIRIE_CAP&&(best<0||T2[m]<T2[best]))best=m;
     if(best>=0){prc[best]=(prc[best]||0)+1;out.past[k]={ok:true,by:best};out.claim[best]={by:'p',kind:'prairie',n:prc[best]}}else out.past[k]={ok:false}}
   return out}
-function needText(R){var n=R.need,o=[];if(n.woodT)o.push('woodland <b>'+R.woodT+'/'+n.woodT+'</b>');if(n.past)o.push('pastures <b>'+R.past+'/'+n.past+'</b>');if(n.fire)o.push('firewood <b>'+(Math.round(R.fire*100)/100)+'/'+n.fire+'</b>');if(n.spec)o.push('orchards <b>'+R.spec+'/'+n.spec+'</b>');return ' · '+o.join(' · ')}
+function needText(R){var n=R.need,o=[];if(n.woodT)o.push('woodland <b>'+R.woodT+'/'+n.woodT+'</b>');if(n.past)o.push('pastures <b>'+(Math.round(R.past*10)/10)+'/'+n.past+'</b>');if(n.fire)o.push('firewood <b>'+(Math.round(R.fire*100)/100)+'/'+n.fire+'</b>');if(n.spec)o.push('orchards <b>'+R.spec+'/'+n.spec+'</b>');return ' · '+o.join(' · ')}
 function needSay(nd){var o=[];if(nd.woodT)o.push(nd.woodT+' wood tile');if(nd.past)o.push(nd.past+' pastures (for clothing)');if(nd.fire)o.push(nd.fire+' firewood');if(nd.spec)o.push(nd.spec+' orchards');return o.join(', ')}
 function supplyPanel(){if(S.match)return '';var SU=supply(),rows=[];
   S.setl.forEach(function(st){var R=SU.set[st.id];if(!R)return;rows.push('<div class="row suprow'+(R.ok?'':' bad')+'"><button class="btn sm'+(UI.supSel===st.id?' on':'')+'" data-act="supsel" data-id="'+st.id+'">'+esc(setName(st))+'</button><span>'+SETT[st.type].n+needText(R)+(R.ok?' ✓':' · short')+'</span></div>')});
   var ps=Object.keys(SU.past),pk=ps.filter(function(k){return SU.past[k].ok}).length;
   if(ps.length)rows.push('<div class="row suprow'+(pk<ps.length?' bad':'')+'"><button class="btn sm'+(UI.supSel==='p'?' on':'')+'" data-act="supsel" data-id="p">Pastures</button><span>'+pk+' of '+ps.length+' fed by prairie (1 field feeds 2)'+(pk<ps.length?' · '+(ps.length-pk)+' short':' ✓')+'</span></div>');
-  return '<p class="label">Land use · within an hour\'s walk, one claim per tile</p>'+(rows.join('')||'<p class="note">Hamlets need 1 wood tile (woodland, oak forest, pine or swamp) and 2 pastures. Villages need 8 firewood and 3 orchards; camps 2 firewood; every pasture half a prairie.</p>')+(UI.supSel!=null?'<p class="note">Rings on the map: brown feeds firewood, white a pasture for clothing, red an orchard, yellow a prairie. Firewood: oak forest 1.5, oak woodland 1, pine 0.75, swamp peat 0.5.</p>':'')}
+  return '<p class="label">Land use · within an hour\'s walk, one claim per tile</p>'+(rows.join('')||'<p class="note">Hamlets need 1 wood tile (woodland, oak forest, pine or swamp) and 2 pastures (a kharst tile counts as half a pasture). Villages need 8 firewood and 3 orchards; camps 2 firewood; every pasture half a prairie.</p>')+(UI.supSel!=null?'<p class="note">Rings on the map: brown feeds firewood, white a pasture for clothing, red an orchard, yellow a prairie. Firewood: oak forest 1.5, oak woodland 1, pine 0.75, swamp peat 0.5.</p>':'')}
 function supplyMarks(){if(S.match||UI.supSel==null||UI.tab!=='realm')return '';var SU=supply(),o='';Object.keys(SU.claim).forEach(function(k){var C=SU.claim[k];if(UI.supSel==='p'?C.kind!=='prairie':C.by!==UI.supSel)return;o+='<polygon class="sup-ring sup-'+C.kind+'" points="'+hexPts(k%COLS,Math.floor(k/COLS),.86)+'"/>'});
   if(UI.supSel==='p')Object.keys(SU.past).forEach(function(k){o+='<polygon class="sup-ring sup-past'+(SU.past[k].ok?'':' bad')+'" points="'+hexPts(k%COLS,Math.floor(k/COLS),.86)+'"/>'});
   else{var st=setById(UI.supSel);if(st)setHexes(st).forEach(function(k){o+='<polygon class="sup-ring sup-home" points="'+hexPts(k%COLS,Math.floor(k/COLS),.86)+'"/>'})}
@@ -2595,6 +2606,8 @@ var GROUND={
   s:{n:'Stream',mv:.35,sh:.9,cv:1,ml:-10,t:'wading at ×0.35 speed, −10 melee skill; a sprinting man leaps it if his jump distance reaches 4 yd'},
   a:{n:'Deep water',mv:0,t:'nobody can cross'},
   t:{n:'Thicket',mv:0,t:'trees and brush too dense to pass; go around'},
+  k:{n:'Broken rock',mv:.6,sh:.85,cv:.75,ml:-5,t:'kharst scree, cracks and knee-high rock: speed ×0.6, −5 melee skill for bad footing; arrows into it hit ×0.75'},
+  R:{n:'Outcrop',mv:0,t:'a limestone outcrop too steep to cross; go around, or shelter behind it'},
   q:{n:'Deep bog',mv:0,t:'sucking mud nobody can cross; go around'},
   h:{n:'Longhouse',mv:0,sh:1,cv:1,t:'blocks movement'},
   W:{n:'Small palisade',mv:0,sh:1,cv:1,t:'6 ft of stakes: only a jump of 2 yd clears it; 600 HP a panel; men behind it take arrows ×0.25'},
@@ -2606,10 +2619,10 @@ var BFM={foe:false,jh:0,tig:false,dry:false};
 function cmvAt(F,k){if(BFM.tig){if(F.wet&&F.wet.charCodeAt(k)===49)return 1;return BFM.dry&&cmv(F.g.charAt(k))>0?1:0}return cmv(F.g.charAt(k))}/* who is moving: gates shut for enemies, a high enough jump clears a palisade */
 function cmv(c){if(c==='G')return BFM.foe?0:1;if(c==='W'||c==='X')return BFM.jh>=(c==='X'?PALS.l.yd:PALS.s.yd)?1:0;return (GROUND[c]||GROUND.o).mv}
 function isWallC(c){return c==='W'||c==='X'||c==='G'}
-var GFILL={W:['#4a3826','#3e2e1e'],X:['#3e2e1e','#33261a'],G:['#5a4630','#4a3826'],p:['#3c5a3e','#446444'],f:['#c49a5c','#5e4024'],t:['#0c1c10','#122614'],q:['#231c10','#2c2414'],w:['#2b4f2e','#335c37'],b:['#4a6f3a','#557c43'],m:['#4c5234','#565d3b'],s:['#3f86b8','#4f97c8'],r:['#9a8768','#a8967a'],c:['#7a5a33','#86653b'],a:['#346a90','#3d77a0'],h:['#5a3f26','#6a4a2a']};
-var OPEN={pwood:['#6a8452','#748e5a'],pforest:['#5a7448','#647e50'],forest:['#4e6a3a','#587444'],water:['#6f9150','#7a9b58'],woodland:['#5f7f45','#6a8a4e'],swamp:['#5b7350','#647d59'],pond:['#6f9150','#7a9b58'],field:['#97ad55','#a3b861'],cultivated:['#8f9e4f','#9aaa58'],pasture:['#7a9b46','#84a650'],orchard:['#7f9248','#8a9c50'],settle:['#7d7550','#877f58']};
+var GFILL={W:['#4a3826','#3e2e1e'],X:['#3e2e1e','#33261a'],G:['#5a4630','#4a3826'],p:['#3c5a3e','#446444'],f:['#c49a5c','#5e4024'],t:['#0c1c10','#122614'],q:['#231c10','#2c2414'],w:['#2b4f2e','#335c37'],b:['#4a6f3a','#557c43'],m:['#4c5234','#565d3b'],s:['#3f86b8','#4f97c8'],r:['#9a8768','#a8967a'],c:['#7a5a33','#86653b'],a:['#346a90','#3d77a0'],h:['#5a3f26','#6a4a2a'],k:['#8a8676','#7a7666'],R:['#6a665a','#5a564c']};
+var OPEN={pwood:['#6a8452','#748e5a'],pforest:['#5a7448','#647e50'],forest:['#4e6a3a','#587444'],water:['#6f9150','#7a9b58'],woodland:['#5f7f45','#6a8a4e'],swamp:['#5b7350','#647d59'],pond:['#6f9150','#7a9b58'],field:['#97ad55','#a3b861'],cultivated:['#8f9e4f','#9aaa58'],pasture:['#7a9b46','#84a650'],orchard:['#7f9248','#8a9c50'],kharst:['#8e9a62','#98a46c'],settle:['#7d7550','#877f58']};
 var TCOL=['#f0c64e','#6fd0c0','#e58ad6','#8ab4f5','#f59a5a','#b6e070'];
-var BFNAME={pwood:'Pine woodland',pforest:'Pine forest',forest:'Oak forest',water:'Open water shore',woodland:'Woodland',swamp:'Swamp',pond:'Pond shore',field:'Open field',cultivated:'Cultivated field',pasture:'Pasture',orchard:'Orchard',settle:'Settlement'};
+var BFNAME={pwood:'Pine woodland',pforest:'Pine forest',forest:'Oak forest',water:'Open water shore',woodland:'Woodland',swamp:'Swamp',pond:'Pond shore',field:'Open field',cultivated:'Cultivated field',pasture:'Pasture',orchard:'Orchard',kharst:'Kharst',settle:'Settlement'};
 /* the ground of a fight: a 280 x 192 yard window onto the map wherever the fight happens. Every 4-yard cell takes the
    painted ground under it, so a field near a tile edge runs straight on into the next tile, and the same spot always has
    the same ground whether you look at it or fight on it. */
@@ -2631,6 +2644,7 @@ function bfGenAt(cx,cy,seed){
     else if(k==='water')code='a';
     else if(k==='field')code=n>.9?'w':n>.8?'b':'o';
     else if(k==='pasture')code=n>.86?'b':'o';
+    else if(k==='kharst')code=n>.74?'R':n>.4||n2>.7?'k':n2<.12?'b':'o';
     else if(k==='orchard')code=(x%3===1&&y%3===1)?'w':n>.92?'b':'o';
     else if(k==='cultivated')code=n>.9?'b':y%4===3?'o':'c';
     else if(k==='settle'){var sh=hexOf(px,py),sr=Math.floor(sh/COLS),sc0=[w*((sh%COLS)+.5+((sr&1)?.5:0)),SH*1.5*sr+SH];code=n>.88?'b':'o'}
@@ -2699,6 +2713,7 @@ function bfSvg(F,P,click){
   Object.keys(GFILL).forEach(function(k){var f=GFILL[k];o+='<pattern id="'+P+'gp-'+k+'" width="2" height="2" patternUnits="userSpaceOnUse"><rect width="2" height="2" fill="'+f[0]+'"/><rect x="1" y="1" width="1" height="1" fill="'+f[1]+'"/></pattern>'});
   [['tree',.62],['bush',.38],['reed',.32],['puddle',.45],['tuft',.3],['stone',.25],['ripple',.45],['flowerY',.3],['sheep',.28]].forEach(function(q){o+='<g id="'+P+'d-'+q[0]+'" transform="scale('+q[1]+')">'+microSvg(MICRO[q[0]],-MICRO[q[0]].w/2,-MICRO[q[0]].h)+'</g>'});
   o+='<g id="'+P+'d-pine"><polygon points="0,-3.2 1.5,0 -1.5,0" fill="#22402c"/><polygon points="0,-5 1.1,-2 -1.1,-2" fill="#2c5236"/><rect x="-.18" y="0" width=".36" height=".7" fill="#4a3220"/></g>';
+  o+='<g id="'+P+'d-rock"><polygon points="-1.9,0 -1.4,-1.9 -.3,-2.8 .9,-2.3 1.8,-.9 2,0" fill="#3a362e"/><polygon points="-1.6,-.2 -1.1,-1.8 -.2,-2.5 .8,-2.1 1.5,-.9 1.7,-.2" fill="#aaa596"/><polygon points=".8,-2.1 1.5,-.9 1.7,-.2 .6,-.2" fill="#7e796c"/><path d="M-.4 -2.2L-.6 -1.2L-.2 -.6" stroke="#4a4438" stroke-width=".18" fill="none"/></g>';
   o+='<g id="'+P+'d-bog"><ellipse cx="0" cy="0" rx="1.6" ry=".7" fill="#120e08"/><circle cx=".6" cy="-.2" r=".25" fill="#5a5030"/><circle cx="-.7" cy=".1" r=".18" fill="#5a5030"/></g>';
   o+='<g id="'+P+'d-hut" transform="scale(.55)">'+microSvg(MICRO.hut,-MICRO.hut.w/2,-MICRO.hut.h)+'</g>'+fortDefs(P)+'</defs>';
   o+='<g transform="'+camMatrix()+'"><rect width="'+BFW+'" height="'+BFH+'" fill="url(#'+P+'gp-o)"/>';
@@ -2716,6 +2731,8 @@ function bfSvg(F,P,click){
     if(ck==='w'){if(q<.62)d('tree',jx,jy+2);else if(q<.8)d('bush',jx,jy)}
     if(ck==='p'){if(q<.5)d('pine',jx,jy+2)}
     else if(ck==='t'){d('tree',cx+1,cy+2.6);d('tree',cx+3,cy+3.4);d('bush',cx+2,cy+4.2);if(q<.6)d('tree',cx+2,cy+1.4)}
+    else if(ck==='R'){d('rock',cx+2,cy+3.6);if(q<.5)d('rock',cx+1,cy+2.2)}
+    else if(ck==='k'){if(q<.3)d('stone',jx,jy);else if(q<.38)d('tuft',jx,jy)}
     else if(ck==='q'){d('bog',cx+2,cy+2.4);if(q<.5)d('bog',cx+1,cy+3.6);if(q<.35)d('reed',jx,jy+1)}
     else if(ck==='b'){if(q<.7)d('bush',jx,jy)}
     else if(ck==='m'){if(q<.3)d('reed',jx,jy+1);else if(q<.5)d('puddle',jx,jy)}
@@ -3184,7 +3201,7 @@ function bfTravel(L,U,m){/* which way the squad was going, and where the enemy i
   td=td||[1,0];var eb=td;if(m){var mp=m.pos?walkPos(m):null,up=walkPos(L);if(mp){var d4=Math.hypot(mp[0]-up[0],mp[1]-up[1]);if(d4>1e-6)eb=[(mp[0]-up[0])/d4,(mp[1]-up[1])/d4]}}return{td:td,eb:eb}}
 /* stealth: how close an enemy must come to spot a man who is creeping or lying in wait, by the cover he is in (yards) */
 var HIDE_YD={p:14,w:8,b:12,t:6,c:18,m:20,s:22,f:25,o:35,r:40};
-var HIDE_MAP={pwood:20,pforest:14,forest:7,water:30,woodland:10,swamp:12,cultivated:30,field:40,pasture:45,orchard:18,settle:30};
+var HIDE_MAP={pwood:20,pforest:14,forest:7,water:30,woodland:10,swamp:12,cultivated:30,field:40,pasture:45,orchard:18,kharst:16,settle:30};
 function stealthOf(u){return (u&&u.c&&stats(u.c).stealth)||0}
 function hideRange(F,u){return (HIDE_YD[bfCell(F,u.x,u.y)]||35)*(u.hide?.6:1)*(1-stealthOf(u))}
 function bfHidden(b){var fs=b.foes.filter(function(f){return f.alive});if(b.spring)b.units.forEach(function(u){u.hide=false;u.creep=false});

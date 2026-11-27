@@ -3,7 +3,7 @@
    units; every terrain has a 4-tone muted palette with ordered dithering, a paper grain, broken ink lines where
    terrains meet, and ink-outlined pixel sprites (trees, reeds, sheep, lily pads). Shown with crisp pixel scaling. */
 var TPAL={pwood:['#465a44','#56684e','#687a5c','#7e8c6a'],pforest:['#36483a','#425444','#50604e','#62705c'],forest:['#34442a','#435432','#52643c','#66744a'],water:['#46687e','#577a90','#6e90a2','#a0b8b8'],woodland:['#4a5a34','#5e6e40','#72804c','#8a945e'],swamp:['#55604a','#677058','#7a8068','#5a6e6a'],pond:['#4e6e7e','#5f8090','#7896a0','#a8bcb8'],
-  field:['#a8a468','#b8b276','#c8c086','#d8cf9a'],cultivated:['#a0804a','#b49456','#c8a866','#9a9a5a'],pasture:['#7e8e52','#8e9e5e','#a0ae6c','#b4bf80'],orchard:['#7c8a4c','#8c9a56','#9eaa64','#b0b874'],
+  field:['#a8a468','#b8b276','#c8c086','#d8cf9a'],cultivated:['#a0804a','#b49456','#c8a866','#9a9a5a'],pasture:['#7e8e52','#8e9e5e','#a0ae6c','#b4bf80'],orchard:['#7c8a4c','#8c9a56','#9eaa64','#b0b874'],kharst:['#8a8676','#9a9686','#aeaa98','#c4c0ae'],
   settle:['#9a8462','#aa946e','#baa47e','#8a7454']};
 var TINK='#3a2814',TPX=1.5;
 function tRGB(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]}
@@ -52,7 +52,7 @@ function terrainImage(vis,x0,y0,W,H){
   var items=[];
   for(i=0;i<COLS*ROWS;i++){var t2=kind[i];if(!t2||t2==='settle')continue;var c2=i%COLS,r2=Math.floor(i/COLS),cx=w*(c2+.5+((r2&1)?.5:0)),cy=SH*1.5*r2+SH,rn=seeded(i*9973+7);
     if(t2==='orchard'){var oa2=ang[i],ca2=Math.cos(oa2),sa2=Math.sin(oa2);for(var gu=-6;gu<=6;gu++)for(var gv=-6;gv<=6;gv++){var ox3=cx+(gu*ca2-gv*sa2)*5,oy3=cy+(gu*sa2+gv*ca2)*5,lx2=Math.floor((ox3-x0)/TPX),ly2=Math.floor((oy3-y0)/TPX);if(lx2<0||ly2<0||lx2>=cw||ly2>=chh||T[ly2*cw+lx2]!=='orchard')continue;items.push({t:'orchard',x:lx2,y:ly2,s:rn(),v:rn()})}continue}
-    var n=({woodland:18,swamp:8,field:5,pasture:4,pond:3,forest:24,pwood:14,pforest:22})[t2]||0;
+    var n=({woodland:18,swamp:8,field:5,pasture:4,pond:3,forest:24,pwood:14,pforest:22,kharst:12})[t2]||0;
     for(var q=0;q<n;q++){var aa=rn()*Math.PI*2,rr=Math.sqrt(rn())*SH*1.05,ix2=cx+Math.cos(aa)*rr,iy2=cy+Math.sin(aa)*rr,lx=Math.floor((ix2-x0)/TPX),ly=Math.floor((iy2-y0)/TPX);
       if(lx<0||ly<0||lx>=cw||ly>=chh||T[ly*cw+lx]!==t2)continue;items.push({t:t2,x:lx,y:ly,s:rn(),v:rn()})}}
   items.sort(function(a,b){return a.y-b.y});
@@ -64,6 +64,7 @@ function terrainImage(vis,x0,y0,W,H){
     else if(it.t==='swamp'){dot(x,y-3,1,3,TINK);dot(x+2,y-2,1,2,TINK);dot(x-2,y-2,1,2,TINK);dot(x-3,y,7,1,TINK)}
     else if(it.t==='field'){dot(x,y,1,1,TINK);dot(x+2,y+1,1,1,TINK)}
     else if(it.t==='pasture'){dot(x-2,y-1,5,4,TINK);dot(x-1,y,3,2,'#f4efe0')}
+    else if(it.t==='kharst'){var hk=2+Math.round(it.s*2);dot(x-2,y-hk,5,hk+1,TINK);dot(x-1,y-hk+1,3,hk-1,it.v<.5?'#c4c0ae':'#aeaa98');dot(x+1,y-hk+1,1,hk-1,'#8a8676')}
     else if(it.t==='orchard'){var R2=2;g.fillStyle=TINK;for(yy=-R2-1;yy<=R2+1;yy++)for(xx=-R2-1;xx<=R2+1;xx++){var q2=xx*xx+yy*yy;if(q2<=(R2+1)*(R2+1)&&q2>R2*R2)g.fillRect(x+xx,y+yy-R2,1,1)}g.fillStyle=TPAL.woodland[it.v<.5?2:3];for(yy=-R2;yy<=R2;yy++)for(xx=-R2;xx<=R2;xx++)if(xx*xx+yy*yy<=R2*R2)g.fillRect(x+xx,y+yy-R2,1,1);dot(x-1,y-R2-1,1,1,it.s<.5?'#c8402c':'#e8b030');dot(x+1,y-R2+1,1,1,it.s<.5?'#c8402c':'#e8b030');dot(x,y+1,1,1,TINK)}
     else if(it.t==='pond'){if(it.v<.6){dot(x-1,y-1,4,3,TINK);dot(x,y,2,1,'#6e8a50')}else dot(x,y,3,1,TINK)}
   });
@@ -126,7 +127,7 @@ function mapSvg(opts){
   out+='</svg>';
   return out;
 }
-var LEG_COL={pwood:'#4e6e56',pforest:'#365240',woodland:'var(--t-wood)',swamp:'var(--t-swamp)',pond:'var(--t-pond)',field:'var(--t-field)',cultivated:'var(--t-cult)',pasture:'var(--t-past)',orchard:'#8a9a4a',forest:'#2f4a2c',water:'#4a7c9e'};
+var LEG_COL={pwood:'#4e6e56',pforest:'#365240',woodland:'var(--t-wood)',swamp:'var(--t-swamp)',pond:'var(--t-pond)',field:'var(--t-field)',cultivated:'var(--t-cult)',pasture:'var(--t-past)',orchard:'#8a9a4a',forest:'#2f4a2c',water:'#4a7c9e',kharst:'#9a9586'};
 function legend(){
   return '<div class="legend">'+Object.keys(TERR).map(function(k){return '<span><i style="background:'+LEG_COL[k]+'"></i>'+TERR[k].n+'</span>'}).join('')+'<span>Thin brown lines = height every 10 m · bold every 50 m</span>'+'<span><i style="background:#7a6446"></i>Settlement</span><span><i style="background:#c9bda0"></i>Gravel road</span><span><i style="background:#6fb4e8"></i>Stream</span><span>Goblin or brigand figure = camp · ✓ cleared'+(S.match?' · ! party on the move · number = mobs left':'')+'</span></div>';
 }

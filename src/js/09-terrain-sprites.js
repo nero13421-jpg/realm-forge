@@ -1,6 +1,6 @@
 /* ---------- 8-bit terrain art ---------- */
-var DITHER={pwood:['#3d5e4a','#456852'],pforest:['#2a4a3c','#315444'],forest:['#2c4a2e','#335536'],water:['#3a6e98','#4680aa'],woodland:['#3f6b3f','#467546'],swamp:['#456b66','#4d746f'],pond:['#3f78a0','#4a85ae'],field:['#9db25a','#a8bc66'],cultivated:['#b88f3d','#c09845'],pasture:['#7fa04a','#88a953'],orchard:['#8a9a4a','#96a654']};
-var SPR={};['woodland','swamp','pond','field','cultivated','pasture'].forEach(function(k){SPR[k]=ART16['t_'+k]});SPR.forest=SPR.woodland;SPR.water=SPR.pond;SPR.pwood=SPR.woodland;SPR.pforest=SPR.woodland;SPR.orchard=SPR.woodland;['hamlet','camp','village'].forEach(function(k){SPR['set_'+k]=ART16['set_'+k]});
+var DITHER={pwood:['#3d5e4a','#456852'],pforest:['#2a4a3c','#315444'],forest:['#2c4a2e','#335536'],water:['#3a6e98','#4680aa'],woodland:['#3f6b3f','#467546'],swamp:['#456b66','#4d746f'],pond:['#3f78a0','#4a85ae'],field:['#9db25a','#a8bc66'],cultivated:['#b88f3d','#c09845'],pasture:['#7fa04a','#88a953'],orchard:['#8a9a4a','#96a654'],kharst:['#8c887a','#9a9586']};
+var SPR={};['woodland','swamp','pond','field','cultivated','pasture'].forEach(function(k){SPR[k]=ART16['t_'+k]});SPR.forest=SPR.woodland;SPR.water=SPR.pond;SPR.pwood=SPR.woodland;SPR.pforest=SPR.woodland;SPR.orchard=SPR.woodland;SPR.kharst=ART16.t_kharst;['hamlet','camp','village'].forEach(function(k){SPR['set_'+k]=ART16['set_'+k]});
 DITHER.settle=['#6f5a3e','#7a6446'];
 function artDefs(){
   var o='<defs>';

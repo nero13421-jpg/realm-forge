@@ -105,7 +105,7 @@ function openPackOf(k){
 }
 function rollKey(){
   var g=wpick(PACK);
-  if(g==='terrain'){if(Math.random()<.35){var ek=wpick([['gs',5],['ms',2],['sm',4],['lm',2]]);return 'e_'+ek+'_'+pick(EKIND)}return 't_'+wpick(TERR_PAIRS)}
+  if(g==='terrain'){if(Math.random()<.35){var ec=pick(ECOMBO);if(Math.random()<.5){var ek=wpick([['gs',5],['ms',2],['sm',4],['lm',2]]);ec=[ek,pick(EKIND)]}return 'e_'+ec[0]+'_'+ec[1]}return 't_'+wpick(TERR_PAIRS)}
   if(g==='weapon'&&Math.random()<.08)return Math.random()<.35?'rod_cu':'rod_wood';
   if(g==='weapon'||g==='ammo'){var t=pick(WEAPON_KEYS),hd=Math.random()<.35?'cu':'fl',wd=Math.random()<.4?'pine':'oak';return wvar(t,hd,wd)}
   if(g==='armor')return pick(['hide_armor','leather_armor']);

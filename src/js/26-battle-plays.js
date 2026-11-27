@@ -117,7 +117,7 @@ function bfTravel(L,U,m){/* which way the squad was going, and where the enemy i
   td=td||[1,0];var eb=td;if(m){var mp=m.pos?walkPos(m):null,up=walkPos(L);if(mp){var d4=Math.hypot(mp[0]-up[0],mp[1]-up[1]);if(d4>1e-6)eb=[(mp[0]-up[0])/d4,(mp[1]-up[1])/d4]}}return{td:td,eb:eb}}
 /* stealth: how close an enemy must come to spot a man who is creeping or lying in wait, by the cover he is in (yards) */
 var HIDE_YD={p:14,w:8,b:12,t:6,c:18,m:20,s:22,f:25,o:35,r:40};
-var HIDE_MAP={pwood:20,pforest:14,forest:7,water:30,woodland:10,swamp:12,cultivated:30,field:40,pasture:45,orchard:18,settle:30};
+var HIDE_MAP={pwood:20,pforest:14,forest:7,water:30,woodland:10,swamp:12,cultivated:30,field:40,pasture:45,orchard:18,kharst:16,settle:30};
 function stealthOf(u){return (u&&u.c&&stats(u.c).stealth)||0}
 function hideRange(F,u){return (HIDE_YD[bfCell(F,u.x,u.y)]||35)*(u.hide?.6:1)*(1-stealthOf(u))}
 function bfHidden(b){var fs=b.foes.filter(function(f){return f.alive});if(b.spring)b.units.forEach(function(u){u.hide=false;u.creep=false});

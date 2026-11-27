@@ -12,6 +12,8 @@ var GROUND={
   s:{n:'Stream',mv:.35,sh:.9,cv:1,ml:-10,t:'wading at ×0.35 speed, −10 melee skill; a sprinting man leaps it if his jump distance reaches 4 yd'},
   a:{n:'Deep water',mv:0,t:'nobody can cross'},
   t:{n:'Thicket',mv:0,t:'trees and brush too dense to pass; go around'},
+  k:{n:'Broken rock',mv:.6,sh:.85,cv:.75,ml:-5,t:'kharst scree, cracks and knee-high rock: speed ×0.6, −5 melee skill for bad footing; arrows into it hit ×0.75'},
+  R:{n:'Outcrop',mv:0,t:'a limestone outcrop too steep to cross; go around, or shelter behind it'},
   q:{n:'Deep bog',mv:0,t:'sucking mud nobody can cross; go around'},
   h:{n:'Longhouse',mv:0,sh:1,cv:1,t:'blocks movement'},
   W:{n:'Small palisade',mv:0,sh:1,cv:1,t:'6 ft of stakes: only a jump of 2 yd clears it; 600 HP a panel; men behind it take arrows ×0.25'},
@@ -23,10 +25,10 @@ var BFM={foe:false,jh:0,tig:false,dry:false};
 function cmvAt(F,k){if(BFM.tig){if(F.wet&&F.wet.charCodeAt(k)===49)return 1;return BFM.dry&&cmv(F.g.charAt(k))>0?1:0}return cmv(F.g.charAt(k))}/* who is moving: gates shut for enemies, a high enough jump clears a palisade */
 function cmv(c){if(c==='G')return BFM.foe?0:1;if(c==='W'||c==='X')return BFM.jh>=(c==='X'?PALS.l.yd:PALS.s.yd)?1:0;return (GROUND[c]||GROUND.o).mv}
 function isWallC(c){return c==='W'||c==='X'||c==='G'}
-var GFILL={W:['#4a3826','#3e2e1e'],X:['#3e2e1e','#33261a'],G:['#5a4630','#4a3826'],p:['#3c5a3e','#446444'],f:['#c49a5c','#5e4024'],t:['#0c1c10','#122614'],q:['#231c10','#2c2414'],w:['#2b4f2e','#335c37'],b:['#4a6f3a','#557c43'],m:['#4c5234','#565d3b'],s:['#3f86b8','#4f97c8'],r:['#9a8768','#a8967a'],c:['#7a5a33','#86653b'],a:['#346a90','#3d77a0'],h:['#5a3f26','#6a4a2a']};
-var OPEN={pwood:['#6a8452','#748e5a'],pforest:['#5a7448','#647e50'],forest:['#4e6a3a','#587444'],water:['#6f9150','#7a9b58'],woodland:['#5f7f45','#6a8a4e'],swamp:['#5b7350','#647d59'],pond:['#6f9150','#7a9b58'],field:['#97ad55','#a3b861'],cultivated:['#8f9e4f','#9aaa58'],pasture:['#7a9b46','#84a650'],orchard:['#7f9248','#8a9c50'],settle:['#7d7550','#877f58']};
+var GFILL={W:['#4a3826','#3e2e1e'],X:['#3e2e1e','#33261a'],G:['#5a4630','#4a3826'],p:['#3c5a3e','#446444'],f:['#c49a5c','#5e4024'],t:['#0c1c10','#122614'],q:['#231c10','#2c2414'],w:['#2b4f2e','#335c37'],b:['#4a6f3a','#557c43'],m:['#4c5234','#565d3b'],s:['#3f86b8','#4f97c8'],r:['#9a8768','#a8967a'],c:['#7a5a33','#86653b'],a:['#346a90','#3d77a0'],h:['#5a3f26','#6a4a2a'],k:['#8a8676','#7a7666'],R:['#6a665a','#5a564c']};
+var OPEN={pwood:['#6a8452','#748e5a'],pforest:['#5a7448','#647e50'],forest:['#4e6a3a','#587444'],water:['#6f9150','#7a9b58'],woodland:['#5f7f45','#6a8a4e'],swamp:['#5b7350','#647d59'],pond:['#6f9150','#7a9b58'],field:['#97ad55','#a3b861'],cultivated:['#8f9e4f','#9aaa58'],pasture:['#7a9b46','#84a650'],orchard:['#7f9248','#8a9c50'],kharst:['#8e9a62','#98a46c'],settle:['#7d7550','#877f58']};
 var TCOL=['#f0c64e','#6fd0c0','#e58ad6','#8ab4f5','#f59a5a','#b6e070'];
-var BFNAME={pwood:'Pine woodland',pforest:'Pine forest',forest:'Oak forest',water:'Open water shore',woodland:'Woodland',swamp:'Swamp',pond:'Pond shore',field:'Open field',cultivated:'Cultivated field',pasture:'Pasture',orchard:'Orchard',settle:'Settlement'};
+var BFNAME={pwood:'Pine woodland',pforest:'Pine forest',forest:'Oak forest',water:'Open water shore',woodland:'Woodland',swamp:'Swamp',pond:'Pond shore',field:'Open field',cultivated:'Cultivated field',pasture:'Pasture',orchard:'Orchard',kharst:'Kharst',settle:'Settlement'};
 /* the ground of a fight: a 280 x 192 yard window onto the map wherever the fight happens. Every 4-yard cell takes the
    painted ground under it, so a field near a tile edge runs straight on into the next tile, and the same spot always has
    the same ground whether you look at it or fight on it. */
@@ -48,6 +50,7 @@ function bfGenAt(cx,cy,seed){
     else if(k==='water')code='a';
     else if(k==='field')code=n>.9?'w':n>.8?'b':'o';
     else if(k==='pasture')code=n>.86?'b':'o';
+    else if(k==='kharst')code=n>.74?'R':n>.4||n2>.7?'k':n2<.12?'b':'o';
     else if(k==='orchard')code=(x%3===1&&y%3===1)?'w':n>.92?'b':'o';
     else if(k==='cultivated')code=n>.9?'b':y%4===3?'o':'c';
     else if(k==='settle'){var sh=hexOf(px,py),sr=Math.floor(sh/COLS),sc0=[w*((sh%COLS)+.5+((sr&1)?.5:0)),SH*1.5*sr+SH];code=n>.88?'b':'o'}
@@ -116,6 +119,7 @@ function bfSvg(F,P,click){
   Object.keys(GFILL).forEach(function(k){var f=GFILL[k];o+='<pattern id="'+P+'gp-'+k+'" width="2" height="2" patternUnits="userSpaceOnUse"><rect width="2" height="2" fill="'+f[0]+'"/><rect x="1" y="1" width="1" height="1" fill="'+f[1]+'"/></pattern>'});
   [['tree',.62],['bush',.38],['reed',.32],['puddle',.45],['tuft',.3],['stone',.25],['ripple',.45],['flowerY',.3],['sheep',.28]].forEach(function(q){o+='<g id="'+P+'d-'+q[0]+'" transform="scale('+q[1]+')">'+microSvg(MICRO[q[0]],-MICRO[q[0]].w/2,-MICRO[q[0]].h)+'</g>'});
   o+='<g id="'+P+'d-pine"><polygon points="0,-3.2 1.5,0 -1.5,0" fill="#22402c"/><polygon points="0,-5 1.1,-2 -1.1,-2" fill="#2c5236"/><rect x="-.18" y="0" width=".36" height=".7" fill="#4a3220"/></g>';
+  o+='<g id="'+P+'d-rock"><polygon points="-1.9,0 -1.4,-1.9 -.3,-2.8 .9,-2.3 1.8,-.9 2,0" fill="#3a362e"/><polygon points="-1.6,-.2 -1.1,-1.8 -.2,-2.5 .8,-2.1 1.5,-.9 1.7,-.2" fill="#aaa596"/><polygon points=".8,-2.1 1.5,-.9 1.7,-.2 .6,-.2" fill="#7e796c"/><path d="M-.4 -2.2L-.6 -1.2L-.2 -.6" stroke="#4a4438" stroke-width=".18" fill="none"/></g>';
   o+='<g id="'+P+'d-bog"><ellipse cx="0" cy="0" rx="1.6" ry=".7" fill="#120e08"/><circle cx=".6" cy="-.2" r=".25" fill="#5a5030"/><circle cx="-.7" cy=".1" r=".18" fill="#5a5030"/></g>';
   o+='<g id="'+P+'d-hut" transform="scale(.55)">'+microSvg(MICRO.hut,-MICRO.hut.w/2,-MICRO.hut.h)+'</g>'+fortDefs(P)+'</defs>';
   o+='<g transform="'+camMatrix()+'"><rect width="'+BFW+'" height="'+BFH+'" fill="url(#'+P+'gp-o)"/>';
@@ -133,6 +137,8 @@ function bfSvg(F,P,click){
     if(ck==='w'){if(q<.62)d('tree',jx,jy+2);else if(q<.8)d('bush',jx,jy)}
     if(ck==='p'){if(q<.5)d('pine',jx,jy+2)}
     else if(ck==='t'){d('tree',cx+1,cy+2.6);d('tree',cx+3,cy+3.4);d('bush',cx+2,cy+4.2);if(q<.6)d('tree',cx+2,cy+1.4)}
+    else if(ck==='R'){d('rock',cx+2,cy+3.6);if(q<.5)d('rock',cx+1,cy+2.2)}
+    else if(ck==='k'){if(q<.3)d('stone',jx,jy);else if(q<.38)d('tuft',jx,jy)}
     else if(ck==='q'){d('bog',cx+2,cy+2.4);if(q<.5)d('bog',cx+1,cy+3.6);if(q<.35)d('reed',jx,jy+1)}
     else if(ck==='b'){if(q<.7)d('bush',jx,jy)}
     else if(ck==='m'){if(q<.3)d('reed',jx,jy+1);else if(q<.5)d('puddle',jx,jy)}

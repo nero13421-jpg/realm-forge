@@ -61,6 +61,8 @@ function doPlace(c,r){
   if(pl.t==='e'){
     var ep=pl.k.split('_'),EE=ELEV[ep[0]],ek=ep[1],ecard=S.cards.filter(function(x){return x.at===null&&x.key==='e_'+pl.k})[0],ecost=TERR[ek].cost+EE.cost;
     if(!ecard){say('No '+CD['e_'+pl.k].n.toLowerCase()+' card in hand.',true);return render()}
+    if(ek==='cultivated'&&!waterNear(c,r)){say('A hillside field is still farmland: it needs water within two tiles, like any cultivated field.',true);return render()}
+    if(ek==='pasture'&&S.prestige>=ecost){var pm2=pastureNo(i,c,r,{s:EE.sh,b:baseFor(c,r,EE.sh,EE.rise,UI.rot||0),r:EE.rise,d:UI.rot||0});if(pm2){say(pm2,true);return render()}}
     if(S.prestige<ecost){say('Not enough prestige.',true);return render()}
     var dir=UI.rot||0,eb=baseFor(c,r,EE.sh,EE.rise,dir);
     S.cards.splice(S.cards.indexOf(ecard),1);S.grid[i]=ek;S.hgt[i]={s:EE.sh,b:eb,r:EE.rise,d:dir};S.prestige-=ecost;
@@ -71,7 +73,7 @@ function doPlace(c,r){
     var key=pl.k,card=S.cards.filter(function(x){return x.at===null&&x.key==='t_'+key})[0];
     if(key==='pond'&&nbrs(c,r).some(function(p){return terrAt(p[0],p[1])==='pond'})){say('Ponds cannot touch each other.',true);return render()}
     if(key==='orchard'&&!waterNear(c,r)){say('An orchard is farmland: it needs water within two tiles, like a cultivated field.',true);return render()}
-    if(key==='pasture'&&card&&S.prestige>=TERR[key].cost){var was=S.grid[i],wh=S.hgt[i];S.grid[i]=key;S.hgt[i]={s:'flat',b:baseFor(c,r,'flat',0,0)};var SU0=supply(),okp=SU0.past[i]&&SU0.past[i].ok,TW=okp?null:walkFrom([i]),nf=0;if(TW)for(var fk=0;fk<COLS*ROWS;fk++)if(S.grid[fk]==='field'&&TW[fk]<Infinity)nf++;S.grid[i]=was;S.hgt[i]=wh;if(!okp){say('Every pasture needs half a prairie: one field tile feeds two pastures, within an hour\'s walk. '+(nf?'The '+nf+' field'+(nf>1?'s':'')+' in reach already feed'+(nf>1?'':'s')+' two pastures each':'No field is in reach of '+lab(c,r))+'. Place a field (prairie) next to where the pasture will go first.',true);return render()}}
+    if(key==='pasture'&&card&&S.prestige>=TERR[key].cost){var pm=pastureNo(i,c,r,{s:'flat',b:baseFor(c,r,'flat',0,0)});if(pm){say(pm,true);return render()}}
     if(key==='cultivated'&&!waterNear(c,r)){say('Cultivated fields need water within two tiles: a pond, swamp, small open water, stream or creek, with its water rules met.',true);return render()}
     if(!card){say('No '+TERR[key].n.toLowerCase()+' card in hand.',true);return render()}
     if(S.prestige<TERR[key].cost){say('Not enough prestige.',true);return render()}
@@ -93,3 +95,7 @@ function doPlace(c,r){
   }
   found(pl.k,c,r);
 }
+
+/* a pasture (flat or on a hillside) needs half a prairie in reach: try it on the map and see whether a field can feed it */
+function pastureNo(i,c,r,h){var was=S.grid[i],wh=S.hgt[i];S.grid[i]='pasture';S.hgt[i]=h;var SU0=supply(),okp=SU0.past[i]&&SU0.past[i].ok,TW=okp?null:walkFrom([i]),nf=0;if(TW)for(var fk=0;fk<COLS*ROWS;fk++)if(S.grid[fk]==='field'&&TW[fk]<Infinity)nf++;S.grid[i]=was;S.hgt[i]=wh;
+  if(okp)return null;return 'Every pasture needs half a prairie: one field tile feeds two pastures, within an hour\'s walk. '+(nf?'The '+nf+' field'+(nf>1?'s':'')+' in reach already feed'+(nf>1?'':'s')+' two pastures each':'No field is in reach of '+lab(c,r))+'. Place a field (prairie) next to where the pasture will go first.'}
