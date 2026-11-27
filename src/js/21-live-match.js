@@ -177,7 +177,6 @@ function settleMen(us){
     wear(u.mcard,u.melee&&u.att[u.melee],u.md);if(u.rng&&u.att[u.rng])u.ac.forEach(function(a){wear(a.card,1,u.rd)});
     var lf=u.arrows;u.ac.forEach(function(a){a.card.n=Math.min(a.cap,lf);lf-=a.card.n;if(a.card.n<=0&&S.cards.indexOf(a.card)>=0)S.cards.splice(S.cards.indexOf(a.card),1)});
     if(u.alive&&u.mhp)u.c.dmg=Math.max(0,u.mhp-u.hp);
-    if(u.alive)u.c.lead=Math.min(LEAD_CAP,(u.c.lead||0)+1);/* every fight he comes through steadies him for the next */
     if(u.alive)Object.keys(u.att).forEach(function(w){var g=u.att[w]/10;if(g>0)u.c.skill[w]=Math.min(100,Math.round((u.c.skill[w]+g)*10)/10)});
     else{S.cards.forEach(function(c){if(c.eq===u.c.id)c.eq=null});if(S.cards.indexOf(u.c)>=0){S.cards.splice(S.cards.indexOf(u.c),1);M.humLost++}}});
 }

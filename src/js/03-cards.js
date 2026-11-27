@@ -50,7 +50,7 @@ var STATS=[
  ['gnosis','Magic','Gnosis',0,'','Spent to learn spells',''],
  ['manaRec','Magic','Mana recovery','full','','Refills to full at the start of every fight',''],
  ['cast','Magic','Casting speed',1,'×','Multiplies spell recharge times',''],
- ['lead','Spirit','Leadership',0,'','Steadies the men within 15 yd: each point gives back 0.1 nerve a second to the men around him. +1 for every fight he comes through, up to '+25,''],
+ ['lead','Spirit','Leadership',0,'','Steadies the men within 15 yd: each point gives back 0.1 nerve a second to the men around him. Never grows by itself: only taught in schools, which come with the Garavatra',''],
  ['fear','Spirit','Fear',0,'','How frightening he is: enemies within 6 yd lose fear÷20 nerve a second. Men start at 0; beasts carry a lot',''],
  ['coh','Spirit','Cohesion',0,'','Cuts the nerve lost when a man beside him falls, by this many percent. Never grows by itself: taught in schools (later) or given by sacrificing pack animals (wolf)','wolf'],
  ['fort','Spirit','Fortitude',50,'','Personal grit: every nerve loss is cut by half this many percent, and the lower his health the more he loses','']
