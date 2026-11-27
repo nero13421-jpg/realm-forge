@@ -491,7 +491,7 @@ var STATS=[
  ['jh','Movement','Jump height',0.5,'yd','At a sprint he hops brush at least this tall without slowing (brush needs 0.5 yd)',''],
  ['strike','Offense','Strike speed',1,'×','Multiplies every weapon\'s attacks per minute',''],
  ['str','Offense','Strength',1,'×','Multiplies melee and bow damage','wolf'],
- ['skill','Offense','Weapon skill',10,'per weapon','Hit chance in %, grows with use',''],
+ ['skill','Offense','Weapon skill',10,'per weapon','Hit chance in %. It does not grow with use: nothing a man gains comes from experience',''],
  ['range','Offense','Draw range',1,'×','Multiplies bow range',''],
  ['hp','Defense','Durability',100,'HP','Total health','boar'],
  ['def','Defense','Overall defense',0,'','Flat cut to every hit: 10 defense turns a 20 hit into 10. Armor +5, helmet +'+HELM+', shield +10',''],
@@ -2372,7 +2372,6 @@ function settleMen(us){
     wear(u.mcard,u.melee&&u.att[u.melee],u.md);if(u.rng&&u.att[u.rng])u.ac.forEach(function(a){wear(a.card,1,u.rd)});
     var lf=u.arrows;u.ac.forEach(function(a){a.card.n=Math.min(a.cap,lf);lf-=a.card.n;if(a.card.n<=0&&S.cards.indexOf(a.card)>=0)S.cards.splice(S.cards.indexOf(a.card),1)});
     if(u.alive&&u.mhp)u.c.dmg=Math.max(0,u.mhp-u.hp);
-    if(u.alive)Object.keys(u.att).forEach(function(w){var g=u.att[w]/10;if(g>0)u.c.skill[w]=Math.min(100,Math.round((u.c.skill[w]+g)*10)/10)});
     else{S.cards.forEach(function(c){if(c.eq===u.c.id)c.eq=null});if(S.cards.indexOf(u.c)>=0){S.cards.splice(S.cards.indexOf(u.c),1);M.humLost++}}});
 }
 function hpSum(a){var t=0;a.forEach(function(x){t+=Math.max(0,x.hp)});return t}

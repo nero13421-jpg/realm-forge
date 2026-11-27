@@ -36,7 +36,7 @@ var STATS=[
  ['jh','Movement','Jump height',0.5,'yd','At a sprint he hops brush at least this tall without slowing (brush needs 0.5 yd)',''],
  ['strike','Offense','Strike speed',1,'×','Multiplies every weapon\'s attacks per minute',''],
  ['str','Offense','Strength',1,'×','Multiplies melee and bow damage','wolf'],
- ['skill','Offense','Weapon skill',10,'per weapon','Hit chance in %, grows with use',''],
+ ['skill','Offense','Weapon skill',10,'per weapon','Hit chance in %. It does not grow with use: nothing a man gains comes from experience',''],
  ['range','Offense','Draw range',1,'×','Multiplies bow range',''],
  ['hp','Defense','Durability',100,'HP','Total health','boar'],
  ['def','Defense','Overall defense',0,'','Flat cut to every hit: 10 defense turns a 20 hit into 10. Armor +5, helmet +'+HELM+', shield +10',''],
