@@ -11,7 +11,7 @@ function makeUnit(c){
   if(!rng&&bows.length)rng=bows[0];
   var mhp=Math.round(X.hp*G.hp);
   return {c:c,gm:G,foot:Math.min(.8,(X.foot||0)+G.foot),short:(X.short||1)*G.short,mhp:mhp,hp:Math.max(1,mhp-Math.round(c.dmg||0)),sp:X.sp,dr:X.dr,strike:X.strike,str:X.str,range:X.range,keen:X.keen,dfn:X.def+G.def,dodge:X.dodge+G.dodge,grit:X.grit,react:X.react,rt:X.react,press:X.press,cast:X.cast,sight:X.sight,jd:X.jd,jh:X.jh,ce:100,ceDrain:100/X.cEnd*G.ceDrain,ceRec:100/60*X.rec,
-    rod:eq.reduce(function(m,x){var W2=WEAP[wkey(x.key)];return W2&&W2.rod?Math.max(m,W2.rod+Math.min(.5,(x.eyes||0)*.1)):m},0),watch:!!c.watch,eqk:eq.map(function(x){return x.key}),ac:ac,arrows:ac.reduce(function(t,a){return t+a.cap},0),name:hname(c),endur:100,wf:X.wf,melee:melee,rng:rng,mana:X.mana,spells:c.spells||[],sh:0,cds:0,
+    lead:X.lead,fear:X.fear,coh:X.coh,fort:X.fort,nerve:100,rod:eq.reduce(function(m,x){var W2=WEAP[wkey(x.key)];return W2&&W2.rod?Math.max(m,W2.rod+Math.min(.5,(x.eyes||0)*.1)):m},0),watch:!!c.watch,eqk:eq.map(function(x){return x.key}),ac:ac,arrows:ac.reduce(function(t,a){return t+a.cap},0),name:hname(c),endur:100,wf:X.wf,melee:melee,rng:rng,mana:X.mana,spells:c.spells||[],sh:0,cds:0,
     mcard:melee?eq.filter(function(x){return wkey(x.key)===melee})[0]:null,md:0,rd:0,
     armor:eq.some(function(x){return kindOf(x)==='armor'}),shield:eq.some(function(x){return kindOf(x)==='shield'}),shDef:eq.reduce(function(t,x){return t+(kindOf(x)==='shield'&&ARM[x.key]?ARM[x.key].def:0)},0),helmet:eq.some(function(x){return kindOf(x)==='helmet'}),x:0,cdm:0,cdr:0,att:{},alive:true,gone:false};
 }

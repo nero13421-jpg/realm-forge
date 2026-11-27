@@ -504,7 +504,11 @@ var STATS=[
  ['mana','Magic','Mana',1,'','Casting pool',''],
  ['gnosis','Magic','Gnosis',0,'','Spent to learn spells',''],
  ['manaRec','Magic','Mana recovery','full','','Refills to full at the start of every fight',''],
- ['cast','Magic','Casting speed',1,'×','Multiplies spell recharge times','']
+ ['cast','Magic','Casting speed',1,'×','Multiplies spell recharge times',''],
+ ['lead','Spirit','Leadership',0,'','Steadies the men within 15 yd: each point gives back 0.1 nerve a second to the men around him. +1 for every fight he comes through, up to '+25,''],
+ ['fear','Spirit','Fear',0,'','How frightening he is: enemies within 6 yd lose fear÷20 nerve a second. Men start at 0; beasts carry a lot',''],
+ ['coh','Spirit','Cohesion',0,'','Cuts the nerve lost when a man beside him falls, by this many percent. Never grows by itself: taught in schools (later) or given by sacrificing pack animals (wolf)','wolf'],
+ ['fort','Spirit','Fortitude',50,'','Personal grit: every nerve loss is cut by half this many percent, and the lower his health the more he loses','']
 ];
 function statBase(k){for(var i=0;i<STATS.length;i++)if(STATS[i][0]===k)return STATS[i][3];return 0}
 function stats(c,wt,eq){
@@ -518,6 +522,7 @@ function stats(c,wt,eq){
   X.mana=c.mana||1;X.gnosis=c.gnosis||0;X.cast=statBase('cast');X.keen=b('hawk');
   /* serpent: strike strength, top sprint, attack speed · turtle: health and defense · goat: footing, defense speed, stamina, short-reach blows */
   X.str*=b('serpent');X.sprint*=b('serpent');X.strike=X.strike*b('serpent');X.hp=Math.round(X.hp*b('turtle'));X.def+=Math.round(bo(c,'turtle')*100)/2;
+  X.lead=c.lead||0;X.fear=statBase('fear');X.coh=Math.min(60,Math.round(bo(c,'wolf')*200));X.fort=statBase('fort');/* wolves hunt as a pack: each wolf offered adds cohesion */
   X.dodge+=bo(c,'goat')/2;X.mdEnd*=b('goat');X.foot=Math.min(.6,bo(c,'goat')*3);X.short=b('goat');
   (c.tat||[]).forEach(function(t){if(t&&t.v)Object.keys(t.v).forEach(function(s){X[s]+=t.v[s]})});
   X.stealth=0;/* standard for now: sacrifices, tattoos and the like will raise it later */
@@ -533,6 +538,7 @@ function statVal(c,k,X){
     case 'strike':case 'range':case 'cast':return '×'+f(X[k],2);case 'str':return '×'+f(X.str,3);case 'skill':return 'see Skill';
     case 'hp':return X.hp+' HP'+(c.dmg>0?' ('+Math.round(X.hp-c.dmg)+' now)':'');case 'def':return X.def+'';case 'dodge':return f(X.dodge*100,1)+'%';case 'grit':return X.grit+' HP';case 'heal':return X.heal+' HP/h';
     case 'sight':return f(X.sight)+' yd';case 'react':return X.react+' s';case 'press':return '−'+f(X.press*100)+'%';
+    case 'lead':case 'fear':case 'fort':return X[k]+'';case 'coh':return X.coh+'%';
     case 'mana':return X.mana+'';case 'gnosis':return X.gnosis+'';case 'manaRec':return 'full each fight';
   }
   return '';
@@ -1282,7 +1288,7 @@ function makeUnit(c){
   if(!rng&&bows.length)rng=bows[0];
   var mhp=Math.round(X.hp*G.hp);
   return {c:c,gm:G,foot:Math.min(.8,(X.foot||0)+G.foot),short:(X.short||1)*G.short,mhp:mhp,hp:Math.max(1,mhp-Math.round(c.dmg||0)),sp:X.sp,dr:X.dr,strike:X.strike,str:X.str,range:X.range,keen:X.keen,dfn:X.def+G.def,dodge:X.dodge+G.dodge,grit:X.grit,react:X.react,rt:X.react,press:X.press,cast:X.cast,sight:X.sight,jd:X.jd,jh:X.jh,ce:100,ceDrain:100/X.cEnd*G.ceDrain,ceRec:100/60*X.rec,
-    rod:eq.reduce(function(m,x){var W2=WEAP[wkey(x.key)];return W2&&W2.rod?Math.max(m,W2.rod+Math.min(.5,(x.eyes||0)*.1)):m},0),watch:!!c.watch,eqk:eq.map(function(x){return x.key}),ac:ac,arrows:ac.reduce(function(t,a){return t+a.cap},0),name:hname(c),endur:100,wf:X.wf,melee:melee,rng:rng,mana:X.mana,spells:c.spells||[],sh:0,cds:0,
+    lead:X.lead,fear:X.fear,coh:X.coh,fort:X.fort,nerve:100,rod:eq.reduce(function(m,x){var W2=WEAP[wkey(x.key)];return W2&&W2.rod?Math.max(m,W2.rod+Math.min(.5,(x.eyes||0)*.1)):m},0),watch:!!c.watch,eqk:eq.map(function(x){return x.key}),ac:ac,arrows:ac.reduce(function(t,a){return t+a.cap},0),name:hname(c),endur:100,wf:X.wf,melee:melee,rng:rng,mana:X.mana,spells:c.spells||[],sh:0,cds:0,
     mcard:melee?eq.filter(function(x){return wkey(x.key)===melee})[0]:null,md:0,rd:0,
     armor:eq.some(function(x){return kindOf(x)==='armor'}),shield:eq.some(function(x){return kindOf(x)==='shield'}),shDef:eq.reduce(function(t,x){return t+(kindOf(x)==='shield'&&ARM[x.key]?ARM[x.key].def:0)},0),helmet:eq.some(function(x){return kindOf(x)==='helmet'}),x:0,cdm:0,cdr:0,att:{},alive:true,gone:false};
 }
@@ -1795,7 +1801,10 @@ function newMobs(type){
   else for(i=0;i<8;i++)o.push({k:'brigand',hp:100,w:pick(['spear','spear','club','shortbow']),armor:Math.random()<.5,shield:Math.random()<.5});
   return o;
 }
-function mkFoe(b,i,x){
+/* a mob's spirit: fear it carries, and fortitude against breaking. Beasts never break */
+var MOB_SP={goblin:{fear:3,fort:40},brigand:{fear:4,fort:50},tiggle:{fear:2,fort:30},moon:{fear:6,fort:30},pigger:{fear:25,fl:1},dogman:{fear:25,fl:1},watcher:{fear:40,fl:1}};
+function mkFoe(b,i,x){var f=mkFoe0(b,i,x),sp=MOB_SP[f.kind]||{fear:3,fort:40};f.fear=sp.fear;f.fort=sp.fort||0;f.fearless=!!sp.fl;f.nerve=100;f.lead=0;f.coh=0;return f}
+function mkFoe0(b,i,x){
   if(b.k==='moon')return{side:'e',kind:'moon',dodge:.1,hp:b.hp,x:x,spd:4.6,dmg:6,apm:50,reach:1,rng:false,skill:15,armor:false,shield:false,cd:0,bcd:4+Math.floor(Math.random()*10),mana:2,alive:true,id:i,ref:b};/* two bursts of moonlight a fight each */
   if(b.k==='watcher')return{side:'e',kind:'watcher',dodge:.1,hp:b.hp,mhp:200,x:x,spd:6.5,dmg:0,apm:30,reach:1.6,rng:false,skill:40,armor:false,shield:false,cd:0,fcd:0,alive:true,id:i,ref:b};
   if(b.k==='dogman')return{side:'e',kind:'dogman',dodge:.15,hp:b.hp,x:x,spd:DOG_SP,dmg:32,apm:55,reach:2.2,rng:false,skill:35,armor:false,shield:false,cd:0,alive:true,id:i,ref:b};
@@ -2359,10 +2368,11 @@ function groupOf(b,uid){for(var i=0;i<b.groups.length;i++)if(b.groups[i].uid===u
 function settleMen(us){
   var M=S.match;
   us.forEach(function(u){if(u.done)return;u.done=true;
-    var wear=function(card,used,dealt){if(!card||!used||!headOf(card))return;card.wear=Math.min(1,(card.wear||0)+HEADS[headOf(card)].wear*(1+Math.floor(dealt/300)))};
+    var wear=function(card,used,dealt){if(!card||!used||!headOf(card))return;card.wear=Math.min(1,(card.wear||0)+HEADS[headOf(card)].wear*(1+Math.floor(dealt/300))*(card.boon&&card.boon.k==='boar'?Math.max(.2,1-card.boon.p/20):1))};/* a boar-blessed head keeps its edge */
     wear(u.mcard,u.melee&&u.att[u.melee],u.md);if(u.rng&&u.att[u.rng])u.ac.forEach(function(a){wear(a.card,1,u.rd)});
     var lf=u.arrows;u.ac.forEach(function(a){a.card.n=Math.min(a.cap,lf);lf-=a.card.n;if(a.card.n<=0&&S.cards.indexOf(a.card)>=0)S.cards.splice(S.cards.indexOf(a.card),1)});
     if(u.alive&&u.mhp)u.c.dmg=Math.max(0,u.mhp-u.hp);
+    if(u.alive)u.c.lead=Math.min(LEAD_CAP,(u.c.lead||0)+1);/* every fight he comes through steadies him for the next */
     if(u.alive)Object.keys(u.att).forEach(function(w){var g=u.att[w]/10;if(g>0)u.c.skill[w]=Math.min(100,Math.round((u.c.skill[w]+g)*10)/10)});
     else{S.cards.forEach(function(c){if(c.eq===u.c.id)c.eq=null});if(S.cards.indexOf(u.c)>=0){S.cards.splice(S.cards.indexOf(u.c),1);M.humLost++}}});
 }
@@ -2380,7 +2390,7 @@ function bfArc(a,t){var f=t.face;if(!f)return 'front';var dx=a.x-t.x,dy=a.y-t.y,
 function bfHit(b,a,t,dmg,skill,k,x){var arc=bfArc(a,t),A=arc==='rear'?ARC.rear:arc==='front'?null:ARC.side,noSh=t.shield&&(arc==='rear'||arc==='right'),sd=0,sh0=t.shield;
   if(A){skill*=A.hit;dmg*=A.dmg}if(noSh){if(t.dfn!=null){sd=t.shDef||0;t.dfn-=sd}else t.shield=false}
   a.face=[t.x-a.x,t.y-a.y];/* a man turns to whoever he strikes */
-  var h0=t.hp,h=hitX(t,dmg,skill);if(noSh){if(t.dfn!=null)t.dfn+=sd;else t.shield=sh0}if(A&&h&&!t._dg)b.flk=(b.flk||0)+1;if(t.side==='e')t.woke=true;bfEv(b,a,t,k,h?Math.max(0,h0-t.hp):-1,t._dg?'dodged':(A&&h?(arc==='rear'?'from behind!':'flank!'):null),x);if(h&&k==='m'&&t.gm&&t.gm.thorn&&a.alive){var th=Math.max(1,Math.round(dmg*t.gm.thorn));a.hp-=th;bfEv(b,t,a,'m',th,'hit back',null);if(a.hp<=0)a.alive=false}if(h&&t.hp<=0)t.alive=false;return h}
+  var h0=t.hp,h=hitX(t,dmg,skill);if(noSh){if(t.dfn!=null)t.dfn+=sd;else t.shield=sh0}if(A&&h&&!t._dg){b.flk=(b.flk||0)+1;nerveHit(t,arc==='rear'?4:2)}if(t.side==='e')t.woke=true;bfEv(b,a,t,k,h?Math.max(0,h0-t.hp):-1,t._dg?'dodged':(A&&h?(arc==='rear'?'from behind!':'flank!'):null),x);if(h&&k==='m'&&t.gm&&t.gm.thorn&&a.alive){var th=Math.max(1,Math.round(dmg*t.gm.thorn));a.hp-=th;bfEv(b,t,a,'m',th,'hit back',null);if(a.hp<=0)a.alive=false}if(h&&t.hp<=0)t.alive=false;return h}
 function bfFrame(b){var cen=function(L){var n=0,cx=0,cy=0;L.forEach(function(q){if(q.alive&&!q.gone){n++;cx+=q.x;cy+=q.y}});return n?[cx/n,cy/n]:null};
   b.units.concat(b.foes).forEach(function(x){if(!x.alive)return;if(!x.face){/* at contact men face the way their team faces, mobs face the men */var tm=x.side==='e'?null:b.teams.filter(function(t){return t.k===x.tk})[0],c0=cen(x.side==='e'?b.units:b.foes);x.face=tm&&tm.face?tm.face.slice():c0?[c0[0]-x.x,c0[1]-x.y]:[1,0]}if(x._px!=null){var dx=x.x-x._px,dy=x.y-x._py;if(dx*dx+dy*dy>.0025)x.face=[dx,dy]}x._px=x.x;x._py=x.y});var fr=[];b.units.concat(b.foes).forEach(function(x){fr[x._ri]=[Math.round(x.x*10)/10,Math.round(x.y*10)/10,Math.max(0,Math.round(x.hp)),x.alive?(x.gone?2:1):0]});b.rec.fr.push(fr)}
 /* bodies keep apart: at least GAP_E yards between enemies, GAP_S between men of the same side, so the lines stay readable */
@@ -2417,7 +2427,23 @@ function watcherAI(b,F,f,seen,live){f.fcd=Math.max(0,(f.fcd||0)-1);f.woke=true;
   if(pick.frz>0||Math.random()<.35){f.grab=pick;pick.grabbed=true;bfEv(b,f,pick,'m',0,'grabbed!',null);mlog('The watcher has '+pick.name+'.','bad')}}
 /* a man who has taken the watcher's eyes can rear up the same way: once every 20 s, when two or more enemies are within 10 yd */
 function eyesFreeze(b,u,fs){u.wcd=Math.max(0,(u.wcd||0)-1);if(u.wcd>0)return;if(fs.filter(function(f){return bfD(u,f)<=W_FREEZE}).length<2)return;u.wcd=W_FCD;wFreeze(b,u,fs,u.name+' rears up: the enemy near him freezes')}
-function nerveHit(){}
+/* ---------- nerve: leadership, fear, cohesion and fortitude ----------
+   Everyone starts a fight with 100 nerve. Losses: a man beside him falls (−12, less cohesion), a blow from the side (−2) or behind (−4),
+   fighting on below grit (−1 a second), a frightening enemy close by (−fear÷20 a second), moonlight, a freeze, a grab. Fortitude cuts every
+   loss by half its value in percent. Leaders within 15 yd give back leadership÷10 a second, and nerve comes back slowly out of contact.
+   At 0 he breaks and runs for 8 seconds, then steadies at 35. Beasts (pigger, dog man, watcher) never break. */
+var LEAD_CAP=25,NERVE_BREAK_S=8;
+function nerveHit(e,n){if(!e||e.fearless||e.nerve==null||!e.alive||e.rout>0)return;var hp=e.mhp?Math.max(0,e.hp)/e.mhp:1;e.nerve-=n*(1-(e.fort||0)/200)*(hp<.5?1.25:1)}
+function moraleTick(b){var all=b.units.concat(b.foes);
+  all.forEach(function(d){if(d.alive||d._dn)return;d._dn=1;var side=d.side==='e'?b.foes:b.units;side.forEach(function(a){if(a!==d&&a.alive&&!a.gone&&bfD(a,d)<=10)nerveHit(a,12*(1-(a.coh||0)/100))})});
+  var side=function(L,E){L.forEach(function(u){if(!u.alive||u.gone||u.nerve==null||u.fearless)return;
+    var fm=0,near=false;E.forEach(function(f){if(!f.alive||f.gone)return;var d=bfD(u,f);if(d<=10)near=true;if(d<=6&&(f.fear||0)>fm)fm=f.fear});if(fm)nerveHit(u,fm/20);if(u.grit&&u.hp<u.grit)nerveHit(u,1);
+    var ld=0;L.forEach(function(v){if(v!==u&&v.alive&&!v.gone&&(v.lead||0)>ld&&bfD(u,v)<=15)ld=v.lead});u.nerve=Math.min(100,u.nerve+ld/10+(near?0:.5));
+    if(u.rout>0){u.rout--;if(!u.rout){u.nerve=35}return}
+    if(u.nerve<=0){u.rout=NERVE_BREAK_S;u.nerve=0;bfEv(b,u,u,'note',-1,'breaks and runs!',null);b.brk=b.brk||{p:0,e:0};b.brk[u.side==='e'?'e':'p']++}})};
+  side(b.units,b.foes);side(b.foes,b.units)}
+/* a broken man or mob runs from the nearest enemy and strikes no one */
+function routStep(F,e,E){var n=bfNear(e,E,0);if(!n)return;var d=bfD(e,n)||1;bfMove(F,e,e.x+(e.x-n.x)/d*12,e.y+(e.y-n.y)/d*12,e.sp?e.sp.sprint:(e.spd||PACE.jog)*1.2)}
 function sepOk(F,e,x,y){var o=BFM;BFM={foe:e.side==='e',jh:0};var r=bfPass(F,x,y);BFM=o;return r}
 function bfSep(F,all){
   for(var it=0;it<2;it++)for(var i=0;i<all.length;i++){var a=all[i];for(var j=i+1;j<all.length;j++){var c=all[j],mn=(a.side==='e')!==(c.side==='e')?GAP_E:GAP_S,dx=c.x-a.x,dy=c.y-a.y,d=Math.hypot(dx,dy);if(d>=mn)continue;
@@ -2451,6 +2477,7 @@ function stepBattle(b){
   var seenL=live.filter(function(u){return !u.hid}),seenG=seenL.filter(function(u){return !u.tw}),hasW=F.wl&&F.wl.length;b._fl=null;
   fl.forEach(function(f){
     if(f.frz>0){f.frz--;return}
+    if(f.rout>0){routStep(F,f,live);return}
     if(f.kind==='moon'||f.kind==='watcher'){if(f.kind==='moon')moonAI(b,F,f,seenG,live);else watcherAI(b,F,f,seenG,live);return}
     var tg=bfNear(f,f.rng?seenL:seenG,f.id);if(!tg){if(hasW&&seenL.length)wallAI(b,f,null);return}if(f.unaware){f.unaware=false;mlog('The '+f.kind+'s spot the ambush.','bad')}
     var d=bfD(f,tg),aggro=f.kind==='goblin'||f.kind==='pigger'||d<=110||f.woke;if(aggro)f.woke=true;
@@ -2462,7 +2489,7 @@ function stepBattle(b){
     if(f.woke&&d<=f.reach+.6&&f.cd<=0){f.cd+=60/f.apm;bfHit(b,f,tg,f.dmg,f.rng?f.skill*bfShotMul(F,f,tg):f.skill+bfMeleeMod(F,f,false,tg),f.rng?'r':'m',f.kind==='goblin'?'claw':f.kind==='tiggle'?(f.rng?'shortbow':'knife'):f.ref&&f.ref.w)}
   });
   live.forEach(function(u){
-    if(!u.alive||u.gone)return;if(u.grabbed){if(!b.foes.some(function(f){return f.alive&&f.grab===u}))u.grabbed=false;else return}if(u.frz>0){u.frz--;return}if(u.watch)eyesFreeze(b,u,b.foes.filter(function(f){return f.alive}));var t=T[u.tk],g=G[u.uid],fs=b.foes.filter(function(f){return f.alive});if(!fs.length)return;
+    if(!u.alive||u.gone)return;if(u.grabbed){if(!b.foes.some(function(f){return f.alive&&f.grab===u}))u.grabbed=false;else return}if(u.frz>0){u.frz--;return}if(u.rout>0){routStep(F,u,b.foes.filter(function(f){return f.alive}));return}if(u.watch)eyesFreeze(b,u,b.foes.filter(function(f){return f.alive}));var t=T[u.tk],g=G[u.uid],fs=b.foes.filter(function(f){return f.alive});if(!fs.length)return;
     var tf=t.tgt!=null&&b.foes[t.tgt]&&b.foes[t.tgt].alive?b.foes[t.tgt]:null;if(t.tgt!=null&&!tf)t.tgt=null;
     u.guard=false;var gr=u.hp<u.grit?.8:1,o=t.order,mv=0,used=0,near=tf&&o==='advance'?tf:bfNear(u,fs,u.c.num),dn=bfD(u,near),pace=(u.endur>0?u.sp.jog:u.sp.walk)*gr,run=(u.endur>0?u.sp.sprint:u.sp.walk)*gr,hold=false,ran=false;
     var fp=t.pace||(o==='form'&&g.mode==='leg'?g.pace:null);if(fp){pace=run=((fp==='sprint'&&u.endur<=0)?u.sp.walk:(u.sp[fp]||u.sp.walk))*gr}
@@ -2499,7 +2526,7 @@ function stepBattle(b){
     if(archer&&u.cdr<=0&&mv<.5){var seen=fs.filter(function(f){return bfSeen(F,u,f)}),t2=tf&&seen.indexOf(tf)>=0&&bfD(u,tf)<=bowR?tf:bfNear(u,seen,u.c.num+3);if(t2&&bfD(u,t2)<=bowR){u.hide=false;u.rev=8;u.cdr+=60/(WEAP[u.rng].apm*sm*GM.rspd);u.att[u.rng]=(u.att[u.rng]||0)+1;u.arrows--;var ac0=u.ac.filter(function(a){return a.card})[0],rh0=t2.hp;bfHit(b,u,t2,WEAP[u.rng].dmg*u.str*GM.rstr*matMul(ac0&&ac0.card,t2),u.c.skill[u.rng]*u.keen*GM.rhit*bfShotMul(F,u,t2)*gr*(dn<5?1-u.press:1)*(GM.foot&&'kbm'.indexOf(bfCell(F,u.x,u.y))>=0?1+GM.foot/3:1),'r',u.rng);u.rd+=Math.max(0,rh0-t2.hp)}}
   });
   bfSep(F,b.units.filter(function(u){return u.alive&&!u.gone}).concat(b.foes.filter(function(f){return f.alive})));
-  b.bt++;bfFrame(b);
+  moraleTick(b);b.bt++;bfFrame(b);
   b.dmgP+=Math.max(0,e0-hpSum(b.foes));b.dmgE+=Math.max(0,p0-hpSum(b.units));
   b.groups.forEach(function(g){
     if(g.gone)return;var mem=b.units.filter(function(u){return u.uid===g.uid});
@@ -2588,6 +2615,7 @@ function endBattle(b){
   var left=b.foes.filter(function(f){return f.alive}),alive=b.units.filter(function(u){return u.alive&&!u.gone}),res;
   if(m){m.mobs=left.map(function(f){f.ref.hp=f.hp;return f.ref});m.inBattle=null;m.wait=Math.max(m.wait||0,20);if(left.length&&(b.wdmg||b.past)&&m.path&&m.path.length)m.thru=ix(m.path[0][0],m.path[0][1])}
   if(b.flk)mlog(b.flk+' blow'+(b.flk===1?'':'s')+' at '+b.where+' landed on a flank or a back.','dim');
+  if(b.brk&&(b.brk.p||b.brk.e))mlog((b.brk.e?b.brk.e+' of the '+b.tn+' broke and ran':'')+(b.brk.e&&b.brk.p?'; ':'')+(b.brk.p?b.brk.p+' of your men lost their nerve and ran':'')+' at '+b.where+'.','dim');
   if(!left.length){res='won';var lt0='';if(m){S.prestige+=m.reward;M.earned+=m.reward;lt0=giveLoot(m,false)}mlog('The fight at '+b.where+' is won. The '+b.tn+' are destroyed.'+(m?' +'+m.reward+' prestige. Loot: '+lt0+'.'+(m.razed?'':' Their camp still stands.'):''),'good')}
   else if(!b.units.some(function(u){return u.alive})){res='lost';mlog('Everyone at '+b.where+' is killed. '+left.length+' '+b.tn+' remain.','bad')}
   else if(!alive.length){res='fled';mlog('Your men escape from '+b.where+'. '+left.length+' '+b.tn+' remain.','bad')}
@@ -3828,9 +3856,9 @@ function vInfo(){
     '<ul class="facts"><li>Wear comes from use: a weapon loses its wear step for every fight it is used in, plus another for every 300 damage it deals. Arrows wear as a stack.</li><li>Nothing breaks, and every match starts with fresh, sharp gear: wear only makes the later fights of a match harder. Knapping and smithing will restore edges later.</li><li>Pine handles are 15% lighter than oak.</li></ul>'+
     tbl(['Armor','Slot','Stops per hit','Dodge','Weight'],Object.keys(ARM).map(function(k){return[CD[k].n,KIND[CD[k].k],ARM[k].def,ARM[k].dodge?'+'+ARM[k].dodge+'%':'',ARM[k].wt+' lb']}))+
     '<ul class="facts"><li>Pine woodland and pine forest are easier to move through than oak (×0.85 and ×0.7 against ×0.7 and ×0.5) but give less cover: arrows into a pine stand hit ×0.8 instead of ×0.5, and a hidden man is seen from 14 yd instead of 8.</li></ul>')+
-  sec('sacred','Sacred mounds (coming)','<p>'+nm(icoArt('sacred_mound'),'<b>Sacred mound</b>')+': a medium mound that forms on the highest ground of a world. A watcher holds each one. Not in the world yet.</p>'+tbl(['Stone','Letters','Reach','Effect'],[[nm(icoArt('cairn'),'Cairn'),'one Garavatra letter','half a tile','boosts the one stat its letter stands for'],[nm(icoArt('obelisk'),'Obelisk'),'two Garavatra letters','a whole tile','boosts both stats']]))+
+  sec('sacred','Sacred mounds','<p>'+nm(icoArt('sacred_mound'),'<b>Sacred mound</b>')+': a medium mound that forms on the highest ground of a world, marked on the match map. A watcher holds it. Cairns and obelisks drop as cards for now; raising them comes with the Garavatra.</p>'+tbl(['Stone','Letters','Reach','Effect'],[[nm(icoArt('cairn'),'Cairn'),'one Garavatra letter','half a tile','boosts the one stat its letter stands for'],[nm(icoArt('obelisk'),'Obelisk'),'two Garavatra letters','a whole tile','boosts both stats']]))+
   sec('elev','Elevation (Chalcolithic)',tbl(['Card','Shape','Rise','Extra cost'],Object.keys(ELEV).map(function(e){var E2=ELEV[e];return[E2.n+' · field, woodland or forest',E2.sh==='slope'?'Rises across the tile toward the side you turn it to':'Rises in the middle, edges stay level',E2.rise+' m',E2.cost+' prestige on top of the terrain']}))+
-    '<ul class="facts"><li>A tile is about 340 m across, so a gentle slope is about a 7% grade and a moderate one about 15%.</li><li>Heights carry forward: a new tile starts at the height its placed neighbours hand it. Past a slope\'s high edge the land stays up (a plateau). A slope dropped between level tiles climbs to a crest and falls away into the far neighbour as a bank.</li><li>Banks are where heights meet. They feather over about 80 m, so a 25 m drop is a moderate scramble and a 50 m drop a hard one.</li></ul>'+
+    '<ul class="facts"><li>A tile is about 340 m across, so a gentle slope is about a 7% grade and a moderate one about 15%.</li><li>Hillside farming: a gentle slope of cultivated field (terraced, and it still needs water within two tiles), and gentle or moderate slopes of pasture (each still needs half a prairie).</li><li>Kharst is rocky limestone ground: 50 prestige, crossed at half speed, broken rock and outcrops on the battlefield (×0.6 speed, −5 melee footing, some cover). It counts as half a pasture toward a hamlet\'s clothing and needs no prairie. Mountain goats live there.</li><li>Heights carry forward: a new tile starts at the height its placed neighbours hand it. Past a slope\'s high edge the land stays up (a plateau). A slope dropped between level tiles climbs to a crest and falls away into the far neighbour as a bank.</li><li>Banks are where heights meet. They feather over about 80 m, so a 25 m drop is a moderate scramble and a 50 m drop a hard one.</li></ul>'+
     tbl(['Grade','How men move'],[['up to 20%','Creep, walk, jog or sprint. Uphill is slower (×0.55 at worst), downhill a little faster.'],['20 to 50%','Moderate scramble: about '+SCR_MOD+' yd/s at most, as tiring as jogging.'],['50 to 100%','Hard scramble on all fours: about '+SCR_HARD+' yd/s at most, as tiring as sprinting.'],['over 100%','Only a jump or a climb gets you up. Nobody has those skills yet, so patrol lines cannot be drawn up it.']])+
     '<ul class="facts"><li>High ground: an archer above his target hits up to 20% more often (1% per metre); below, up to 20% less. In melee the man above gets up to +8 skill.</li></ul>')+
   sec('water','Water (Chalcolithic)','<ul class="facts"><li>Water only runs downhill; level ground is fine.</li><li>A stream starts anywhere and must end in a body of water: a pond, swamp, small open water or a creek.</li><li>A creek is twice a stream\'s width. It must start in a body of water and end in another.</li><li>Ponds never touch ponds. Small open water can touch other water, but needs water flowing in: a stream or creek ending in it, or a pond or swamp beside it at its level or higher.</li><li>A pond, swamp or open water standing above the land next to it needs an outlet: a stream or creek running out of it.</li><li>Cultivated fields need water within two tiles: a pond, swamp, small open water, stream or creek, with its rules met. Water with a rule unmet shows a blue ! on the map and does not count until fixed.</li></ul>')+
@@ -3872,9 +3900,11 @@ function vInfo(){
     [nm(icoMob('pigger'),'Pigger (no camp)'),'oak woods','1, roams alone','300','twice a human sprint','flint spear, 25 damage','100 prestige + raw materials'],
     [nm(icoMob('tiggle',{w:'bow'}),'Tiggle swamp'),'swamp','2 per swamp tile, up to 40','30','3.6 yd/s, free in wet ground','little bow (12 yd) or dagger','100 prestige + anything'],
     [nm(icoMob('dogman'),'Dog man (no camp)'),DOG_WOODS+' or more connected wooded tiles','1, always alone; smart, goes for gates','600',DOG_SP+' yd/s, a third faster than a man; runs on all fours, fights upright','claw swipes, 32 damage','200 prestige + the Arcane Bark parchment'],
-    [nm(icoMob('moon'),'Moon eyes (not in the world yet)'),'rocky ground: high ground and plains','large groups; they scurry and never hold a formation','20, frail','quick, scurrying','flint daggers, and area magic: −10 to −15 hp to everyone in a small patch','100 prestige + moon eyes (only from them) and flint tools'],
-    [nm(icoWatch(),'Watcher (not in the world yet)'),'a sacred mound, on high ground','1, always alone; average sense','200, twice a man; as hard to hurt as a man','long strides; never leaves high ground (a small dip is fine, a cluster of mounds is his, a run of low tiles is not)','circles round to the back for archers and casters, then grabs: heavy damage, very fast, while he holds on','watching eyes, and maybe a cairn, an obelisk or copper tools']])+
-    '<p class="note">Mob skill is 20 (placeholder). Goblins have no gnosis. Moon eyes punish men standing close together: fight them spread out, with heroes and at range.</p>');
+    [nm(icoMob('moon'),'Moon eyes'),'any 15 joined tiles of field, raised ground or kharst; no camp, they keep to that ground (about one world in four)','20 to 30; they scurry and never hold a formation','20, frail','quick, scurrying; full speed over broken rock','flint daggers; two bursts of moonlight each a fight, −10 to −15 hp to everyone within 2 yd of the man they aim at. Spent, they rush in with the knives','100 prestige + moon eyes (only from them), flint tools, and sometimes an Arcane Shower or Arcane Grenade parchment'],
+    [nm(icoWatch(),'Watcher'),'the sacred mound on the highest ground (about one world in four)','1, always alone; average sense; never breaks','200, twice a man; as hard to hurt as a man','long strides; never leaves high ground (a small dip is fine, a cluster of mounds is his, a run of low tiles is not)','circles round to the back for archers and casters. Rears up: everyone within 10 yd is frozen 3 to 4 s and takes −5 hp (every 20 s). Grabs one man and drains 15 hp a second; he cannot strike back, and only the watcher\'s death frees him. When the man dies the watcher vanishes 50 to 100 m off, takes back 10 to 20% of his health, and comes again','200 prestige + watching eyes, and maybe a cairn, an obelisk or copper tools']])+
+  sec('nerve','Nerve',tbl(['Stat','What it does'],STATS.filter(function(s){return s[1]==='Spirit'}).map(function(s){return[s[2]+(s[3]?' (starts at '+s[3]+')':''),s[5]]}))+'<ul class="facts"><li>Everyone starts a fight with 100 nerve. It drops when a man beside him falls (−12, cut by cohesion), when he is hit from the side (−2) or behind (−4), while he fights on below grit (−1 a second), near a frightening enemy (−fear÷20 a second, within 6 yd), in moonlight (−4), frozen (−6) or held by the watcher (−10 a second). Below half health every loss is a quarter worse. Fortitude cuts every loss.</li><li>Leaders within 15 yd give back leadership÷10 nerve a second, and it creeps back half a point a second out of contact.</li><li>At 0 he breaks and runs from the nearest enemy for 8 seconds, striking no one, then steadies at 35.</li><li>Mobs break too: goblins (fear 3, fortitude 40), brigands (4, 50), tiggles (2, 30), moon eyes (6, 30). Piggers and dog men (fear 25) and the watcher (fear 40) never break.</li></ul>')+
+  sec('trophies','Trophies','<ul class="facts"><li>'+nm(icoArt('moon_eye'),'<b>Moon eye</b>')+': moon eyes ring with plain magic. Use one on a man holding a rod and it is set into the rod: every spell he casts reaches and hits +0.1 further (a copper rod goes from ×1.2 to ×1.3), up to five eyes. Each adds 1 resonance to the rod.</li><li>'+nm(icoArt('watching_eyes'),'<b>Watching eyes</b>')+': use them on a man and he takes them for good. He sees through woods, brush and rock, slopes and banks slow him far less, and he can rear up like the watcher: when two or more enemies are within 10 yd, they freeze for 3 to 4 seconds and take −5 hp, once every 20 seconds.</li></ul>')+
+    '<p class="note">Mob skill is 20 (placeholder). Goblins have no gnosis. Moon eyes punish men standing close together: fight them spread out, with casters and at range.</p>');
   o+=sec('match','Matches',
     '<ul class="facts"><li>Two types: your placed tiles become 25% or 50% of the world. The rest is generated at random.</li><li>Camps form only in the generated land, usually one to three per world.</li><li>For the first 5 minutes mobs stay in their base range. Then they leave and wander, looking for you. A mob that finds a gravel road follows it, a random way at first, until it ends. They spot a settlement up to '+MOB_SIGHT+' tiles away ('+(MOB_SIGHT+1)+' once they stand on your land) and go straight for it.</li><li>A mob has two parts: its people and its camp. Killing the people earns the camp\'s reward and some loot. Burning the camp earns the reward again and more loot. A unit burns a camp in '+RAZE_S+' seconds by standing in it once its people are dead or away. Tap the camp\'s tile in a match and pick a unit in the box that opens, or route a patrol through it.</li><li>Loot goes to your stockpile when the match ends, win or lose.</li><li>The match runs live on its own clock: pause, 1×, 10× or 60×. Units run their default patrols on their own, and you can switch any unit to another saved patrol or order it to hold or go home. Pause on contact stops the clock when a unit spots mobs or a fight happens.</li><li>Win by killing every mob and burning every camp. Lose if every settlement falls or every human dies. There is no time limit.</li><li>When a settlement falls, everyone in it is lost. Men out on patrol are not there to defend it, but they survive and answer to another settlement.</li><li>When a match ends, win, lose or abandoned, the match world goes away and your realm returns exactly as it was before the match. Prestige earned from mobs is kept.</li></ul>');
   return o;

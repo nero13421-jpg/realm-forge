@@ -173,10 +173,11 @@ function groupOf(b,uid){for(var i=0;i<b.groups.length;i++)if(b.groups[i].uid===u
 function settleMen(us){
   var M=S.match;
   us.forEach(function(u){if(u.done)return;u.done=true;
-    var wear=function(card,used,dealt){if(!card||!used||!headOf(card))return;card.wear=Math.min(1,(card.wear||0)+HEADS[headOf(card)].wear*(1+Math.floor(dealt/300)))};
+    var wear=function(card,used,dealt){if(!card||!used||!headOf(card))return;card.wear=Math.min(1,(card.wear||0)+HEADS[headOf(card)].wear*(1+Math.floor(dealt/300))*(card.boon&&card.boon.k==='boar'?Math.max(.2,1-card.boon.p/20):1))};/* a boar-blessed head keeps its edge */
     wear(u.mcard,u.melee&&u.att[u.melee],u.md);if(u.rng&&u.att[u.rng])u.ac.forEach(function(a){wear(a.card,1,u.rd)});
     var lf=u.arrows;u.ac.forEach(function(a){a.card.n=Math.min(a.cap,lf);lf-=a.card.n;if(a.card.n<=0&&S.cards.indexOf(a.card)>=0)S.cards.splice(S.cards.indexOf(a.card),1)});
     if(u.alive&&u.mhp)u.c.dmg=Math.max(0,u.mhp-u.hp);
+    if(u.alive)u.c.lead=Math.min(LEAD_CAP,(u.c.lead||0)+1);/* every fight he comes through steadies him for the next */
     if(u.alive)Object.keys(u.att).forEach(function(w){var g=u.att[w]/10;if(g>0)u.c.skill[w]=Math.min(100,Math.round((u.c.skill[w]+g)*10)/10)});
     else{S.cards.forEach(function(c){if(c.eq===u.c.id)c.eq=null});if(S.cards.indexOf(u.c)>=0){S.cards.splice(S.cards.indexOf(u.c),1);M.humLost++}}});
 }
@@ -194,7 +195,7 @@ function bfArc(a,t){var f=t.face;if(!f)return 'front';var dx=a.x-t.x,dy=a.y-t.y,
 function bfHit(b,a,t,dmg,skill,k,x){var arc=bfArc(a,t),A=arc==='rear'?ARC.rear:arc==='front'?null:ARC.side,noSh=t.shield&&(arc==='rear'||arc==='right'),sd=0,sh0=t.shield;
   if(A){skill*=A.hit;dmg*=A.dmg}if(noSh){if(t.dfn!=null){sd=t.shDef||0;t.dfn-=sd}else t.shield=false}
   a.face=[t.x-a.x,t.y-a.y];/* a man turns to whoever he strikes */
-  var h0=t.hp,h=hitX(t,dmg,skill);if(noSh){if(t.dfn!=null)t.dfn+=sd;else t.shield=sh0}if(A&&h&&!t._dg)b.flk=(b.flk||0)+1;if(t.side==='e')t.woke=true;bfEv(b,a,t,k,h?Math.max(0,h0-t.hp):-1,t._dg?'dodged':(A&&h?(arc==='rear'?'from behind!':'flank!'):null),x);if(h&&k==='m'&&t.gm&&t.gm.thorn&&a.alive){var th=Math.max(1,Math.round(dmg*t.gm.thorn));a.hp-=th;bfEv(b,t,a,'m',th,'hit back',null);if(a.hp<=0)a.alive=false}if(h&&t.hp<=0)t.alive=false;return h}
+  var h0=t.hp,h=hitX(t,dmg,skill);if(noSh){if(t.dfn!=null)t.dfn+=sd;else t.shield=sh0}if(A&&h&&!t._dg){b.flk=(b.flk||0)+1;nerveHit(t,arc==='rear'?4:2)}if(t.side==='e')t.woke=true;bfEv(b,a,t,k,h?Math.max(0,h0-t.hp):-1,t._dg?'dodged':(A&&h?(arc==='rear'?'from behind!':'flank!'):null),x);if(h&&k==='m'&&t.gm&&t.gm.thorn&&a.alive){var th=Math.max(1,Math.round(dmg*t.gm.thorn));a.hp-=th;bfEv(b,t,a,'m',th,'hit back',null);if(a.hp<=0)a.alive=false}if(h&&t.hp<=0)t.alive=false;return h}
 function bfFrame(b){var cen=function(L){var n=0,cx=0,cy=0;L.forEach(function(q){if(q.alive&&!q.gone){n++;cx+=q.x;cy+=q.y}});return n?[cx/n,cy/n]:null};
   b.units.concat(b.foes).forEach(function(x){if(!x.alive)return;if(!x.face){/* at contact men face the way their team faces, mobs face the men */var tm=x.side==='e'?null:b.teams.filter(function(t){return t.k===x.tk})[0],c0=cen(x.side==='e'?b.units:b.foes);x.face=tm&&tm.face?tm.face.slice():c0?[c0[0]-x.x,c0[1]-x.y]:[1,0]}if(x._px!=null){var dx=x.x-x._px,dy=x.y-x._py;if(dx*dx+dy*dy>.0025)x.face=[dx,dy]}x._px=x.x;x._py=x.y});var fr=[];b.units.concat(b.foes).forEach(function(x){fr[x._ri]=[Math.round(x.x*10)/10,Math.round(x.y*10)/10,Math.max(0,Math.round(x.hp)),x.alive?(x.gone?2:1):0]});b.rec.fr.push(fr)}
 /* bodies keep apart: at least GAP_E yards between enemies, GAP_S between men of the same side, so the lines stay readable */
@@ -231,7 +232,23 @@ function watcherAI(b,F,f,seen,live){f.fcd=Math.max(0,(f.fcd||0)-1);f.woke=true;
   if(pick.frz>0||Math.random()<.35){f.grab=pick;pick.grabbed=true;bfEv(b,f,pick,'m',0,'grabbed!',null);mlog('The watcher has '+pick.name+'.','bad')}}
 /* a man who has taken the watcher's eyes can rear up the same way: once every 20 s, when two or more enemies are within 10 yd */
 function eyesFreeze(b,u,fs){u.wcd=Math.max(0,(u.wcd||0)-1);if(u.wcd>0)return;if(fs.filter(function(f){return bfD(u,f)<=W_FREEZE}).length<2)return;u.wcd=W_FCD;wFreeze(b,u,fs,u.name+' rears up: the enemy near him freezes')}
-function nerveHit(){}
+/* ---------- nerve: leadership, fear, cohesion and fortitude ----------
+   Everyone starts a fight with 100 nerve. Losses: a man beside him falls (−12, less cohesion), a blow from the side (−2) or behind (−4),
+   fighting on below grit (−1 a second), a frightening enemy close by (−fear÷20 a second), moonlight, a freeze, a grab. Fortitude cuts every
+   loss by half its value in percent. Leaders within 15 yd give back leadership÷10 a second, and nerve comes back slowly out of contact.
+   At 0 he breaks and runs for 8 seconds, then steadies at 35. Beasts (pigger, dog man, watcher) never break. */
+var LEAD_CAP=25,NERVE_BREAK_S=8;
+function nerveHit(e,n){if(!e||e.fearless||e.nerve==null||!e.alive||e.rout>0)return;var hp=e.mhp?Math.max(0,e.hp)/e.mhp:1;e.nerve-=n*(1-(e.fort||0)/200)*(hp<.5?1.25:1)}
+function moraleTick(b){var all=b.units.concat(b.foes);
+  all.forEach(function(d){if(d.alive||d._dn)return;d._dn=1;var side=d.side==='e'?b.foes:b.units;side.forEach(function(a){if(a!==d&&a.alive&&!a.gone&&bfD(a,d)<=10)nerveHit(a,12*(1-(a.coh||0)/100))})});
+  var side=function(L,E){L.forEach(function(u){if(!u.alive||u.gone||u.nerve==null||u.fearless)return;
+    var fm=0,near=false;E.forEach(function(f){if(!f.alive||f.gone)return;var d=bfD(u,f);if(d<=10)near=true;if(d<=6&&(f.fear||0)>fm)fm=f.fear});if(fm)nerveHit(u,fm/20);if(u.grit&&u.hp<u.grit)nerveHit(u,1);
+    var ld=0;L.forEach(function(v){if(v!==u&&v.alive&&!v.gone&&(v.lead||0)>ld&&bfD(u,v)<=15)ld=v.lead});u.nerve=Math.min(100,u.nerve+ld/10+(near?0:.5));
+    if(u.rout>0){u.rout--;if(!u.rout){u.nerve=35}return}
+    if(u.nerve<=0){u.rout=NERVE_BREAK_S;u.nerve=0;bfEv(b,u,u,'note',-1,'breaks and runs!',null);b.brk=b.brk||{p:0,e:0};b.brk[u.side==='e'?'e':'p']++}})};
+  side(b.units,b.foes);side(b.foes,b.units)}
+/* a broken man or mob runs from the nearest enemy and strikes no one */
+function routStep(F,e,E){var n=bfNear(e,E,0);if(!n)return;var d=bfD(e,n)||1;bfMove(F,e,e.x+(e.x-n.x)/d*12,e.y+(e.y-n.y)/d*12,e.sp?e.sp.sprint:(e.spd||PACE.jog)*1.2)}
 function sepOk(F,e,x,y){var o=BFM;BFM={foe:e.side==='e',jh:0};var r=bfPass(F,x,y);BFM=o;return r}
 function bfSep(F,all){
   for(var it=0;it<2;it++)for(var i=0;i<all.length;i++){var a=all[i];for(var j=i+1;j<all.length;j++){var c=all[j],mn=(a.side==='e')!==(c.side==='e')?GAP_E:GAP_S,dx=c.x-a.x,dy=c.y-a.y,d=Math.hypot(dx,dy);if(d>=mn)continue;
@@ -265,6 +282,7 @@ function stepBattle(b){
   var seenL=live.filter(function(u){return !u.hid}),seenG=seenL.filter(function(u){return !u.tw}),hasW=F.wl&&F.wl.length;b._fl=null;
   fl.forEach(function(f){
     if(f.frz>0){f.frz--;return}
+    if(f.rout>0){routStep(F,f,live);return}
     if(f.kind==='moon'||f.kind==='watcher'){if(f.kind==='moon')moonAI(b,F,f,seenG,live);else watcherAI(b,F,f,seenG,live);return}
     var tg=bfNear(f,f.rng?seenL:seenG,f.id);if(!tg){if(hasW&&seenL.length)wallAI(b,f,null);return}if(f.unaware){f.unaware=false;mlog('The '+f.kind+'s spot the ambush.','bad')}
     var d=bfD(f,tg),aggro=f.kind==='goblin'||f.kind==='pigger'||d<=110||f.woke;if(aggro)f.woke=true;
@@ -276,7 +294,7 @@ function stepBattle(b){
     if(f.woke&&d<=f.reach+.6&&f.cd<=0){f.cd+=60/f.apm;bfHit(b,f,tg,f.dmg,f.rng?f.skill*bfShotMul(F,f,tg):f.skill+bfMeleeMod(F,f,false,tg),f.rng?'r':'m',f.kind==='goblin'?'claw':f.kind==='tiggle'?(f.rng?'shortbow':'knife'):f.ref&&f.ref.w)}
   });
   live.forEach(function(u){
-    if(!u.alive||u.gone)return;if(u.grabbed){if(!b.foes.some(function(f){return f.alive&&f.grab===u}))u.grabbed=false;else return}if(u.frz>0){u.frz--;return}if(u.watch)eyesFreeze(b,u,b.foes.filter(function(f){return f.alive}));var t=T[u.tk],g=G[u.uid],fs=b.foes.filter(function(f){return f.alive});if(!fs.length)return;
+    if(!u.alive||u.gone)return;if(u.grabbed){if(!b.foes.some(function(f){return f.alive&&f.grab===u}))u.grabbed=false;else return}if(u.frz>0){u.frz--;return}if(u.rout>0){routStep(F,u,b.foes.filter(function(f){return f.alive}));return}if(u.watch)eyesFreeze(b,u,b.foes.filter(function(f){return f.alive}));var t=T[u.tk],g=G[u.uid],fs=b.foes.filter(function(f){return f.alive});if(!fs.length)return;
     var tf=t.tgt!=null&&b.foes[t.tgt]&&b.foes[t.tgt].alive?b.foes[t.tgt]:null;if(t.tgt!=null&&!tf)t.tgt=null;
     u.guard=false;var gr=u.hp<u.grit?.8:1,o=t.order,mv=0,used=0,near=tf&&o==='advance'?tf:bfNear(u,fs,u.c.num),dn=bfD(u,near),pace=(u.endur>0?u.sp.jog:u.sp.walk)*gr,run=(u.endur>0?u.sp.sprint:u.sp.walk)*gr,hold=false,ran=false;
     var fp=t.pace||(o==='form'&&g.mode==='leg'?g.pace:null);if(fp){pace=run=((fp==='sprint'&&u.endur<=0)?u.sp.walk:(u.sp[fp]||u.sp.walk))*gr}
@@ -313,7 +331,7 @@ function stepBattle(b){
     if(archer&&u.cdr<=0&&mv<.5){var seen=fs.filter(function(f){return bfSeen(F,u,f)}),t2=tf&&seen.indexOf(tf)>=0&&bfD(u,tf)<=bowR?tf:bfNear(u,seen,u.c.num+3);if(t2&&bfD(u,t2)<=bowR){u.hide=false;u.rev=8;u.cdr+=60/(WEAP[u.rng].apm*sm*GM.rspd);u.att[u.rng]=(u.att[u.rng]||0)+1;u.arrows--;var ac0=u.ac.filter(function(a){return a.card})[0],rh0=t2.hp;bfHit(b,u,t2,WEAP[u.rng].dmg*u.str*GM.rstr*matMul(ac0&&ac0.card,t2),u.c.skill[u.rng]*u.keen*GM.rhit*bfShotMul(F,u,t2)*gr*(dn<5?1-u.press:1)*(GM.foot&&'kbm'.indexOf(bfCell(F,u.x,u.y))>=0?1+GM.foot/3:1),'r',u.rng);u.rd+=Math.max(0,rh0-t2.hp)}}
   });
   bfSep(F,b.units.filter(function(u){return u.alive&&!u.gone}).concat(b.foes.filter(function(f){return f.alive})));
-  b.bt++;bfFrame(b);
+  moraleTick(b);b.bt++;bfFrame(b);
   b.dmgP+=Math.max(0,e0-hpSum(b.foes));b.dmgE+=Math.max(0,p0-hpSum(b.units));
   b.groups.forEach(function(g){
     if(g.gone)return;var mem=b.units.filter(function(u){return u.uid===g.uid});

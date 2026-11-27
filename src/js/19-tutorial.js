@@ -193,7 +193,10 @@ function newMobs(type){
   else for(i=0;i<8;i++)o.push({k:'brigand',hp:100,w:pick(['spear','spear','club','shortbow']),armor:Math.random()<.5,shield:Math.random()<.5});
   return o;
 }
-function mkFoe(b,i,x){
+/* a mob's spirit: fear it carries, and fortitude against breaking. Beasts never break */
+var MOB_SP={goblin:{fear:3,fort:40},brigand:{fear:4,fort:50},tiggle:{fear:2,fort:30},moon:{fear:6,fort:30},pigger:{fear:25,fl:1},dogman:{fear:25,fl:1},watcher:{fear:40,fl:1}};
+function mkFoe(b,i,x){var f=mkFoe0(b,i,x),sp=MOB_SP[f.kind]||{fear:3,fort:40};f.fear=sp.fear;f.fort=sp.fort||0;f.fearless=!!sp.fl;f.nerve=100;f.lead=0;f.coh=0;return f}
+function mkFoe0(b,i,x){
   if(b.k==='moon')return{side:'e',kind:'moon',dodge:.1,hp:b.hp,x:x,spd:4.6,dmg:6,apm:50,reach:1,rng:false,skill:15,armor:false,shield:false,cd:0,bcd:4+Math.floor(Math.random()*10),mana:2,alive:true,id:i,ref:b};/* two bursts of moonlight a fight each */
   if(b.k==='watcher')return{side:'e',kind:'watcher',dodge:.1,hp:b.hp,mhp:200,x:x,spd:6.5,dmg:0,apm:30,reach:1.6,rng:false,skill:40,armor:false,shield:false,cd:0,fcd:0,alive:true,id:i,ref:b};
   if(b.k==='dogman')return{side:'e',kind:'dogman',dodge:.15,hp:b.hp,x:x,spd:DOG_SP,dmg:32,apm:55,reach:2.2,rng:false,skill:35,armor:false,shield:false,cd:0,alive:true,id:i,ref:b};

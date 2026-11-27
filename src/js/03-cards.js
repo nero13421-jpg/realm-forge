@@ -49,7 +49,11 @@ var STATS=[
  ['mana','Magic','Mana',1,'','Casting pool',''],
  ['gnosis','Magic','Gnosis',0,'','Spent to learn spells',''],
  ['manaRec','Magic','Mana recovery','full','','Refills to full at the start of every fight',''],
- ['cast','Magic','Casting speed',1,'×','Multiplies spell recharge times','']
+ ['cast','Magic','Casting speed',1,'×','Multiplies spell recharge times',''],
+ ['lead','Spirit','Leadership',0,'','Steadies the men within 15 yd: each point gives back 0.1 nerve a second to the men around him. +1 for every fight he comes through, up to '+25,''],
+ ['fear','Spirit','Fear',0,'','How frightening he is: enemies within 6 yd lose fear÷20 nerve a second. Men start at 0; beasts carry a lot',''],
+ ['coh','Spirit','Cohesion',0,'','Cuts the nerve lost when a man beside him falls, by this many percent. Never grows by itself: taught in schools (later) or given by sacrificing pack animals (wolf)','wolf'],
+ ['fort','Spirit','Fortitude',50,'','Personal grit: every nerve loss is cut by half this many percent, and the lower his health the more he loses','']
 ];
 function statBase(k){for(var i=0;i<STATS.length;i++)if(STATS[i][0]===k)return STATS[i][3];return 0}
 function stats(c,wt,eq){
@@ -63,6 +67,7 @@ function stats(c,wt,eq){
   X.mana=c.mana||1;X.gnosis=c.gnosis||0;X.cast=statBase('cast');X.keen=b('hawk');
   /* serpent: strike strength, top sprint, attack speed · turtle: health and defense · goat: footing, defense speed, stamina, short-reach blows */
   X.str*=b('serpent');X.sprint*=b('serpent');X.strike=X.strike*b('serpent');X.hp=Math.round(X.hp*b('turtle'));X.def+=Math.round(bo(c,'turtle')*100)/2;
+  X.lead=c.lead||0;X.fear=statBase('fear');X.coh=Math.min(60,Math.round(bo(c,'wolf')*200));X.fort=statBase('fort');/* wolves hunt as a pack: each wolf offered adds cohesion */
   X.dodge+=bo(c,'goat')/2;X.mdEnd*=b('goat');X.foot=Math.min(.6,bo(c,'goat')*3);X.short=b('goat');
   (c.tat||[]).forEach(function(t){if(t&&t.v)Object.keys(t.v).forEach(function(s){X[s]+=t.v[s]})});
   X.stealth=0;/* standard for now: sacrifices, tattoos and the like will raise it later */
@@ -78,6 +83,7 @@ function statVal(c,k,X){
     case 'strike':case 'range':case 'cast':return '×'+f(X[k],2);case 'str':return '×'+f(X.str,3);case 'skill':return 'see Skill';
     case 'hp':return X.hp+' HP'+(c.dmg>0?' ('+Math.round(X.hp-c.dmg)+' now)':'');case 'def':return X.def+'';case 'dodge':return f(X.dodge*100,1)+'%';case 'grit':return X.grit+' HP';case 'heal':return X.heal+' HP/h';
     case 'sight':return f(X.sight)+' yd';case 'react':return X.react+' s';case 'press':return '−'+f(X.press*100)+'%';
+    case 'lead':case 'fear':case 'fort':return X[k]+'';case 'coh':return X.coh+'%';
     case 'mana':return X.mana+'';case 'gnosis':return X.gnosis+'';case 'manaRec':return 'full each fight';
   }
   return '';
