@@ -100,7 +100,7 @@ function bfSegOk(F,x0,y0,x1,y1,leave){var d=Math.hypot(x1-x0,y1-y0),n=Math.ceil(
 function bfMove0(F,e,tx,ty,pace,leave){
   if(!leave&&!bfClear(F,e.x,e.y,tx,ty)){var wp=bfWay(F,e.x,e.y,tx,ty);if(wp){tx=wp[0];ty=wp[1]}}
   var dx=tx-e.x,dy=ty-e.y,d=Math.hypot(dx,dy);if(d<.2)return 0;
-  var gc=bfCell(F,e.x,e.y),g=GROUND[gc]||GROUND.o,gm=g.mv||.3;if(e.kind==='tiggle')gm=1;if(e.leap&&((gc==='s'&&e.jd>=BFC)||(gc==='b'&&e.jh>=.5)))gm=1;var gfx=F.hg?(bfHt(F,e.x+dx/d*2,e.y+dy/d*2)-bfHt(F,e.x,e.y))/(2*.9144):0,sp=Math.min(d,gradeSpeed(pace*(e.wf||1)*gm,gfx)),a0=Math.atan2(dy,dx),tr=[0,.5,-.5,1,-1,1.5,-1.5,2.2,-2.2];
+  var gc=bfCell(F,e.x,e.y),g=GROUND[gc]||GROUND.o,gm=g.mv||.3;if(e.kind==='tiggle')gm=1;if(e.leap&&((gc==='s'&&e.jd>=BFC)||(gc==='b'&&e.jh>=.5)))gm=1;if(e.foot&&gm<1)gm+=(1-gm)*e.foot;if(e.kind==='moon'&&(gc==='k'||gc==='b'))gm=1;var gfx=F.hg?(bfHt(F,e.x+dx/d*2,e.y+dy/d*2)-bfHt(F,e.x,e.y))/(2*.9144)*(e.watch||e.kind==='watcher'?.4:e.foot?1-e.foot/2:1):0,sp=Math.min(d,gradeSpeed(pace*(e.wf||1)*gm,gfx)),a0=Math.atan2(dy,dx),tr=[0,.5,-.5,1,-1,1.5,-1.5,2.2,-2.2];
   for(var i=0;i<tr.length;i++){var a=a0+tr[i],nx=e.x+Math.cos(a)*sp,ny=e.y+Math.sin(a)*sp;if(bfPass(F,nx,ny,leave)&&(!F.wl||!F.wl.length||bfSegOk(F,e.x,e.y,nx,ny,leave))){e.x=nx;e.y=ny;return sp}}
   return 0;
 }

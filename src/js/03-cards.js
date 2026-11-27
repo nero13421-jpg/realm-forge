@@ -53,7 +53,7 @@ var STATS=[
 ];
 function statBase(k){for(var i=0;i<STATS.length;i++)if(STATS[i][0]===k)return STATS[i][3];return 0}
 function stats(c,wt,eq){
-  eq=eq||gearOf(c);if(wt==null){wt=0;eq.forEach(function(x){wt+=wtOf(x.key)})}
+  eq=eq||gearOf(c);if(wt==null){wt=0;eq.forEach(function(x){wt+=wtCard(x)})}
   var b=function(k){return 1+bo(c,k,eq)},has=function(k){return eq.some(function(x){return x.key===k})},X={},rg=function(k){return has(k)?1+RING_B:1};
   X.mEnd=statBase('mEnd')*b('stag');X.mdEnd=statBase('mdEnd')*b('stag')*rg('ring_endur');X.spEnd=statBase('spEnd')*b('rabbit')*rg('ring_swift');X.cEnd=statBase('cEnd');X.rec=statBase('rec');
   X.walk=PACE.walk;X.jog=PACE.jog;X.sprint=PACE.sprint*b('rabbit')*rg('ring_swift');X.creep=PACE.creep;X.carry=statBase('carry')*rg('ring_str');X.jd=statBase('jd');X.jh=statBase('jh');
@@ -61,6 +61,9 @@ function stats(c,wt,eq){
   var ad=0,ag=0;eq.forEach(function(x){var A=ARM[x.key];if(A){ad+=A.def;ag+=A.dodge}});X.def=statBase('def')+ad;X.dodge=(statBase('dodge')+ag)/100;
   X.grit=statBase('grit');X.heal=statBase('heal');X.sight=statBase('sight')*b('hawk');X.react=statBase('react');X.press=statBase('press')/100;
   X.mana=c.mana||1;X.gnosis=c.gnosis||0;X.cast=statBase('cast');X.keen=b('hawk');
+  /* serpent: strike strength, top sprint, attack speed · turtle: health and defense · goat: footing, defense speed, stamina, short-reach blows */
+  X.str*=b('serpent');X.sprint*=b('serpent');X.strike=X.strike*b('serpent');X.hp=Math.round(X.hp*b('turtle'));X.def+=Math.round(bo(c,'turtle')*100)/2;
+  X.dodge+=bo(c,'goat')/2;X.mdEnd*=b('goat');X.foot=Math.min(.6,bo(c,'goat')*3);X.short=b('goat');
   (c.tat||[]).forEach(function(t){if(t&&t.v)Object.keys(t.v).forEach(function(s){X[s]+=t.v[s]})});
   X.stealth=0;/* standard for now: sacrifices, tattoos and the like will raise it later */
   X.wf=wt>X.carry?X.carry/wt:1;
@@ -79,17 +82,33 @@ function statVal(c,k,X){
   }
   return '';
 }
-var SAC_GOODS={rabbit:[{lumber:2},{gravel:3},{knife:1}],stag:[{lumber:4},{spear:2},{hide_armor:1}],boar:[{gravel:5},{club:2},{hide_shield:1}],wolf:[{spear:2},{knife:2},{hide_helmet:1}],hawk:[{short_arrows:2},{shortbow:1},{lumber:3}]};
+var SAC_GOODS={rabbit:[{lumber:2},{gravel:3},{knife:1}],stag:[{lumber:4},{spear:2},{hide_armor:1}],boar:[{gravel:5},{club:2},{hide_shield:1}],wolf:[{spear:2},{knife:2},{hide_helmet:1}],hawk:[{short_arrows:2},{shortbow:1},{lumber:3}],serpent:[{lumber:3},{knife:2},{hide_armor:1}],turtle:[{gravel:4},{club:2},{hide_shield:1}],goat:[{gravel:4},{spear:1},{hide_helmet:1}]};
 /* what the altar asks with each animal is drawn once and kept until it is paid */
 function sacDem(s,k){s.altar.dem=s.altar.dem||{};if(!s.altar.dem[k]){var L=SAC_GOODS[k];s.altar.dem[k]=JSON.parse(JSON.stringify(S.tut?L[0]:pick(L)))}return s.altar.dem[k]}
 function killHuman(h){removeFromUnit(h.id);S.cards.forEach(function(c){if(c.eq===h.id)c.eq=null});S.setl.forEach(function(x){if(x.altar&&x.altar.pr===h.id)x.altar.pr=null});S.cards.splice(S.cards.indexOf(h),1);cleanUnits()}
 /* the animal shown at the altar: the one you picked, else the kind this man already carries, else the first you hold */
 function sacPick(T,cnt){if(UI.sacA&&cnt[UI.sacA])return UI.sacA;if(T&&T.boon&&cnt[T.boon.k])return T.boon.k;return Object.keys(cnt)[0]||null}
-var BOON={rabbit:{n:'Rabbit',a:'Swiftness',lo:3,hi:6,t:'sprint speed and sprint endurance: charges, flanking runs and falling back. Not road marching.'},stag:{n:'Stag',a:'Stamina',lo:3,hi:6,t:'marching and middle-distance endurance'},boar:{n:'Boar',a:'Hardiness',lo:3,hi:6,t:'durability, more health'},wolf:{n:'Wolf',a:'Ferocity',lo:3,hi:6,t:'strength, more melee and bow damage'},hawk:{n:'Hawk',a:'Keen eye',lo:3,hi:6,t:'bow hit chance and sight range'}};
-function bo(c,k,eq){var v=c&&c.boon&&c.boon.k===k?c.boon.p/100:0;if(c&&c.key==='human')(eq||gearOf(c)).forEach(function(x){if(x.boon&&x.boon.k===k)v+=x.boon.p/100});return v}
+var BOON={rabbit:{n:'Rabbit',a:'Swiftness',lo:3,hi:6,t:'sprint speed and sprint endurance: charges, flanking runs and falling back. Not road marching.'},stag:{n:'Stag',a:'Stamina',lo:3,hi:6,t:'marching and middle-distance endurance'},boar:{n:'Boar',a:'Hardiness',lo:3,hi:6,t:'durability, more health'},wolf:{n:'Wolf',a:'Ferocity',lo:3,hi:6,t:'strength, more melee and bow damage'},hawk:{n:'Hawk',a:'Keen eye',lo:3,hi:6,t:'bow hit chance and sight range'},
+  serpent:{n:'Constrictor serpent',a:'Constriction',lo:3,hi:6,t:'strike strength, top sprint speed and attack speed'},turtle:{n:'Turtle',a:'Shell',lo:3,hi:6,t:'health and defense'},goat:{n:'Mountain goat',a:'Sure foot',lo:3,hi:6,t:'footing on rough ground and slopes, defense speed, stamina and short-reach blows'}};
+/* the same offering made toward gear blesses the gear itself, in that animal's way. p is the boon as a fraction (0.05 = +5%) */
+var GEARB={rabbit:{bow:'arrows fly faster: longer reach and better hits on the move',melee:'faster strikes',armor:'lighter, so it slows him less'},stag:{bow:'less tiring to draw',melee:'less tiring to swing',armor:'less tiring to wear'},boar:{bow:'keeps its pull when he tires',melee:'keeps its edge when he tires',armor:'blocks more of every hit'},wolf:{bow:'harder-hitting arrows',melee:'more damage',armor:'hits back at whoever strikes it'},hawk:{bow:'more accurate',melee:'finds the gaps in armor',armor:'no effect'},serpent:{bow:'harder, faster shots',melee:'harder, faster blows',armor:'no effect'},turtle:{bow:'no effect',melee:'no effect',armor:'blocks more of every hit, more health'},goat:{bow:'steadier footing: fewer misses on rough ground',melee:'short-reach blows land harder',armor:'quicker to dodge'}};
+function gearClass(c){var k=kindOf(c),w=WEAP[wkey(c.key)];if(w)return w.rng?'bow':'melee';if(k==='armor'||k==='shield'||k==='helmet')return 'armor';return null}
+/* a man's own boon (sacrifices made for him). Blessed gear works on the gear instead: see gearMods */
+function bo(c,k){return c&&c.boon&&c.boon.k===k?c.boon.p/100:0}
+function gearMods(eq){var m={mstr:1,rstr:1,mspd:1,rspd:1,range:1,rhit:1,pierce:0,ceDrain:1,tired:0,def:0,thorn:0,hp:1,dodge:0,short:1,foot:0};
+  eq.forEach(function(x){if(!x.boon)return;var p=x.boon.p/100,k=x.boon.k,cl=gearClass(x);if(!cl)return;
+    if(k==='rabbit'){if(cl==='bow'){m.range*=1+p;m.rhit*=1+p/2}else if(cl==='melee')m.mspd*=1+p}
+    else if(k==='stag'){m.ceDrain*=1-p/(cl==='armor'?2:1)}
+    else if(k==='boar'){if(cl==='armor')m.def+=Math.round(p*100)/2;else m.tired+=p*3}
+    else if(k==='wolf'){if(cl==='bow')m.rstr*=1+p;else if(cl==='melee')m.mstr*=1+p;else m.thorn+=p*2}
+    else if(k==='hawk'){if(cl==='bow')m.rhit*=1+p;else if(cl==='melee')m.pierce+=Math.round(p*100)/2}
+    else if(k==='serpent'){if(cl==='bow'){m.rstr*=1+p/2;m.rspd*=1+p/2}else if(cl==='melee'){m.mstr*=1+p/2;m.mspd*=1+p/2}}
+    else if(k==='turtle'){if(cl==='armor'){m.def+=Math.round(p*100)/2;m.hp*=1+p/2}}
+    else if(k==='goat'){if(cl==='armor')m.dodge+=p/2;else if(cl==='melee')m.short*=1+p;else m.foot+=p*3}});
+  m.tired=Math.min(.3,m.tired);m.foot=Math.min(.6,m.foot);return m}
 /* gear can be blessed only while it has never been worn */
 function blessable(c){return c&&isItem(c)&&!c.worn&&c.eq==null&&['animal','altar','mat','crystal','gnosis','parch','tattoo','trophy','monument'].indexOf(kindOf(c))<0}
-function resText(c){return c.boon?BOON[c.boon.k].a+' +'+c.boon.p+'% · resonance '+(c.res||0):''}
+function resText(c){if(!c.boon)return '';var cl=gearClass(c),g=cl&&GEARB[c.boon.k]?GEARB[c.boon.k][cl]:'';return BOON[c.boon.k].a+' +'+c.boon.p+'%'+(g?': '+g:'')+' · resonance '+(c.res||0)}
 function boonText(c){return c.boon?BOON[c.boon.k].a+' +'+c.boon.p+'% ('+c.boon.n+' '+BOON[c.boon.k].n.toLowerCase()+(c.boon.n>1?'s':'')+')':'none'}
 function cardName(c){return c.key==='human'?hname(c):CD[c.key].n}
 var PACKS={starter:{n:'Chalcolithic Starter Pack',t:'The kit you begin with: 3 settlement cards, 38 terrain cards, 5 elevation cards (slopes and mounds), 2 forest, 1 small open water, 3 orchards, 8 men, 1 woman to serve at a shrine (outside the tutorial, where Ama joins later), starter arms and armor, 12 small lumber, 12 small gravel, 300 small timber and 50 large timber.'},booster:{n:'Chalcolithic Booster Pack',size:10,t:'10 random cards.'},buff:{n:'Chalcolithic Buff Pack',size:25,t:'25 random cards.'}};

@@ -1,13 +1,16 @@
 /* ---------- patrol simulation ---------- */
+/* a card's weight; armor blessed with a rabbit sits lighter */
+function wtCard(x){var w=wtOf(x.key);if(x.boon&&x.boon.k==='rabbit'&&gearClass(x)==='armor')w*=1-x.boon.p/100;return w}
 function wtOf(k){var t=wkey(k);return WEAP[t]?WEAP[t].wt*(wmat(k).wd==='pine'?.85:1):ARM[k]?ARM[k].wt:AMMO_WT[t]||0}
 function mmss(t){t=Math.floor(t);var m=Math.floor(t/60),s=t%60;return (m<10?'0':'')+m+':'+(s<10?'0':'')+s}
 function makeUnit(c){
   var eq=gearOf(c),ws=eq.filter(function(x){return WEAP[wkey(x.key)]}).map(function(x){return wkey(x.key)});
-  var wt=0;eq.forEach(function(x){wt+=wtOf(x.key)});
-  var X=stats(c,wt,eq),melee=MELEE.filter(function(k){return ws.indexOf(k)>=0})[0]||null,bows=BOWS.filter(function(k){return ws.indexOf(k)>=0}),rng=null,ac=[];
+  var wt=0;eq.forEach(function(x){wt+=wtCard(x)});
+  var X=stats(c,wt,eq),G=gearMods(eq),melee=MELEE.filter(function(k){return ws.indexOf(k)>=0})[0]||null,bows=BOWS.filter(function(k){return ws.indexOf(k)>=0}),rng=null,ac=[];
   bows.some(function(k){var a=eq.filter(function(x){return wkey(x.key)===WEAP[k].ammo});if(a.length){rng=k;ac=a.map(function(x){return{card:x,cap:x.n===undefined?20:x.n}});return true}});
   if(!rng&&bows.length)rng=bows[0];
-  return {c:c,mhp:X.hp,hp:Math.max(1,X.hp-Math.round(c.dmg||0)),sp:X.sp,dr:X.dr,strike:X.strike,str:X.str,range:X.range,keen:X.keen,dfn:X.def,dodge:X.dodge,grit:X.grit,react:X.react,rt:X.react,press:X.press,cast:X.cast,sight:X.sight,jd:X.jd,jh:X.jh,ce:100,ceDrain:100/X.cEnd,ceRec:100/60*X.rec,
+  var mhp=Math.round(X.hp*G.hp);
+  return {c:c,gm:G,foot:Math.min(.8,(X.foot||0)+G.foot),short:(X.short||1)*G.short,mhp:mhp,hp:Math.max(1,mhp-Math.round(c.dmg||0)),sp:X.sp,dr:X.dr,strike:X.strike,str:X.str,range:X.range,keen:X.keen,dfn:X.def+G.def,dodge:X.dodge+G.dodge,grit:X.grit,react:X.react,rt:X.react,press:X.press,cast:X.cast,sight:X.sight,jd:X.jd,jh:X.jh,ce:100,ceDrain:100/X.cEnd*G.ceDrain,ceRec:100/60*X.rec,
     rod:ws.reduce(function(m,k){return Math.max(m,WEAP[k].rod||0)},0),eqk:eq.map(function(x){return x.key}),ac:ac,arrows:ac.reduce(function(t,a){return t+a.cap},0),name:hname(c),endur:100,wf:X.wf,melee:melee,rng:rng,mana:X.mana,spells:c.spells||[],sh:0,cds:0,
     mcard:melee?eq.filter(function(x){return wkey(x.key)===melee})[0]:null,md:0,rd:0,
     armor:eq.some(function(x){return kindOf(x)==='armor'}),shield:eq.some(function(x){return kindOf(x)==='shield'}),shDef:eq.reduce(function(t,x){return t+(kindOf(x)==='shield'&&ARM[x.key]?ARM[x.key].def:0)},0),helmet:eq.some(function(x){return kindOf(x)==='helmet'}),x:0,cdm:0,cdr:0,att:{},alive:true,gone:false};

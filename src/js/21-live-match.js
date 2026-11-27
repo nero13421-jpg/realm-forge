@@ -194,7 +194,7 @@ function bfArc(a,t){var f=t.face;if(!f)return 'front';var dx=a.x-t.x,dy=a.y-t.y,
 function bfHit(b,a,t,dmg,skill,k,x){var arc=bfArc(a,t),A=arc==='rear'?ARC.rear:arc==='front'?null:ARC.side,noSh=t.shield&&(arc==='rear'||arc==='right'),sd=0,sh0=t.shield;
   if(A){skill*=A.hit;dmg*=A.dmg}if(noSh){if(t.dfn!=null){sd=t.shDef||0;t.dfn-=sd}else t.shield=false}
   a.face=[t.x-a.x,t.y-a.y];/* a man turns to whoever he strikes */
-  var h0=t.hp,h=hitX(t,dmg,skill);if(noSh){if(t.dfn!=null)t.dfn+=sd;else t.shield=sh0}if(A&&h&&!t._dg)b.flk=(b.flk||0)+1;if(t.side==='e')t.woke=true;bfEv(b,a,t,k,h?Math.max(0,h0-t.hp):-1,t._dg?'dodged':(A&&h?(arc==='rear'?'from behind!':'flank!'):null),x);if(h&&t.hp<=0)t.alive=false;return h}
+  var h0=t.hp,h=hitX(t,dmg,skill);if(noSh){if(t.dfn!=null)t.dfn+=sd;else t.shield=sh0}if(A&&h&&!t._dg)b.flk=(b.flk||0)+1;if(t.side==='e')t.woke=true;bfEv(b,a,t,k,h?Math.max(0,h0-t.hp):-1,t._dg?'dodged':(A&&h?(arc==='rear'?'from behind!':'flank!'):null),x);if(h&&k==='m'&&t.gm&&t.gm.thorn&&a.alive){var th=Math.max(1,Math.round(dmg*t.gm.thorn));a.hp-=th;bfEv(b,t,a,'m',th,'hit back',null);if(a.hp<=0)a.alive=false}if(h&&t.hp<=0)t.alive=false;return h}
 function bfFrame(b){var cen=function(L){var n=0,cx=0,cy=0;L.forEach(function(q){if(q.alive&&!q.gone){n++;cx+=q.x;cy+=q.y}});return n?[cx/n,cy/n]:null};
   b.units.concat(b.foes).forEach(function(x){if(!x.alive)return;if(!x.face){/* at contact men face the way their team faces, mobs face the men */var tm=x.side==='e'?null:b.teams.filter(function(t){return t.k===x.tk})[0],c0=cen(x.side==='e'?b.units:b.foes);x.face=tm&&tm.face?tm.face.slice():c0?[c0[0]-x.x,c0[1]-x.y]:[1,0]}if(x._px!=null){var dx=x.x-x._px,dy=x.y-x._py;if(dx*dx+dy*dy>.0025)x.face=[dx,dy]}x._px=x.x;x._py=x.y});var fr=[];b.units.concat(b.foes).forEach(function(x){fr[x._ri]=[Math.round(x.x*10)/10,Math.round(x.y*10)/10,Math.max(0,Math.round(x.hp)),x.alive?(x.gone?2:1):0]});b.rec.fr.push(fr)}
 /* bodies keep apart: at least GAP_E yards between enemies, GAP_S between men of the same side, so the lines stay readable */
@@ -249,7 +249,7 @@ function stepBattle(b){
     u.cdm=Math.max(-1,u.cdm-1);u.cdr=Math.max(-1,u.cdr-1);
     u.ce=dn<=3?Math.max(0,u.ce-u.ceDrain):Math.min(100,u.ce+u.ceRec);
     if(o==='back'){var sp=u.endur>0;go(-6,u.y,(sp?u.sp.sprint:u.sp.walk)*gr,true);u.endur=Math.max(0,u.endur-(sp?u.dr.sprint:u.dr.walk));if(u.x<0)u.gone=true;return}
-    var archer=u.rng&&u.arrows>0&&t.shoot,reach=u.melee?WEAP[u.melee].reach:1,bowR=u.rng?WEAP[u.rng].reach*u.range*(u.tw?1.2:1):0,sl=null;
+    var archer=u.rng&&u.arrows>0&&t.shoot,reach=u.melee?WEAP[u.melee].reach:1,bowR=u.rng?WEAP[u.rng].reach*u.range*(u.gm?u.gm.range:1)*(u.tw?1.2:1):0,sl=null;
     u.guard=false;
     if(u.rt>0){u.rt--;hold=true}
     else if(u.tw){hold=true}
@@ -273,9 +273,9 @@ function stepBattle(b){
     if(u.hid){u.cds=Math.max(0,(u.cds||0)-1);return}
     var hp0=fs.map(function(f){return f.hp}),sh0=u.sh||0,cs=castAI(u,fs,null,F);if(cs||(!(sh0>0)&&u.sh>0)){u.casts=(u.casts||0)+1;u.hide=false;u.rev=8}if(!(sh0>0)&&u.sh>0)bfEv(b,u,u,'sh',-1,'shield up','p_shield');fs.forEach(function(f,i){if(f.hp<hp0[i]||(cs&&cs.t===f&&(cs.k==='p_push'||cs.k==='p_pull'))){bfEv(b,u,f,'b',hp0[i]-f.hp,cs&&cs.t===f?(cs.k==='p_pull'?'pulled!':cs.k==='p_push'?'pushed −'+Math.round(hp0[i]-f.hp)+' HP':null):null,cs&&cs.t===f?cs.k:'p_bolt');f.woke=true}});
     fs=fs.filter(function(f){return f.alive});if(!fs.length)return;
-    var sm=u.strike*(u.ce<=0?.7:1)*(u.guard?.8:1);
-    if(u.melee&&u.cdm<=0){var mt=tf&&bfD(u,tf)<=reach+.6?tf:bfNear(u,fs,u.c.num);if(mt&&bfD(u,mt)<=reach+.6){u.hide=false;u.rev=8;u.cdm+=60/(WEAP[u.melee].apm*sm);u.att[u.melee]=(u.att[u.melee]||0)+1;var mh0=mt.hp;bfHit(b,u,mt,WEAP[u.melee].dmg*u.str*matMul(u.mcard,mt),(u.c.skill[u.melee]+bfMeleeMod(F,u,hold,mt))*gr,'m',u.melee);u.md+=Math.max(0,mh0-mt.hp);return}}
-    if(archer&&u.cdr<=0&&mv<.5){var seen=fs.filter(function(f){return bfSeen(F,u,f)}),t2=tf&&seen.indexOf(tf)>=0&&bfD(u,tf)<=bowR?tf:bfNear(u,seen,u.c.num+3);if(t2&&bfD(u,t2)<=bowR){u.hide=false;u.rev=8;u.cdr+=60/(WEAP[u.rng].apm*sm);u.att[u.rng]=(u.att[u.rng]||0)+1;u.arrows--;var ac0=u.ac.filter(function(a){return a.card})[0],rh0=t2.hp;bfHit(b,u,t2,WEAP[u.rng].dmg*u.str*matMul(ac0&&ac0.card,t2),u.c.skill[u.rng]*u.keen*bfShotMul(F,u,t2)*gr*(dn<5?1-u.press:1),'r',u.rng);u.rd+=Math.max(0,rh0-t2.hp)}}
+    var GM=u.gm||{mstr:1,rstr:1,mspd:1,rspd:1,rhit:1,tired:0,pierce:0},sm=u.strike*(u.ce<=0?.7+GM.tired:1)*(u.guard?.8:1),mreach=u.melee?WEAP[u.melee].reach:1;
+    if(u.melee&&u.cdm<=0){var mt=tf&&bfD(u,tf)<=reach+.6?tf:bfNear(u,fs,u.c.num);if(mt&&bfD(u,mt)<=reach+.6){u.hide=false;u.rev=8;u.cdm+=60/(WEAP[u.melee].apm*sm*GM.mspd);u.att[u.melee]=(u.att[u.melee]||0)+1;var mh0=mt.hp;bfHit(b,u,mt,WEAP[u.melee].dmg*u.str*GM.mstr*(mreach<=1.5?(u.short||1):1)*matMul(u.mcard,mt)+GM.pierce,(u.c.skill[u.melee]+bfMeleeMod(F,u,hold,mt))*gr,'m',u.melee);u.md+=Math.max(0,mh0-mt.hp);return}}
+    if(archer&&u.cdr<=0&&mv<.5){var seen=fs.filter(function(f){return bfSeen(F,u,f)}),t2=tf&&seen.indexOf(tf)>=0&&bfD(u,tf)<=bowR?tf:bfNear(u,seen,u.c.num+3);if(t2&&bfD(u,t2)<=bowR){u.hide=false;u.rev=8;u.cdr+=60/(WEAP[u.rng].apm*sm*GM.rspd);u.att[u.rng]=(u.att[u.rng]||0)+1;u.arrows--;var ac0=u.ac.filter(function(a){return a.card})[0],rh0=t2.hp;bfHit(b,u,t2,WEAP[u.rng].dmg*u.str*GM.rstr*matMul(ac0&&ac0.card,t2),u.c.skill[u.rng]*u.keen*GM.rhit*bfShotMul(F,u,t2)*gr*(dn<5?1-u.press:1)*(GM.foot&&'kbm'.indexOf(bfCell(F,u.x,u.y))>=0?1+GM.foot/3:1),'r',u.rng);u.rd+=Math.max(0,rh0-t2.hp)}}
   });
   bfSep(F,b.units.filter(function(u){return u.alive&&!u.gone}).concat(b.foes.filter(function(f){return f.alive})));
   b.bt++;bfFrame(b);
